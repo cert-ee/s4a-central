@@ -1,0 +1,41 @@
+// Specify overrides (theme and/or base variables etc.)
+// See https://vuetifyjs.com/quick-start
+/*$theme := {
+  primary: #9c27b0
+  accent: #ce93d8
+  secondary: #424242
+  info: #0d47a1
+  warning: #ffb300
+  error: #B71C1C
+  success: #2E7D32
+}*/
+
+// Import Vuetify styling
+@require 'atom-one-dark.css'
+@require '~vuetify/src/stylus/main'
+
+.page-enter-active, .page-leave-active {
+  transition: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.page-enter, .page-leave-to {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.list__tile--active,
+.navigation-drawer>.list .list--group__container .list__tile--active .list__tile__title {
+  color: #2196f3;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0
+}

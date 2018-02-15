@@ -1,0 +1,197 @@
+{
+  "name": "detector",
+  "plural": "detectors",
+  "base": "PersistedModel",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Unique name, linked to other systems via this",
+      "default": ""
+    },
+    "friendly_name": {
+      "type": "string",
+      "required": false,
+      "description": "Friendly detector",
+      "default": ""
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Unused",
+      "default": ""
+    },
+    "ip": {
+      "type": "string",
+      "required": false,
+      "description": "IP address",
+      "default": ""
+    },
+    "version": {
+      "type": "number",
+      "required": false,
+      "default": ""
+    },
+    "first_name": {
+      "type": "string",
+      "required": true,
+      "description": "First Name",
+      "default": ""
+    },
+    "last_name": {
+      "type": "string",
+      "required": true,
+      "description": "Last Name"
+    },
+    "organization_name": {
+      "type": "string",
+      "required": true,
+      "description": "Organization Name",
+      "default": ""
+    },
+    "contact_phone": {
+      "type": "string",
+      "required": true,
+      "description": "Contact Phone",
+      "default": ""
+    },
+    "contact_email": {
+      "type": "string",
+      "required": true,
+      "description": "Contact Email",
+      "default": ""
+    },
+    "machine_id": {
+      "type": "string",
+      "required": true,
+      "description": "Machine ID from var lib ",
+      "default": ""
+    },
+    "csr_unsigned": {
+      "type": "string",
+      "required": true,
+      "description": "Unsigned CSR",
+      "default": false
+    },
+    "csr_signed": {
+      "type": "string",
+      "required": true,
+      "description": "Signed CSR",
+      "default": false
+    },
+    "activated": {
+      "type": "boolean",
+      "required": true,
+      "description": "Registration Approved",
+      "default": false
+    },
+    "registration_status": {
+      "type": "string",
+      "required": true,
+      "description": "Registration Status",
+      "Default": "Unapproved"
+    },
+    "reject_reason": {
+      "type": "string",
+      "required": false,
+      "description": "Reject reason",
+      "default": ""
+    },
+    "components_overall": {
+      "type": "boolean",
+      "required": false,
+      "description": "Components status",
+      "default": false
+    },
+    "components": {
+      "type": "array",
+      "required": false,
+      "description": "Components info",
+      "default": []
+    },
+    "last_seen": {
+      "type": "date",
+      "required": false,
+      "default": "$now"
+    },
+    "online": {
+      "type": "boolean",
+      "required": false,
+      "description": "Detector online",
+      "default": false
+    },
+    "created_time": {
+      "type": "date",
+      "required": true,
+      "description": "When the detector was added",
+      "default": "$now"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "job_schedule": {
+      "type": "hasMany",
+      "model": "job_schedule",
+      "foreignKey": "detectorId"
+    },
+    "users": {
+      "type": "hasOne",
+      "model": "user",
+      "foreignKey": "userId"
+    },
+    "feedbacks": {
+      "type": "hasMany",
+      "model": "feedback",
+      "foreignKey": "detectorId"
+    },
+    "tags": {
+      "type": "hasAndBelongsToMany",
+      "model": "tag",
+      "foreignKey": "tagId"
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "currentToken",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "remove",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

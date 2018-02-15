@@ -1,0 +1,9 @@
+{
+  "no_changes": "No changes",
+  "no_data_found": "No data found",
+  "worker_busy": "Worker already busy, please wait",
+  "save_failed": "Failed to save info to database",
+  "load_failed": "Failed to load info from database",
+  "delete_failed": "Failed to remove info from database",
+  "done": "Done"
+}

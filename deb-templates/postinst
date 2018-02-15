@@ -1,0 +1,168 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+declare -r init_type='{{ node_deb_init }}'
+declare -ri no_rebuild='{{ node_deb_no_rebuild }}'
+declare -r install_strategy='{{ install_strategy }}'
+
+add_user() {
+  : "${1:?'User was not defined'}"
+  declare -r user="$1"
+  declare -r uid="$2"
+
+  if [ -z "$uid" ]; then
+    declare -r uid_flags=""
+  else
+    declare -r uid_flags="--uid $uid"
+  fi
+
+  declare -r group="${3:-$user}"
+  declare -r descr="${4:-No description}"
+  declare -r shell="${5:-/bin/false}"
+
+  if ! getent passwd | grep -q "^$user:"; then
+    echo "Creating system user: $user in $group with $descr and shell $shell"
+    useradd $uid_flags --create-home --gid $group --system --shell $shell -c "$descr" $user
+  fi
+}
+
+add_group() {
+  : "${1:?'Group was not defined'}"
+  declare -r group="$1"
+  declare -r gid="$2"
+
+  if [ -z "$gid" ]; then
+    declare -r gid_flags=""
+  else
+    declare -r gid_flags="--gid $gid"
+  fi
+
+  if ! getent group | grep -q "^$group:" ; then
+    echo "Creating system group: $group"
+    groupadd $gid_flags --system $group
+  fi
+}
+
+start_service () {
+  : "${1:?'Service name was not defined'}"
+  declare -r service_name="$1"
+
+  if hash systemctl 2> /dev/null; then
+    if [[ "$init_type" == 'auto' || "$init_type" == 'systemd' ]]; then
+      {
+        systemctl enable "$service_name.service" && \
+        systemctl start "$service_name.service"
+      } || echo "$service_name could not be registered or started"
+    fi
+  elif hash service 2> /dev/null; then
+    if [[ "$init_type" == 'auto' || "$init_type" == 'upstart' || "$init_type" == 'sysv' ]]; then
+      service "$service_name" start || echo "$service_name could not be registered or started"
+    fi
+  elif hash start 2> /dev/null; then
+    if [[ "$init_type" == 'auto' || "$init_type" == 'upstart' ]]; then
+      start "$service_name" || echo "$service_name could not be registered or started"
+    fi
+  elif hash update-rc.d 2> /dev/null; then
+    if [[ "$init_type" == 'auto' || "$init_type" == 'sysv' ]]; then
+      {
+        update-rc.d "$service_name" defaults && \
+        "/etc/init.d/$service_name" start
+      } || echo "$service_name could not be registered or started"
+    fi
+  else
+    echo 'Your system does not appear to use systemd, Upstart, or System V, so the service could not be started'
+  fi
+}
+
+dependency_install() {
+  : "${1:?'Package name was not defined'}"
+
+  for app in server client ./
+  do
+    cd "/usr/share/$1/app/$app"
+
+    case $install_strategy in
+      auto)
+        if hash yarn 2> /dev/null; then
+          echo "Running 'yarn install'"
+          # yarn install --production
+          su {{ node_deb_user }} -s /bin/bash -c yarn
+	  #if [ $app == "client" ] ; then
+          #  su {{ node_deb_user }} -s /bin/bash -c "yarn build"
+          #fi
+        else
+          echo "WARN: 'npm' was not on the path. Dependencies may be missing."
+        fi
+        ;;
+      copy)
+        # pass
+        ;;
+      npm-install)
+        echo 'Installing dependenencies from NPM'
+        # yarn install --production
+        su {{ node_deb_user }} -s /bin/bash -c yarn
+	#if [ $app == "client" ] ; then
+        #  su {{ node_deb_user }} -s /bin/bash -c "yarn build"
+        #fi
+        ;;
+      *)
+        echo "WARN: Unexpected install strategy: $install_strategy"
+        echo 'WARN: Dependencies may be missing.'
+        ;;
+    esac
+  done
+}
+
+create_mongodb_users() {
+  declare -r service_name="$1"
+  echo "Create MongoDB users..."
+  if [ ! -e /root/.mongodb.passwd ] ; then
+	  echo " * root..."
+	mongodb_pass=$( pwgen 12 1 )
+	echo -e "MONGODB_USER=root\nMONGODB_PASS=$mongodb_pass\n" > /root/.mongodb.passwd
+	mongo admin --eval "db.createUser({user: 'root',pwd: '"$mongodb_pass"', roles: [ 'root' ] })"
+	if [ `grep -c ^security.authorization /etc/mongod.conf` == 0 ] ; then
+	        echo "security.authorization: enabled" >> /etc/mongod.conf
+	fi
+	service mongod restart
+	sleep 5
+  fi
+  . /root/.mongodb.passwd
+
+  app_db_pass=$( pwgen 12 1 )
+  user_found=$( mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.getUsers();" | jq -r '.[] | select(.user | match("'$service_name'"))|.user' )
+  if [ "x$user_found" == "x$service_name" ] ; then
+        echo " * $service_name - reset password ..."
+	mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.changeUserPassword(\"$service_name\", \"$app_db_pass\")"
+  else
+        echo " * $service_name - create user ..."
+	mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.createUser({ user: \"$service_name\", pwd: \"$app_db_pass\", roles: [ \"readWrite\" ] })"
+  fi
+
+  # Update app configuration
+  sed -i "s/\(MONGODB_USER\)=.*/\\1=$service_name/" /etc/default/$service_name
+  sed -i "s/\(MONGODB_PASSWORD\)=.*/\\1=$app_db_pass/" /etc/default/$service_name
+}
+
+add_group '{{ node_deb_group }}' ''
+add_user '{{ node_deb_user }}' '' '{{ node_deb_group }}' '{{ node_deb_user }} user-daemon' '/bin/false'
+
+# em - EMerging threats
+mkdir -p '/var/log/{{ node_deb_package_name }}' '/srv/data/suricata_em' '/var/log/suricata/'
+
+touch /var/log/suricata/eve.json
+
+chown -R '{{ node_deb_user }}:{{ node_deb_group }}' \
+	'/var/log/{{ node_deb_package_name }}' \
+	'/usr/share/{{ node_deb_package_name }}/app' \
+	'/srv/data/suricata_em' \
+	'/var/log/suricata/eve.json'
+
+dependency_install '{{ node_deb_package_name }}'
+create_mongodb_users '{{ node_deb_package_name }}'
+
+if [[ "$init_type" != 'none' ]]; then
+  start_service '{{ node_deb_package_name }}'
+fi

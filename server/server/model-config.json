@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "../node_modules/loopback-cascade-delete-mixin",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "user": {
+    "dataSource": "db",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": false,
+      "allowEternalTokens": true
+    }
+  },
+  "accessToken": {
+    "dataSource": "db",
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "db",
+    "public": false
+  },
+  "roleMapping": {
+    "dataSource": "db",
+    "public": true,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "role": {
+    "dataSource": "db",
+    "public": true
+  },
+  "detector": {
+    "dataSource": "db",
+    "public": true
+  },
+  "feedback": {
+    "dataSource": "db",
+    "public": true
+  },
+  "log": {
+    "dataSource": "db",
+    "public": true
+  },
+  "job_schedule": {
+    "dataSource": "db",
+    "public": true
+  },
+  "registration": {
+    "dataSource": "db",
+    "public": true
+  },
+  "report": {
+    "dataSource": "db",
+    "public": true
+  },
+  "rule": {
+    "dataSource": "db",
+    "public": true
+  },
+  "rule_draft": {
+    "dataSource": "db",
+    "public": true
+  },
+  "ruleset": {
+    "dataSource": "db",
+    "public": true
+  },
+  "rule_classtype": {
+    "dataSource": "db",
+    "public": true
+  },
+  "tag": {
+    "dataSource": "db",
+    "public": true
+  },
+  "settings": {
+    "dataSource": "db",
+    "public": true
+  },
+  "system_info": {
+    "dataSource": "db",
+    "public": true
+  }
+}

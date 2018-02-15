@@ -1,0 +1,86 @@
+{
+  "name": "ruleset",
+  "plural": "rulesets",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "id": true,
+      "required": true,
+      "index": true,
+      "description": "Ruleset name",
+      "isArray": false
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Ruleset description",
+      "default": ""
+    },
+    "automatically_enable_new_rules": {
+      "type": "boolean",
+      "required": true,
+      "description": "Automatically enable new rules",
+      "default": true
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "description": "Created time",
+      "default": "$now"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "tags": {
+      "type": "hasAndBelongsToMany",
+      "model": "tag",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "toggleAll",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "tagAll",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

@@ -1,0 +1,143 @@
+{
+  "close": "Close",
+  "cancel": "Cancel",
+  "save": "Save",
+  "add": "Add",
+  "delete": "Delete",
+  "search": "Search",
+  "ok": "OK",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "fail": "Fail",
+  "delete_selected": "Delete Selected",
+  "edit_rule": "Edit Rule",
+  "edit": "Edit",
+  "name": "Name",
+  "logs": "Logs",
+  "back": "Back",
+  "continue": "Continue",
+  "yes": "Yes",
+  "no": "No",
+  "name": "Name",
+  "message": "Message",
+  "actions": "Actions",
+  "menu": {
+    "dashboard": "Dashboard",
+    "detectors": "Detector List",
+    "tags": "Tags",
+    "rulesets": "Rulesets",
+    "rules": "Rules",
+    "rules_review": "Review Changes",
+    "feedback": "Feedback",
+    "users": "User Management"
+  },
+  "dashboard": {
+    "title": "S4A Central",
+    "detectors": "Detectors",
+    "detectors_online": "Online Detectors",
+    "detectors_problems": "Detectors with Problems",
+    "detectors_unapproved": "Unapproved Detectors"
+  },
+  "detectors": {
+    "title": "Detector List",
+    "clear_filters": "Clear Filters",
+    "filters": {
+      "search": "Search",
+      "online": "Online",
+      "components_status": "Components Status",
+      "registration_status": "Registration Status",
+      "tags": "Tags"
+    },
+    "table": {
+      "friendly_name": "Friendly Name",
+      "online": "Online",
+      "last_seen": "Last Seen",
+      "components": "Components",
+      "registration_status": "Registration Status",
+      "version": "Version",
+      "tags": "Tags",
+      "alerts": "Alerts",
+      "graphs": "Graphs",
+      "yes": "Yes",
+      "no": "No",
+      "ok": "OK",
+      "fail": "Fail"
+    }
+  },
+  "tags": {
+    "add_tag": "Add Tag",
+    "edit_tag": "Edit Tag",
+    "description": "Description",
+    "name": "Name",
+    "required" : "Required"
+  },
+  "rulesets": {
+    "enable_all": "Enable All",
+    "disable_all": "Disable All",
+    "add_tag": "Add Tag",
+    "remove_tag": "Remove Tag",
+    "automatic_updates_enable_new": "Automatic updates: enable new rules"
+  },
+  "rules": {
+    "required" : "Required",
+    "add_tag": "Add Tag",
+    "edit_tag": "Edit Tag",
+    "remove_tag": "Remove Tag",
+    "enable_selected": "Enable Selected",
+    "disable_selected": "Disable Selected",
+    "add_rule": "Add Rule",
+    "edit_rule": "Edit rule",
+    "remove_rule": "Remove Rule",
+    "severity": "Severity",
+    "revision": "Revision",
+    "message": "Message",
+    "classtype": "Classtype",
+    "rule_data": "Rule Data",
+    "ruleset": "Ruleset",
+    "saved": "Changes saved to draft",
+    "sid_format": "Must be above ",
+    "sid_format_max": "and below ",
+    "review": {
+      "publish": "Publish"
+    }
+  },
+  "feedback": {
+    "title" : "Feedback",
+    "mark_as_solved": "Mark as Solved",
+    "mark_as_unsolved": "Mark as Unsolved",
+    "filters": {
+      "search": "Search",
+      "solved": "Solved"
+    },
+    "table" : {
+      "case_number": "Case Number",
+      "machine_id": "Machine ID",
+      "detector": "Detector",
+      "created_time": "Feedback Received",
+      "message": "Message",
+      "comment": "Comment",
+      "internal_comment": "Internal Comment",
+      "solved": "Solved",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "disk_mount": "mount",
+    "disk_part": "part",
+    "disk_type": "type",
+    "disk_size": "size",
+    "disk_free": "free",
+    "net_name": "Name",
+    "net_state": "State",
+    "net_ip": "IP"
+  },
+  "users": {
+    "add_user": "Add User",
+    "user_management": "User Management",
+    "really_delete_user": "Really delete user",
+    "username": "Username",
+    "user": "User",
+    "message": "Message",
+    "time": "Time",
+    "roles": "Roles"
+  }
+}

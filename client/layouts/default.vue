@@ -1,0 +1,153 @@
+<template>
+  <v-app toolbar>
+    <v-navigation-drawer persistent dark overflow v-model="drawer">
+      <v-list class="pa-0" dark>
+        <v-list-tile avatar tag="div" ripple>
+          <v-list-tile-avatar>
+            <v-icon dark>account_circle</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>{{$store.state.user ? $store.state.user.username : 'Test User'}}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+      <v-list class="pt-0" dense dark>
+        <v-divider></v-divider>
+        <v-subheader class="grey--text">Menu</v-subheader>
+        <v-list-tile to="/" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>dashboard</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.dashboard') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/detectors" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>dns</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.detectors') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/tags" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>bookmark</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.tags') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/rulesets" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>track_changes</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.rulesets') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-group v-if="$store.state.rulesReview" v-model="rulesExpanded" group="/rules">
+          <v-list-tile slot="item" to="/rules" exact ripple>
+            <v-list-tile-action>
+              <v-icon dark>track_changes</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t('menu.rules') }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action @click.stop.prevent="rulesExpanded = !rulesExpanded">
+              <v-btn icon>
+                <v-icon dark>keyboard_arrow_down</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile to="/rules/review" exact ripple>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t('menu.rules_review') }}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list-group>
+
+        <v-list-tile v-else to="/rules" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>track_changes</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.rules') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/feedback" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>feedback</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.feedback') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile v-if="$store.getters.hasAdminRole" to="/users" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>people</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.users') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile v-if="$store.state.debugMode" @click="resetCentral" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>gavel</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>reset demo</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-divider></v-divider>
+        <v-subheader class="grey--text">Versions</v-subheader>
+
+        <v-list-tile ripple>
+          <v-list-tile-action>
+            server
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{$store.state.versions.server}}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile ripple>
+          <v-list-tile-action>
+            client
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{$store.state.versions.client}}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile ripple>
+          <v-list-tile-action>
+            main
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{$store.state.versions.main}}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+      </v-list>
+    </v-navigation-drawer>
+    <nuxt />
+    <v-snackbar top :timeout="5000" :error="$store.state.snackBar.type === 'error'"
+                :success="$store.state.snackBar.type === 'success'"
+                v-model="snackBar"
+    >
+      {{ $store.state.snackBar.text }}
+      <v-btn dark flat @click="$store.commit('closeSnackbar')">{{ $t('close') }}</v-btn>
+    </v-snackbar>
+  </v-app>
+</template>
+
+<script src="./default.js"></script>

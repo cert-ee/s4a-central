@@ -1,0 +1,31 @@
+{
+  "name": "s4a-central",
+  "version": "0.1.61",
+  "description": "s4a",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "verup": "npm version patch --no-git-tag-version",
+    "testenv": "node_modules/pm2/bin/pm2 restart pm2.config.js",
+    "prodenv": "node_modules/pm2/bin/pm2 restart pm2.config.js"
+  },
+  "node_deb": {
+    "user": "s4a",
+    "group": "s4a",
+    "maintainer": "CERT.EE",
+    "dependencies": "mongodb-org, nodejs, yarn, pwgen, jq",
+    "description": "s4a central",
+    "templates": {
+      "postinst": "deb-templates/postinst",
+      "postrm": "deb-templates/postrm",
+      "default_variables": "deb-templates/s4a-central.defaults",
+      "systemd_service": "deb-templates/s4a-central.service"
+    },
+    "entrypoints": {
+      "daemon": "node_modules/pm2/bin/pm2"
+    }
+  },
+  "dependencies": {
+    "pm2": "^2.6.1"
+  }
+}

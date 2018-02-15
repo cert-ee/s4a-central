@@ -1,0 +1,141 @@
+{
+  "close": "Закрыть",
+  "cancel": "Отмена",
+  "save": "сохранять",
+  "add": "Добавить",
+  "delete": "Удалить",
+  "search": "Поиск",
+  "ok": "хорош",
+  "enabled": "включен",
+  "disabled": "Выключено",
+  "fail": "разбитый",
+  "delete_selected": "Удалить выбранный",
+  "edit": "редактировать",
+  "logs": "журнал",
+  "back": "назад",
+  "continue": "вперед",
+  "yes": "да",
+  "no": "нет",
+  "message": "сообщение",
+  "name": "Ru Name",
+  "actions": "RU Actions",
+  "menu": {
+    "dashboard": "Панель приборов",
+    "detectors": "Список детекторов",
+    "tags": "Теги",
+    "rulesets": "Наборы правил",
+    "rules": "Правила",
+    "rules_review": "Обзор изменений",
+    "feedback": "RU Feedback",
+    "users": "Управление пользователями"
+  },
+  "dashboard": {
+    "title": "S4A Центральный",
+    "detectors": "Детекторы",
+    "detectors_online": "Детекторы онлайн",
+    "detectors_problems": "Детекторы с проблемами",
+    "detectors_unapproved": "Несанкционированные детекторы"
+  },
+  "detectors": {
+    "title": "Список детекторов",
+    "clear_filters": "Очистить фильтры",
+    "filters": {
+      "search": "Поиск",
+      "online": "Онлайн",
+      "components_status": "Состояние компонентов",
+      "registration_status": "Статус регистрации",
+      "tags": "Теги"
+    },
+    "table": {
+      "friendly_name": "Дружественное имя",
+      "online": "Онлайн",
+      "last_seen": "Последнее посещение",
+      "components": "Компоненты",
+      "registration_status": "Статус регистрации",
+      "version": "Версия",
+      "tags": "Теги",
+      "alerts": "Оповещения",
+      "graphs": "Графики",
+      "yes": "Да",
+      "no": "Нет",
+      "ok": "Хорошо",
+      "fail": "Потерпеть неудачу"
+    }
+  },
+  "tags": {
+    "add_tag": "добавлять тег",
+    "edit_tag": "редактировать тег",
+    "name": "RU name",
+    "description": "описание",
+    "required" : "RU Required"
+  },
+  "rulesets": {
+    "enable_all": "включить все",
+    "disable_all": "выключить все",
+    "add_tag": "добавлять тег",
+    "remove_tag": "убрать тег",
+    "automatic_updates_enable_new": "автоматические обновления: включить новые правила"
+  },
+  "rules": {
+    "required" : "RU Required",
+    "add_tag": "добавлять тег",
+    "edit_tag": "редактировать тег",
+    "remove_tag": "убрать тег",
+    "enable_selected": "включить выбранные предметы",
+    "disable_selected": "выключить выбранные предметы",
+    "add_rule": "добавить правил",
+    "edit_rule": "редактировать правил",
+    "remove_rule": "убрать правил",
+    "severity": "строгость",
+    "revision": "ревизия",
+    "classtype": "тип класса",
+    "message": "сообщение",
+    "rule_data": "данные правил",
+    "ruleset": "список правил",
+    "saved": "RU Changes saved to draft",
+    "sid_format": "RU Must be above ",
+    "sid_format_max": "RU and below ",
+    "review": {
+      "publish": "публиковать"
+    }
+  },
+  "feedback": {
+    "title" : "RU Feedback",
+    "mark_as_solved": "RU Mark as Solved",
+    "mark_as_unsolved": "RU Mark as Unsolved",
+    "filters": {
+      "search": "RU Search",
+      "solved": "RU Solved"
+    },
+    "table" : {
+      "case_number": "RU Case Number",
+      "machine_id": "RU Machine ID",
+      "detector": "RU Detector",
+      "created_time": "RU Feedback Received",
+      "message": "RU Message",
+      "comment": "RU Comment",
+      "internal_comment": "RU Internal Comment",
+      "solved": "RU Solved",
+      "yes": "RU Yes",
+      "no": "RU No"
+    },
+    "disk_mount": "RU mount",
+    "disk_part": "RU part",
+    "disk_type": "RU type",
+    "disk_size": "RU size",
+    "disk_free": "RU free",
+    "net_name": "RU Name",
+    "net_state": "RU State",
+    "net_ip": "RU IP"
+  },
+  "users": {
+    "add_user": "Добавить пользовател",
+    "user_management": "Управление пользователями",
+    "really_delete_user": "действительно удалить пользовател",
+    "username": "имя пользователя",
+    "user": "пользователь",
+    "message": "RU message",
+    "time": "время",
+    "roles": "роли"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "name": "job_schedule",
+  "plural": "job_schedule",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "target": {
+      "type": "string",
+      "required": true,
+      "description": "Detector name"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Name of the job to be called on the detector side"
+    },
+    "transferred": {
+      "type": "boolean",
+      "required": true,
+      "description": "If the job has been handed over to detector",
+      "default": false
+    },
+    "completed": {
+      "type": "boolean",
+      "required": true,
+      "description": "If the job has been completed",
+      "default": false
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Job description"
+    },
+    "created_time": {
+      "type": "date",
+      "required": true,
+      "description": "When the job was added",
+      "default": "$now"
+    },
+    "transferred_time": {
+      "type": "date",
+      "required": false,
+      "description": "When the job was transferred to detector"
+    },
+    "completed_time": {
+      "type": "date",
+      "required": false,
+      "description": "When the job was completed"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "detectors": {
+      "type": "belongsTo",
+      "model": "detector",
+      "foreignKey": "detectorId"
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "detector",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}
