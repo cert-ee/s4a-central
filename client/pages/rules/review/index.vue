@@ -1,16 +1,15 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>{{ $t('menu.rules_review') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <transition name="fade">
-        <v-btn v-if="selectedRules.length" error @click="deleteSelectedRules">{{ $t('delete_selected') }}</v-btn>
+        <v-btn v-if="selectedRules.length" color="error" @click="deleteSelectedRules">{{ $t('delete_selected') }}</v-btn>
       </transition>
-      <v-btn primary @click="publish">{{ $t('rules.review.publish') }}</v-btn>
+      <v-btn color="primary" @click="publish">{{ $t('rules.review.publish') }}</v-btn>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid grid-list-lg>
         <v-layout row wrap>
           <v-flex xs12>
@@ -24,17 +23,17 @@
               </v-card-title>
               <v-card-text>
                 <v-data-table :headers="headers" :items="rules" :rows-per-page-items="rowsPerPage" :search="search"
-                              :pagination.sync="pagination" v-model="selectedRules" select-all
+                              :pagination.sync="pagination" v-model="selectedRules" select-all="primary"
                 >
-                  <template slot="items" scope="props">
+                  <template slot="items" slot-scope="props">
                     <td>
-                      <v-checkbox primary hide-details v-model="props.selected"></v-checkbox>
+                      <v-checkbox color="primary" hide-details v-model="props.selected"></v-checkbox>
                     </td>
                     <td :class="props.item.changes_fields.includes('sid') ? 'yellow lighten-3' : ''">
                       {{ props.item.sid }}
                     </td>
                     <td :class="props.item.changes_fields.includes('enabled') ? 'yellow lighten-3' : ''">
-                      <v-switch v-model="props.item.enabled" @change="changeEnabled(props.item)"></v-switch>
+                      <v-switch color="primary" v-model="props.item.enabled" @change="changeEnabled(props.item)"></v-switch>
                     </td>
                     <td :class="props.item.changes_fields.includes('severity') ? 'yellow lighten-3' : ''">{{ props.item.severity }}</td>
                     <td>{{ props.item.ruleset }}</td>
@@ -45,7 +44,7 @@
                                 item-text="name" item-value="id" return-object hide-details class="mb-2"
                                 @input="saveTags(props.item)"
                       >
-                        <template slot="selection" scope="data">
+                        <template slot="selection" slot-scope="data">
                           <template v-for="tag in props.item.tags" v-if="tag.id === data.item.id">
                             <v-chip v-if="tag.added === true" :key="data.item.id" close small
                                     :selected="data.selected" class="chip--select-multi light-green"
@@ -73,12 +72,12 @@
                       </v-icon>
                     </td>
                     <td>
-                      <v-icon v-if="props.item.ruleset === $store.state.rule_custom_name" primary class="pointer"
+                      <v-icon v-if="props.item.ruleset === $store.state.rule_custom_name" color="primary" class="pointer"
                               @click.stop="openEditRuleDialog(props.item)"
                       >
                         edit
                       </v-icon>
-                      <v-icon v-else error>block</v-icon>
+                      <v-icon v-else color="error">block</v-icon>
                     </td>
                   </template>
                 </v-data-table>
@@ -111,7 +110,7 @@
                         </v-select>
                       </v-flex>
                       <v-flex xs2>
-                        <v-checkbox :label="$t('enabled')" v-model="editRule.enabled"></v-checkbox>
+                        <v-checkbox color="primary" :label="$t('enabled')" v-model="editRule.enabled"></v-checkbox>
                       </v-flex>
                       <v-flex xs12>
                         <v-text-field :label="$t('rules.message')" v-model="editRule.message" required :rules="[formRules.required]"></v-text-field>
@@ -127,7 +126,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn type="button" flat @click="editRuleDialog = false">{{ $t('cancel') }}</v-btn>
-                  <v-btn type="submit" flat primary>{{ $t('save') }}</v-btn>
+                  <v-btn type="submit" flat color="primary">{{ $t('save') }}</v-btn>
                 </v-card-actions>
               </v-form>
             </v-card>
@@ -147,7 +146,7 @@
           </v-dialog>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

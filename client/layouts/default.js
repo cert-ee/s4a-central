@@ -1,10 +1,4 @@
 export default {
-    data () {
-        return {
-            rulesExpanded: false
-        }
-    },
-
     computed: {
         drawer: {
             get() { return this.$store.state.drawer; },
@@ -14,6 +8,11 @@ export default {
         snackBar: {
             get() { return this.$store.state.snackBar.open; },
             set() { this.$store.commit('closeSnackbar'); }
+        },
+
+        rulesExpanded: {
+            get() { return this.$store.state.rulesExpanded; },
+            set(value) { this.$store.commit('setRulesExpanded', value) }
         }
     },
 

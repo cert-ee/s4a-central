@@ -29,13 +29,6 @@ export default {
         }
     },
 
-    computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        }
-    },
-
     methods: {
         async toggleRole(role, active) {
             try {
@@ -72,12 +65,13 @@ export default {
 
     async asyncData({ params, store, error, app: {$axios} }) {
         try {
-
             const filter = { filter: {where: {username: params.username}, include: 'roles'} };
-            const userPromise = $axios.get('users/findOne', {params: filter});
             const rulesFilter = { filter: {where: {name: {neq: 'detector'}}} };
-            const rolesPromise = $axios.get('roles', {params: rulesFilter});
-            const [ {data: user}, {data: roles} ] = await Promise.all([userPromise, rolesPromise]);
+
+            const [ user, roles ] = await Promise.all([
+                $axios.$get('users/findOne', {params: filter}), $axios.$get('roles', {params: rulesFilter})
+            ]);
+
             if (!user || !roles || !roles.length) return error({statusCode: 404});
 
             for (let role of roles) {
@@ -89,7 +83,7 @@ export default {
                 { or: [ {target: user.username}, {target: user.id} ] }
             ]}}};
 
-            const {data: log} = await $axios.get('log', {params: logFilter});
+            const log = await $axios.$get('log', {params: logFilter});
             return {user, roles, log};
         } catch (err) {
             if (err.response && err.response.status === 401) {

@@ -105,14 +105,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() {
-                return this.$store.state.drawer;
-            },
-            set() {
-            }
-        },
-
         search: {
             get() {
                 return this.$store.state.rules.search;
@@ -217,6 +209,7 @@ export default {
                 await this.$axios.post('rule_drafts/more', {changes: changedRules});
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});
                 this.$store.commit('setRulesReview', true);
+                this.$store.commit('setRulesExpanded', true);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -234,6 +227,7 @@ export default {
                 await this.$axios.post('rule_drafts/more', {changes: changedRules});
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});
                 this.$store.commit('setRulesReview', true);
+                this.$store.commit('setRulesExpanded', true);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -266,6 +260,7 @@ export default {
                 this.addEditRuleDialog.open = false;
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});
                 this.$store.commit('setRulesReview', true);
+                this.$store.commit('setRulesExpanded', true);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -275,9 +270,11 @@ export default {
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
             const params = {filter: {include: 'tags'}};
+            const origOnProgress = $axios.defaults.onDownloadProgress;
+            $axios.defaults.onDownloadProgress = null; // temp disable axios progress control
 
-            let [{data: rulesAll}, {data: rulesetNames}, {data: tagNames}, {data: classTypeNames },] = await Promise.all([
-                $axios.get('rules', {params}), $axios.get('rulesets'), $axios.get('tags'), $axios.get('rule_classtypes')
+            let [ rulesAll, rulesetNames, tagNames, classTypeNames ] = await Promise.all([
+                $axios.$get('rules', {params}), $axios.$get('rulesets'), $axios.$get('tags'), $axios.$get('rule_classtypes')
             ]);
 
             if (!rulesAll || !rulesAll.length) return;
@@ -287,6 +284,7 @@ export default {
                 rule.tagsStr = rule.tags.map(t => t.name).join(', ');
             }
 
+            $axios.defaults.onDownloadProgress = origOnProgress; // enable axios progress control again
             return {rulesAll, rulesetNames, tagNames, classTypeNames};
         } catch (err) {
             if (err.response && err.response.status === 401) {

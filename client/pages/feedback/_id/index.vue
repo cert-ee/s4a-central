@@ -1,44 +1,41 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>Feedback Case {{feedback.case_number}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="feedback.solved" error @click="toggleSolved(false)">
+      <v-btn v-if="feedback.solved" color="error" @click="toggleSolved(false)">
         {{ $t('feedback.mark_as_unsolved') }}
       </v-btn>
-      <v-btn v-else success @click="toggleSolved(true)">
+      <v-btn v-else color="success" @click="toggleSolved(true)">
         {{ $t('feedback.mark_as_solved') }}
       </v-btn>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid>
         <v-layout row wrap>
           <v-flex xs1>
-            <v-btn fab dark primary @click.native="$router.go(-1)">
+            <v-btn fab dark color="primary" @click.native="$router.go(-1)">
               <v-icon dark>arrow_back</v-icon>
             </v-btn>
           </v-flex>
           <v-flex xs12 lg10>
-            <v-tabs icons centered grow>
-              <v-tabs-bar class="grey lighten-4">
-                <v-tabs-slider class="primary"></v-tabs-slider>
-                <v-tabs-item href="#details">
-                  <v-icon>account_balance</v-icon>
-                  Details
-                </v-tabs-item>
-                <v-tabs-item href="#logs">
-                  <v-icon>view_list</v-icon>
-                  Logs
-                </v-tabs-item>
-                <v-tabs-item href="#components">
-                  <v-icon>dns</v-icon>
-                  Components
-                </v-tabs-item>
-              </v-tabs-bar>
+            <v-tabs icons-and-text centered grow>
+              <v-tabs-slider color="primary"></v-tabs-slider>
+              <v-tab href="#details">
+                <v-icon>account_balance</v-icon>
+                Details
+              </v-tab>
+              <v-tab href="#logs">
+                <v-icon>view_list</v-icon>
+                Logs
+              </v-tab>
+              <v-tab href="#components">
+                <v-icon>dns</v-icon>
+                Components
+              </v-tab>
 
-              <v-tabs-content id="details">
+              <v-tab-item id="details">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -94,7 +91,7 @@
                           <v-divider></v-divider>
                         </v-flex>
                         <v-flex xs12 class="mb-2">
-                          <h6>System Info</h6>
+                          <div class="title">System Info</div>
                         </v-flex>
                       </template>
                       <template v-if="feedback.system_info && Object.keys(feedback.system_info).length">
@@ -118,7 +115,7 @@
                           </v-flex>
                           <v-flex xs8 sm10>
                             <v-data-table class="mt-3 mb-3" :headers="disksHeaders" :items="feedback.system_info.disks" hide-actions>
-                              <template slot="items" scope="props">
+                              <template slot="items" slot-scope="props">
                                 <td>{{ props.item.mount }}</td>
                                 <td>{{ props.item.part }}</td>
                                 <td>{{ props.item.type }}</td>
@@ -135,7 +132,7 @@
                         </v-flex>
                         <v-flex xs8 sm10>
                           <v-data-table class="mt-3 mb-3" :headers="interfacesHeaders" :items="feedback.network_interfaces" hide-actions>
-                            <template slot="items" scope="props">
+                            <template slot="items" slot-scope="props">
                               <td>{{ props.item.name }}</td>
                               <td>{{ props.item.state }}</td>
                               <td>{{ props.item.ip }}</td>
@@ -149,7 +146,7 @@
                           <v-divider></v-divider>
                         </v-flex>
                         <v-flex xs12 class="mb-2">
-                          <h6>Contact Information</h6>
+                          <div class="title">Contact Information</div>
                         </v-flex>
                         <v-flex xs4 sm2>
                           <v-subheader>Name</v-subheader>
@@ -171,9 +168,9 @@
                     </v-layout>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
+              </v-tab-item>
 
-              <v-tabs-content id="logs">
+              <v-tab-item id="logs">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -183,9 +180,9 @@
                     </v-layout>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
+              </v-tab-item>
 
-              <v-tabs-content id="components">
+              <v-tab-item id="components">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-text-field append-icon="search" label="Search" single-line hide-details
@@ -196,7 +193,7 @@
                     <v-data-table :headers="componentsHeaders" :items="feedback.components"
                                   :rows-per-page-items="rowsPerPage" :search="search" :pagination.sync="pagination"
                     >
-                      <template slot="items" scope="props">
+                      <template slot="items" slot-scope="props">
                         <td>{{ props.item.friendly_name }}</td>
                         <td :class="props.item.status ? 'success--text' : 'error--text'">
                           <v-icon v-if="props.item.status" class="success--text">
@@ -208,27 +205,33 @@
                         <td>{{ props.item.message }}</td>
                         <td>
                           <span v-if="props.item.logs">
-                            <v-btn icon v-tooltip:right="{ html: 'View Log' }"
-                                   @click.stop="log = {name: props.item.friendly_name, data: props.item.logs}; logDialog = true"
-                            >
-                              <v-icon>view_list</v-icon>
-                            </v-btn>
+                            <v-tooltip right>
+                              <v-btn icon slot="activator"
+                                     @click.stop="log = {name: props.item.friendly_name, data: props.item.logs}; logDialog = true"
+                              >
+                                <v-icon>view_list</v-icon>
+                              </v-btn>
+                              <span>View Log</span>
+                            </v-tooltip>
                           </span>
                         </td>
                         <td>
                           <span v-if="props.item.logs_error">
-                            <v-btn icon v-tooltip:right="{ html: 'View Error Log' }"
-                                   @click.stop="log = {name: `${props.item.friendly_name} Error`, data: props.item.logs_error}; logDialog = true"
-                            >
-                              <v-icon class="red--text">view_list</v-icon>
-                            </v-btn>
+                            <v-tooltip right>
+                              <v-btn icon
+                                     @click.stop="log = {name: `${props.item.friendly_name} Error`, data: props.item.logs_error}; logDialog = true"
+                              >
+                                <v-icon class="red--text">view_list</v-icon>
+                              </v-btn>
+                              <span>View Error Log</span>
+                            </v-tooltip>
                           </span>
                         </td>
                       </template>
                     </v-data-table>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
+              </v-tab-item>
             </v-tabs>
           </v-flex>
 
@@ -248,7 +251,7 @@
           </v-dialog>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 
