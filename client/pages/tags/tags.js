@@ -24,11 +24,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        },
-
         search: {
             get() { return this.$store.state.tags.search; },
             set(value) { this.$store.commit('tags/setSearch', value); }
@@ -61,7 +56,7 @@ export default {
                 this.$refs.addEditTagForm.validate();
                 if (!this.formValid) return;
                 let tag = {id: this.tagId, name: this.name, description: this.description};
-                ({data: tag} = await this.$axios.put('tags', tag));
+                tag = await this.$axios.$put('tags', tag);
 
                 if (this.addEditTagDialog.isEditDialog) {
                     Object.assign(this.tagRef, tag);
@@ -95,7 +90,7 @@ export default {
 
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
-            let {data: tags} = await $axios.get('tags');
+            let tags = await $axios.$get('tags');
             if (!tags || !tags.length) return;
             return { tags };
         } catch (err) {

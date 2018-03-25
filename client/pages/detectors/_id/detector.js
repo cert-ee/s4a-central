@@ -36,13 +36,6 @@ export default {
         }
     },
 
-    computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        }
-    },
-
     methods: {
         async approveRegistration() {
             try {
@@ -152,8 +145,8 @@ export default {
         try {
             const include = {filter: {include: 'tags'}};
 
-            let [ {data: detector}, {data: tagNames} ] = await Promise.all([
-                $axios.get(`detectors/${params.id}`, {params: include}), $axios.get('tags')
+            let [ detector, tagNames ] = await Promise.all([
+                $axios.$get(`detectors/${params.id}`, {params: include}), $axios.$get('tags')
             ]);
 
             if (!detector) return error({statusCode: 404, message: 'Not Found'});

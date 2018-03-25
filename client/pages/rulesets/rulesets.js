@@ -16,11 +16,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        },
-
         search: {
             get() { return this.$store.state.rulesets.search; },
             set(value) { this.$store.commit('rulesets/setSearch', value); }
@@ -91,8 +86,8 @@ export default {
         try {
             const params = {filter: {include: 'tags'}};
 
-            let [ {data: rulesetsAll}, {data: tagNames} ] = await Promise.all([
-                $axios.get('rulesets', {params}), $axios.get('tags')
+            let [ rulesetsAll, tagNames ] = await Promise.all([
+                $axios.$get('rulesets', {params}), $axios.$get('tags')
             ]);
 
             for (let ruleset of rulesetsAll) {

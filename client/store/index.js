@@ -4,6 +4,7 @@ export function state() {
         drawer: true,
         user: {},
         rulesReview: false,
+        rulesExpanded: false,
         unauthorized: 'You are not authorized to view this page.',
         versions: {},
         snackBar: {
@@ -18,7 +19,7 @@ export function state() {
 
 export const getters = {
     hasAdminRole(state) {
-        return state.user && state.user.roles.some(r => r.name === 'admin');
+        return state.user && state.user.roles && state.user.roles.some(r => r.name === 'admin');
     }
 };
 
@@ -29,6 +30,10 @@ export const mutations = {
 
     setRulesReview(state, value) {
         state.rulesReview = value;
+    },
+
+    setRulesExpanded(state, value) {
+        state.rulesExpanded = value;
     },
 
     showSnackbar(state, snackBar) {
@@ -63,7 +68,7 @@ export const actions = {
             //get the header and save for store
             this.$axios.setHeader("x-remote-user", req.headers["x-remote-user"]);
             const params = {filter: {include: 'roles'}};
-            const {data: user} = await $axios.get('users/current', {params});
+            const user = await $axios.$get('users/current', {params});
             state.user = user;
             state.rule_custom_name = "cert";
             state.rule_sid_limit = 10000000;
@@ -78,10 +83,7 @@ export const actions = {
             const vers = await $axios.get('/system_info/version');
             state.versions = vers.data;
 
-            const [{data: rule_drafts}] = await Promise.all([
-                $axios.get('rule_drafts/count')
-            ]);
-
+            const rule_drafts = await $axios.$get('rule_drafts/count');
             state.rulesReview = rule_drafts && rule_drafts.count;
         } catch (err) {
             console.log("FRONTEND: NUXT SERVER INIT ERROR");

@@ -1,0 +1,26 @@
+{
+  "env": {
+    "NODE_ENV": "dev",
+    "MONGODB_HOST": "localhost",
+    "MONGODB_PORT": "27017",
+    "MONGODB_DATABASE": "s4a-central",
+    "MONGODB_USER": "s4a-central",
+    "MONGODB_PASSWORD": "",
+    "API_REST_ROOT_URL": "/api",
+    "API_HOST": "0.0.0.0",
+    "API_PORT": 5000,
+    "API_URL": "http://localhost:5000/api",
+    "API_URL_BROWSER": "http://localhost:5000/api",
+    "URL_KIBANA": "http://localhost:123/kibana/",
+    "URL_GRAFANA": "http://localhost:456/grafana/",
+    "URL_FEEDBACK_FAQ" : "http://localhost:789/faq",
+    "URL_SURICATA_EM_RULES" : "https://rules.emergingthreats.net/open/suricata-3.0/emerging.rules.tar.gz",
+    "PATH_SURICATA_EM_TEMP" : "/srv/data/suricata_em/temp.tar.gz",
+    "PATH_SURICATA_EM_TEMP_EXTRACT" : "/srv/data/suricata_em/",
+    "PATH_SURICATA_EM_RULES" : "/srv/data/suricata_em/",
+    "PATH_SURICATA_ALERTS" : "/tmp/eve.json.test",
+    "DEBUG": "1",
+    "DEBUG_LEVEL": "5"
+  }
+}
+

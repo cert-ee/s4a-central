@@ -17,11 +17,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        },
-
         search: {
             get() {
                 return this.$store.state.feedback.search;
@@ -79,7 +74,7 @@ export default {
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
             const params = {filter: {include: 'detector'}};
-            let {data: feedbackAll} = await $axios.get('feedbacks', {params});
+            let feedbackAll = await $axios.$get('feedbacks', {params});
 
             for (let feedback of feedbackAll) {
                 feedback.solvedStr = feedback.solved ? i18n.t('feedback.table.yes') : i18n.t('feedback.table.no');

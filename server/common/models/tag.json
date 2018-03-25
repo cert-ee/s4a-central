@@ -41,7 +41,7 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "ALLOW"
+      "permission": "DENY"
     },
     {
       "accessType": "*",
@@ -59,6 +59,12 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "detector",
       "permission": "ALLOW"
     }
   ],

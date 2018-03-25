@@ -1,50 +1,46 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>Detector Details - {{detector.friendly_name}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn error v-if="$store.getters.hasAdminRole" @click="deleteDetector">Delete Detector</v-btn>
+      <v-btn color="error" v-if="$store.getters.hasAdminRole" @click="deleteDetector">Delete Detector</v-btn>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid>
         <v-layout row wrap>
           <v-flex xs1>
-            <v-btn fab dark primary @click.native="$router.go(-1)">
+            <v-btn fab dark color="primary" @click.native="$router.go(-1)">
               <v-icon dark>arrow_back</v-icon>
             </v-btn>
           </v-flex>
           <v-flex xs12 lg10>
-            <v-tabs icons centered grow>
-              <v-tabs-bar class="grey lighten-4">
-                <v-tabs-slider class="primary"></v-tabs-slider>
-                <v-tabs-item href="#details">
-                  <v-icon>account_balance</v-icon>
-                  Details
-                </v-tabs-item>
-                <v-tabs-item href="#components">
-                  <v-icon class="red--after" v-badge="{value: '!', visible: !detector.components_overall}">
-                    dns
-                  </v-icon>
-                  Components
-                </v-tabs-item>
-                <v-tabs-item href="#registration">
-                  <v-icon v-if="registration_step === 1 || registration_step < 5" class="deep-orange--after"
-                          v-badge:notifications_active.icon="{visible: registration_step === 1}"
-                  >
-                    assignment_ind
-                  </v-icon>
-                  <v-icon v-if="registration_step >= 5" class="success--after"
-                          v-badge:check.icon="{visible: registration_step >= 5}"
-                  >
-                    assignment_ind
-                  </v-icon>
-                  Registration
-                </v-tabs-item>
-              </v-tabs-bar>
+            <v-tabs icons-and-text centered grow>
+              <v-tabs-slider color="primary"></v-tabs-slider>
+              <v-tab href="#details">
+                Details
+                <v-icon>account_balance</v-icon>
+              </v-tab>
+              <v-tab href="#components">
+                Components
+                <v-badge color="error" :value="!detector.components_overall">
+                  <span slot="badge">!</span>
+                  <v-icon>dns</v-icon>
+                </v-badge>
+              </v-tab>
+              <v-tab href="#registration">
+                Registration
+                <v-badge color="deep-orange" :value="registration_step === 1">
+                  <v-icon dark slot="badge">notifications_active</v-icon>
+                  <v-icon v-if="registration_step === 1 || registration_step < 5">assignment_ind</v-icon>
+                </v-badge>
+                <v-badge color="success" :value="registration_step >= 5">
+                  <v-icon dark slot="badge">check</v-icon>
+                  <v-icon v-if="registration_step >= 5">assignment_ind</v-icon>
+                </v-badge>
+              </v-tab>
 
-              <v-tabs-content id="details">
+              <v-tab-item id="details">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -109,7 +105,7 @@
                         <v-divider></v-divider>
                       </v-flex>
                       <v-flex xs12 class="mb-2">
-                        <h6>Links</h6>
+                        <div class="title">Links</div>
                       </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Grafana</v-subheader>
@@ -122,9 +118,9 @@
                     </v-layout>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
+              </v-tab-item>
 
-              <v-tabs-content id="components">
+              <v-tab-item id="components">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-text-field append-icon="search" label="Search" single-line hide-details
@@ -135,7 +131,7 @@
                     <v-data-table :headers="headers" :items="detector.components"
                                   :rows-per-page-items="rowsPerPage" :search="search" :pagination.sync="pagination"
                     >
-                      <template slot="items" scope="props">
+                      <template slot="items" slot-scope="props">
                         <td>{{ props.item.friendly_name }}</td>
                         <td :class="props.item.status ? 'success--text' : 'error--text'">
                           <v-icon v-if="props.item.status" class="success--text">
@@ -149,9 +145,9 @@
                     </v-data-table>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
+              </v-tab-item>
 
-              <v-tabs-content id="registration">
+              <v-tab-item id="registration">
                 <v-stepper v-model="registration_step" vertical>
                   <v-stepper-step step="1"
                                   :editable="registration_steps[0].complete && !registration_steps[2].complete"
@@ -160,11 +156,11 @@
                     {{ registration_steps[0].name }}
                   </v-stepper-step>
                   <v-stepper-content step="1">
-                    <v-btn primary @click="registration_step++; registration_steps[0].complete = true">
+                    <v-btn color="primary" @click="registration_step++; registration_steps[0].complete = true">
                       Continue
                     </v-btn>
-                    <v-btn flat error @click.stop="openRejectDialog">Reject</v-btn>
-                    <v-dialog v-model="rejectDialog">
+                    <v-btn flat color="error" @click.stop="openRejectDialog">Reject</v-btn>
+                    <v-dialog width="30%" v-model="rejectDialog">
                       <v-card>
                         <v-form v-model="rejectionReasonFilled" ref="rejectForm" @submit.prevent="rejectRegistration">
                           <v-card-title>
@@ -178,7 +174,7 @@
                           <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn type="button" flat @click="rejectDialog = false">Cancel</v-btn>
-                            <v-btn type="submit" flat error>Reject</v-btn>
+                            <v-btn type="submit" flat color="error">Reject</v-btn>
                           </v-card-actions>
                         </v-form>
                       </v-card>
@@ -204,7 +200,7 @@
                                     required
                                     :rules="[rules.required, rules.name]">
                       </v-text-field>
-                      <v-btn primary :disabled="!nameValid"
+                      <v-btn color="primary" :disabled="!nameValid"
                              @click="registration_step++; registration_steps[1].complete = true"
                       >
                         Continue
@@ -242,8 +238,8 @@
                         </v-expansion-panel>
                       </v-card-text>
                     </v-card>
-                    <v-btn primary @click="approveRegistration" :loading="loading" >Save & Approve*</v-btn>
-                    <v-btn flat error @click.stop="openRejectDialog">Reject</v-btn>
+                    <v-btn color="primary" @click="approveRegistration" :loading="loading" >Save & Approve*</v-btn>
+                    <v-btn flat color="error" @click.stop="openRejectDialog">Reject</v-btn>
                     <div class="caption red--text mt-2">
                       *Detector name cannot be changed after completing this step!
                     </div>
@@ -264,12 +260,12 @@
                     </div>
                   </v-stepper-content>
                 </v-stepper>
-              </v-tabs-content>
+              </v-tab-item>
             </v-tabs>
           </v-flex>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

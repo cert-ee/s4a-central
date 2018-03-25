@@ -49,13 +49,6 @@ export default {
         }
     },
 
-    computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        }
-    },
-
     methods: {
         async toggleSolved(value) {
             try {
@@ -81,8 +74,14 @@ export default {
     async asyncData ({ params, store, error, app: {$axios, i18n} }) {
         try {
             const include = {filter: {include: 'detector'}};
-            let {data: feedback} = await $axios.get(`feedbacks/${params.id}`, {params: include});
+            let feedback = await $axios.$get(`feedbacks/${params.id}`, {params: include});
             if (!feedback) return error({statusCode: 404, message: 'Not Found'});
+
+            try {
+                feedback.logs = JSON.stringify(feedback.logs, null, 2);
+            } catch(err) {
+                feedback.logs = "BROKEN JSON ... " + feedback.logs
+            }
 
             feedback.solvedStr = feedback.solved ? i18n.t('feedback.table.yes') : i18n.t('feedback.table.no');
 

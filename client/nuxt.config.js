@@ -32,9 +32,10 @@ module.exports = {
 		'@nuxtjs/axios',
 	],
 	axios: {
-		baseURL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____',
+		baseURL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____'
 	},
 	env: {
-		URL_GRAFANA: process.env.URL_GRAFANA || 'http://grafana/'
+		URL_GRAFANA: process.env.URL_GRAFANA || 'http://grafana/',
+        API_URL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____'
 	}
 }

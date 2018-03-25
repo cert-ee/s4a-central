@@ -43,14 +43,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() {
-                return this.$store.state.drawer;
-            },
-            set() {
-            }
-        },
-
         search: {
             get() {
                 return this.$store.state.rules.reviewSearch;
@@ -151,8 +143,8 @@ export default {
 
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
-            let [{data: rulesAll}, {data: tagNames}, {data: classTypeNames } ] = await Promise.all([
-                $axios.get('rule_drafts'), $axios.get('tags'), $axios.get('rule_classtypes')
+            let [ rulesAll, tagNames, classTypeNames ] = await Promise.all([
+                $axios.$get('rule_drafts'), $axios.$get('tags'), $axios.$get('rule_classtypes')
             ]);
 
             for (let rule of rulesAll) {

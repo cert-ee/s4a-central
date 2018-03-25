@@ -19,14 +19,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() {
-                return this.$store.state.drawer;
-            },
-            set() {
-            }
-        },
-
         search: {
             get() {
                 return this.$store.state.detectors.search;
@@ -108,8 +100,9 @@ export default {
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
             const params = {filter: {include: 'tags'}};
-            let [{data: detectorsAll}, {data: tagNames}] = await Promise.all([
-                $axios.get('detectors', {params}), $axios.get('tags')
+
+            let [ detectorsAll, tagNames ] = await Promise.all([
+                $axios.$get('detectors', {params}), $axios.$get('tags')
             ]);
 
             for (let detector of detectorsAll) {

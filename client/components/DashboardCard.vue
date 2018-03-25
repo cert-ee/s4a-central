@@ -2,11 +2,11 @@
   <v-card height="100%" :hover="link" style="display: flex; align-items: center;">
     <v-layout fill-height align-center justify-center>
       <v-card-title primary-title>
-        <div class="text-xs-center">
-          <h5>
+        <div class="text-xs-center mb-2">
+          <div class="headline mb-2">
             <v-icon v-if="icon" large>{{icon}}</v-icon>
             {{title}}
-          </h5>
+          </div>
           <slot></slot>
         </div>
       </v-card-title>

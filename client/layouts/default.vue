@@ -1,8 +1,8 @@
 <template>
-  <v-app toolbar>
-    <v-navigation-drawer persistent dark overflow v-model="drawer">
+  <v-app>
+    <v-navigation-drawer app overflow dark width="250" v-model="drawer">
       <v-list class="pa-0" dark>
-        <v-list-tile avatar tag="div" ripple>
+        <v-list-tile avatar ripple>
           <v-list-tile-avatar>
             <v-icon dark>account_circle</v-icon>
           </v-list-tile-avatar>
@@ -50,19 +50,14 @@
           </v-list-tile-content>
         </v-list-tile>
 
-        <v-list-group v-if="$store.state.rulesReview" v-model="rulesExpanded" group="/rules">
-          <v-list-tile slot="item" to="/rules" exact ripple>
+        <v-list-group v-if="$store.state.rulesReview" v-model="rulesExpanded" group="/rules" no-action>
+          <v-list-tile slot="activator" to="/rules" exact ripple>
             <v-list-tile-action>
               <v-icon dark>track_changes</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
               <v-list-tile-title>{{ $t('menu.rules') }}</v-list-tile-title>
             </v-list-tile-content>
-            <v-list-tile-action @click.stop.prevent="rulesExpanded = !rulesExpanded">
-              <v-btn icon>
-                <v-icon dark>keyboard_arrow_down</v-icon>
-              </v-btn>
-            </v-list-tile-action>
           </v-list-tile>
           <v-list-tile to="/rules/review" exact ripple>
             <v-list-tile-content>
@@ -140,8 +135,9 @@
       </v-list>
     </v-navigation-drawer>
     <nuxt />
-    <v-snackbar top :timeout="5000" :error="$store.state.snackBar.type === 'error'"
-                :success="$store.state.snackBar.type === 'success'"
+    <v-snackbar top :timeout="5000"
+                :color="$store.state.snackBar.type === 'error' ? 'error' :
+                  $store.state.snackBar.type === 'success' ? 'success' : ''"
                 v-model="snackBar"
     >
       {{ $store.state.snackBar.text }}

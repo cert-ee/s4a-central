@@ -169,13 +169,6 @@ module.exports = function (report) {
     (async function () {
       try {
 
-        let detectorId;
-
-        if( options.accessToken !== undefined &&
-          options.accessToken.detectorId !== undefined) {
-          detectorId = options.accessToken.detectorId;
-        }
-
         let count = await report.app.models.feedback.count();
         if (!count && count !== 0 ) throw new Error("failed to create new case number");
 
@@ -192,8 +185,11 @@ module.exports = function (report) {
           components: components,
           contacts: contacts,
           extra: extra,
-          detectorId: detectorId
         };
+
+        if( options.accessToken && options.accessToken.detectorId ) {
+          feedback_input.detectorId = options.accessToken.detectorId;
+        }
 
         //hell.o( feedback_input, "feedback", "info");
 
@@ -206,6 +202,7 @@ module.exports = function (report) {
         cb(null, output);
 
       } catch (err) {
+        console.log ("TERE", options.accessToken );
         hell.o( err, "feedback", "info");
         cb({name: "Error", status: 400, message: "Central failed to process the request"});
       }
