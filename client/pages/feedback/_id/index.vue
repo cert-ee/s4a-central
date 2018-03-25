@@ -175,7 +175,7 @@
                   <v-card-text>
                     <v-layout row wrap align-center>
                       <v-flex xs12>
-                        <v-text-field v-model="feedback.logs.data" multi-line readonly rows="30"></v-text-field>
+                        <v-text-field v-model="feedback.logs" multi-line readonly rows="30"></v-text-field>
                       </v-flex>
                     </v-layout>
                   </v-card-text>
