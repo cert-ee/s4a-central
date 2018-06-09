@@ -1,6 +1,6 @@
 {
   "name": "s4a-central-lb_server",
-  "version": "0.1.48",
+  "version": "0.1.50",
   "description": "s4a central loopback server",
   "license": "MIT",
   "private": true,
@@ -29,8 +29,7 @@
     "loopback": "^3.0.0",
     "loopback-boot": "^2.0.0",
     "loopback-cli": "^4.0.0",
-    "loopback-component-explorer": "^5.1.0",
-    "loopback-connector-mongodb": "^3.1.0",
+    "loopback-connector-mongodb": "^3.4.3",
     "nodemon": "^1.12.0",
     "passport": "^0.4.0",
     "serve-favicon": "^2.0.1",
@@ -41,6 +40,7 @@
   "devDependencies": {
     "eslint": "^4.1.1",
     "eslint-config-loopback": "^10.0.0",
+    "loopback-component-explorer": "^6.00",
     "nsp": "^3.1.0"
   },
   "repository": {

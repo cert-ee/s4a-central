@@ -163,6 +163,20 @@ chown -R '{{ node_deb_user }}:{{ node_deb_group }}' \
 dependency_install '{{ node_deb_package_name }}'
 create_mongodb_users '{{ node_deb_package_name }}'
 
+# logrotate for pm2
+cat > '/etc/logrotate.d/s4a-detector'  <<EOF
+/home/{{ node_deb_user }}/.pm2/pm2.log /home/{{ node_deb_user }}/.pm2/logs/*.log {
+	rotate 12
+	daily
+	missingok
+	notifempty
+	compress
+	delaycompress
+	copytruncate
+	create 0640 {{ node_deb_user }} {{ node_deb_group }}
+}
+EOF
+
 if [[ "$init_type" != 'none' ]]; then
   start_service '{{ node_deb_package_name }}'
 fi
