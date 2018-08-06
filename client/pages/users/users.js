@@ -52,7 +52,7 @@ export default {
 
         async addUser() {
             try {
-                const user = await this.$axios.$post('users', {username: this.newUser});
+                const user = await this.$axios.$post('users/createUser', {username: this.newUser});
                 this.users.push(user);
                 this.addUserDialog = false;
             } catch (err) {

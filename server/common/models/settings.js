@@ -24,7 +24,7 @@ module.exports = function (settings) {
           delete setts.id;
 
           if (!setts.includes(name)) throw new Error("illegal setting: " + name);
-          if (sett[name] == value) return cb({name: "Error", statu: 400, message: "no_changes"});
+          if (sett[name] == value) return cb({name: "Error", status: 400, message: "no_changes"});
 
           /*
           Update

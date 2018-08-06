@@ -1,11 +1,83 @@
 'use strict';
 
 const shelljs = require('shelljs');
+const axios = require('axios');
 const hell = new (require(__dirname + "/helper.js"))({module_name: "user"});
 
 module.exports = function(user) {
   delete user.validations.email;
   delete user.validations.password;
+
+  /**
+   * CREATE USER
+   *
+   * add to moloch
+   *
+   * @param username
+   * @param options
+   * @param cb
+   */
+  user.createUser = function (username, options, cb) {
+    hell.o("start", "createUser", "info");
+    hell.o(username, "createUser", "info");
+
+    (async function () {
+      try {
+        user.local_connection = axios.create({});
+
+        let user_find = await user.findOne({where: {username: username }});
+        if( user_find ) throw new Error("duplicate_data");
+
+        let user_create = await user.create({ username: username });
+        if (!user_create) throw new Error("failed to create user");
+
+        /*
+        if (process.env.NODE_ENV != "dev") {
+          user.local_connection.post( "http://localhost:9200/_bulk",
+            {
+              "index":
+                {"_index": "users",
+                  "_type": "user",
+                  "_id": username
+                }
+            },
+            {
+              "removeEnabled": false,
+              "userName": username,
+              "emailSearch": false,
+              "enabled": true,
+              "webEnabled": true,
+              "headerAuthEnabled": true,
+              "createEnabled": true,
+              "settings": {},
+              "passStore": "",
+              "userId": username
+            }
+          );
+        }
+        */
+
+        user_find = await user.findOne({where: {username: username }});
+
+        hell.o("done", "createUser", "info");
+        cb(null, user_find );
+      } catch (err) {
+        hell.o(err, "createUser", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  user.remoteMethod('createUser', {
+    accepts: [
+      {arg: 'username', type: 'string', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/createUser', verb: 'post', status: 200}
+  });
 
   /**
    * BEFORE DELETE HOOK
@@ -43,6 +115,59 @@ module.exports = function(user) {
     })(); // async
 
   });
+
+
+  /**
+   * DELETE USER
+   *
+   * remove from moloch
+   *
+   * @param username
+   * @param options
+   * @param cb
+   */
+
+  /*
+  user.deleteUser = function (username, options, cb) {
+    hell.o("start", "deleteUser", "info");
+    hell.o(username, "deleteUser", "info");
+
+    (async function () {
+      try {
+        user.local_connection = axios.create({});
+
+        let user_find = await user.findOne({where: {username: username }});
+        if( !user_find ) throw new Error("no_data_found");
+
+        //let user_remove = await user.destroyById({ id: user_find.id });
+        //if (!user_remove) throw new Error("failed to remove user");
+
+        let comp = await user.app.models.component.findOne({where: { name: "moloch", installed: true, enabled: true}})
+        if ( comp && process.env.NODE_ENV != "dev") {
+          user.local_connection.delete( "http://localhost:9200/users/user/" + username);
+          user.local_connection = "";
+        }
+
+        hell.o("done", "deleteUser", "info");
+        cb(null, {message: "ok"});
+      } catch (err) {
+        hell.o(err, "deleteUser", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  user.remoteMethod('deleteUser', {
+    accepts: [
+      {arg: 'username', type: 'string', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/deleteUser', verb: 'post', status: 200}
+  });
+  */
 
   /**
    * UPDATE USER PASSWORD
