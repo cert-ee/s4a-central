@@ -93,14 +93,27 @@
           </v-list-tile-content>
         </v-list-tile>
 
-        <v-list-tile v-if="$store.state.debugMode" @click="resetCentral" exact ripple>
+        <v-list-tile v-if="$store.state.debugMode" @click.stop="showResetDemoConfirm" exact ripple>
           <v-list-tile-action>
             <v-icon dark>gavel</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>reset demo</v-list-tile-title>
+            <v-list-tile-title>{{ $t('menu.reset_demo') }}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+
+        <v-dialog v-model="resetDemoDialog" width="20%" lazy>
+          <v-card>
+            <v-card-text>
+              {{ $t('menu.reset_demo') }} ?
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn flat @click="resetDemoDialog = false">{{ $t('cancel') }}</v-btn>
+              <v-btn flat color="error" @click="resetDemo">{{ $t('reset') }}</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
 
         <v-divider></v-divider>
         <v-subheader class="grey--text">Versions</v-subheader>

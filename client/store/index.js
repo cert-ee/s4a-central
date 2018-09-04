@@ -100,7 +100,7 @@ export const actions = {
         commit('setRulesSyncing', true);
 
         try {
-            await this.$axios.get('rules/checkRoutine');
+            await this.$axios.get('rules/task');
         } catch (err) {
             dispatch('handleError', err);
         } finally {

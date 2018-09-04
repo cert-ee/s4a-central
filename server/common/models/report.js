@@ -276,6 +276,118 @@ module.exports = function (report) {
     http: {path: '/rules', verb: 'post', status: 201}
   });
 
+
+  /**
+   * YARA CHECK from detector
+   *
+   * @param detector_checksum
+   * @param options
+   * @param cb
+   */
+  report.yara = function (detector_checksum, options, cb) {
+    hell.o( "start", "yara", "info");
+
+    let token_detector = options.accessToken.detectorId;
+    hell.o( token_detector, "yara", "info");
+
+    (async function () {
+      try {
+
+        let update_detector = {last_seen: new Date(), online: true};
+
+        hell.o( [ token_detector, "update status" ], "rules", "info");
+        let update_result = await report.app.models.detector.update({id: token_detector}, update_detector);
+        if (!update_result) throw new Error("failed to update detector status");
+
+        let yara_busy = await report.app.models.yara.findOne({ where: { name: "busy"} });
+        if( yara_busy.data === "true" ){
+          hell.o( "Yara busy", "yara", "warning");
+          return cb({name: "Error", status: 503, message: "Central busy"}); //?
+        }
+
+        /*
+        output = { checksum: "", yara: "" };
+         */
+        let output = await report.app.models.yara.checkForDetector( detector_checksum );
+
+        //TODO mark yara as updated for detector
+
+        hell.o( [ token_detector, "done" ], "yara", "info");
+
+        cb(null, output);
+      } catch (err) {
+        hell.o( err, "yara", "error");
+        cb({name: "Error", status: 400, message: "Central failed to process the request"});
+      }
+
+    })(); // async
+
+  };
+
+  report.remoteMethod('yara', {
+    accepts: [
+      {arg: 'checksum', type: 'string', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/yara', verb: 'post', status: 201}
+  });
+
+  /**
+   * WISE CHECK from detector
+   *
+   * @param detector_checksum
+   * @param options
+   * @param cb
+   */
+  report.wise = function (detector_checksum, options, cb) {
+    hell.o( "start", "wise", "info");
+
+    let token_detector = options.accessToken.detectorId;
+    hell.o( token_detector, "wise", "info");
+
+    (async function () {
+      try {
+
+        let update_detector = {last_seen: new Date(), online: true};
+
+        hell.o( [ token_detector, "update status" ], "rules", "info");
+        let update_result = await report.app.models.detector.update({id: token_detector}, update_detector);
+        if (!update_result) throw new Error("failed to update detector status");
+
+        let wise_busy = await report.app.models.wise.findOne({ where: { name: "busy"} });
+        if( wise_busy.data === "true" ){
+          hell.o( "wise busy", "wise", "warning");
+          return cb({name: "Error", status: 503, message: "Central busy"}); //?
+        }
+        /*
+        output = { checksum: "", wise_ip: "", wise_url: "", wise_domain: "" };
+         */
+        let output = await report.app.models.wise.checkForDetector( detector_checksum );
+
+        //TODO mark wise as updated for detector
+
+        hell.o( [ token_detector, "done" ], "wise", "info");
+
+        cb(null, output);
+      } catch (err) {
+        hell.o( err, "wise", "error");
+        cb({name: "Error", status: 400, message: "Central failed to process the request"});
+      }
+
+    })(); // async
+
+  };
+
+  report.remoteMethod('wise', {
+    accepts: [
+      {arg: 'checksum', type: 'string', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/wise', verb: 'post', status: 201}
+  });
+
   /**
    * SAVE ALERTS TO DISK
    *

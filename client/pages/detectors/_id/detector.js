@@ -32,6 +32,7 @@ export default {
             rejectDialog: false,
             rejectionReason: '',
             rejectionReasonFilled: false,
+            deleteDetectorDialog: false,
             loading: false
         }
     },
@@ -69,6 +70,11 @@ export default {
                 this.loading = false;
                 this.$store.dispatch('handleError', err);
             }
+        },
+
+        openDetectorDeleteDialog() {
+
+            this.deleteDetectorDialog = true;
         },
 
         openRejectDialog() {

@@ -17,6 +17,18 @@
       "required": true,
       "description": "Rule revision number"
     },
+    "primary": {
+      "type": "boolean",
+      "required": true,
+      "description": "Rule is from primary feed",
+      "default": false
+    },
+    "feed_name": {
+      "type": "string",
+      "required": true,
+      "description": "Feed name",
+      "default": "emerging_threats"
+    },
     "classtype": {
       "type": "string",
       "required": true,

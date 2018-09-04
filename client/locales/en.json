@@ -4,6 +4,7 @@
   "save": "Save",
   "add": "Add",
   "delete": "Delete",
+  "reset": "Reset",
   "search": "Search",
   "ok": "OK",
   "enabled": "Enabled",
@@ -29,7 +30,8 @@
     "rules": "Rules",
     "rules_review": "Review Changes",
     "feedback": "Feedback",
-    "users": "User Management"
+    "users": "User Management",
+    "reset_demo": "Reset demo"
   },
   "dashboard": {
     "title": "S4A Central",
@@ -41,6 +43,7 @@
   "detectors": {
     "title": "Detector List",
     "clear_filters": "Clear Filters",
+    "delete_detector": "Delete detector",
     "filters": {
       "search": "Search",
       "online": "Online",

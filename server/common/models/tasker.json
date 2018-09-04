@@ -1,86 +1,95 @@
 {
-  "name": "rule",
-  "plural": "rules",
+  "name": "tasker",
+  "plural": "taskers",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "sid": {
+    "name": {
+      "type": "string",
+      "id": true,
+      "required": true,
+      "index": true,
+      "description": "Tasker name",
+      "isArray": false
+    },
+    "friendly_name": {
       "type": "string",
       "required": true,
-      "description": "Suricata rule ID"
+      "description": "Tasker friendly name",
+      "default": ""
     },
-    "revision": {
-      "type": "string",
-      "required": true,
-      "description": "Rule revision number"
-    },
-    "primary": {
-      "type": "boolean",
-      "required": true,
-      "description": "Rule is from primary feed",
-      "default": false
-    },
-    "feed_name": {
-      "type": "string",
-      "required": true,
-      "description": "Feed name",
-      "default": "emerging_threats"
-    },
-    "classtype": {
-      "type": "string",
-      "required": true,
-      "description": "Rule classtype from emerging threats"
-    },
-    "severity": {
+    "description": {
       "type": "string",
       "required": false,
-      "description": "Rule severity"
+      "description": "Tasker description",
+      "default": ""
     },
-    "ruleset": {
+    "task_name": {
       "type": "string",
       "required": true,
-      "description": "Rule categories like malware and worm"
+      "description": "Task name",
+      "isArray": false
     },
-    "enabled": {
+    "task_friendly_name": {
+      "type": "string",
+      "required": true,
+      "description": "Task friendly name",
+      "default": ""
+    },
+    "task_description": {
+      "type": "string",
+      "required": false,
+      "description": "Task description",
+      "default": ""
+    },
+    "task_params": {
+      "type": "object",
+      "required": true,
+      "description": "Task params",
+      "default": []
+    },
+    "builtin": {
       "type": "boolean",
       "required": true,
-      "description": "Enabled disabled",
-      "default": 1
+      "description": "Tasker not removable",
+      "default": false
     },
-    "message": {
+    "module_name": {
       "type": "string",
       "required": true,
-      "description": "Rule message"
+      "description": "Tasker module to run",
+      "default": ""
     },
-    "rule_data": {
+    "interval_mm": {
       "type": "string",
       "required": true,
-      "description": "Rule itself"
+      "description": "Interval minutes",
+      "default": "false"
+    },
+    "interval_hh": {
+      "type": "string",
+      "required": true,
+      "description": "Interval hours",
+      "default": "false"
     },
     "modified_time": {
       "type": "date",
       "required": true,
-      "description": "Modified Time",
+      "description": "Modified time",
       "default": "$now"
     },
-    "created_time": {
+    "createdAt": {
       "type": "date",
       "required": true,
-      "description": "Created Time",
+      "description": "Created time",
       "default": "$now"
     }
   },
   "validations": [],
-  "relations": {
-    "tags": {
-      "type": "hasAndBelongsToMany",
-      "model": "tag",
-      "foreignKey": ""
-    }
-  },
+  "relations": {},
   "acls": [
     {
       "accessType": "*",
@@ -104,19 +113,6 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "READ",
-      "principalType": "ROLE",
-      "principalId": "detector",
-      "permission": "ALLOW"
-    },
-    {
-      "property": "task",
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

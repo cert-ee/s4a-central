@@ -114,47 +114,44 @@ module.exports = function (detector) {
     http: {path: '/deleteDetector', verb: 'post', status: 200}
   });
 
-
   /**
    * CHECK FOR OFFLINE DETECTORS
    *
    * @param cb
    */
-  detector.checkRoutine = function (cb) {
-    hell.o("start", "checkRoutine", "info");
+  detector.task = async function (input,cb) {
+    hell.o("start", "task", "info");
 
-    (async function () {
-      try {
+    try {
 
-        //current timeout for detector is 12 minutes, which we consider offline
-        let filter_time = new Date();
-        filter_time.setMinutes(filter_time.getMinutes() - 12);
+      //current timeout for detector is 12 minutes, which we consider offline
+      let filter_time = new Date();
+      filter_time.setMinutes(filter_time.getMinutes() - 12);
 
-        let all_detectors = await detector.find({ fields:["id", "last_seen", "online"]});
+      let all_detectors = await detector.find({fields: ["id", "last_seen", "online"]});
 
-        let offline_detectors = 0;
-        for (let i = 0, l = all_detectors.length; i < l; i++) {
-          if( all_detectors[i].online && new Date( all_detectors[i].last_seen ) < filter_time ) {
-            let update_result = await detector.update({id: all_detectors[i].id}, {online: false});
-            hell.o([update_result, " offline"], "checkRoutine", "info");
-            offline_detectors++;
-          }
+      let offline_detectors = 0;
+      for (let i = 0, l = all_detectors.length; i < l; i++) {
+        if (all_detectors[i].online && new Date(all_detectors[i].last_seen) < filter_time) {
+          let update_result = await detector.update({id: all_detectors[i].id}, {online: false});
+          hell.o([update_result, " offline"], "task", "info");
+          offline_detectors++;
         }
-
-        if (offline_detectors == 0) {
-          hell.o(["no new offline detectors found"], "checkRoutine", "info");
-          return cb(null, {message: "ok"});
-        }
-
-        hell.o([offline_detectors, " detectors set to offline"], "checkRoutine", "info");
-
-        return cb(null, {message: "ok"});
-      } catch (err) {
-        hell.o(err, "checkRoutine", "error");
-        cb({name: "Error", status: 400, message: err.message});
       }
 
-    })(); // async
+      if (offline_detectors == 0) {
+        hell.o(["no new offline detectors found"], "task", "info");
+
+        return cb(null, {message: "ok"});
+      }
+
+      hell.o([offline_detectors, " detectors set to offline"], "task", "info");
+
+      return cb(null, {message: "ok"});
+    } catch (err) {
+      hell.o(err, "task", "error");
+      cb({name: "Error", status: 400, message: err.message});
+    }
 
   };
 

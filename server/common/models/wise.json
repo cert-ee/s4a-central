@@ -1,6 +1,6 @@
 {
-  "name": "tag",
-  "plural": "tags",
+  "name": "wise",
+  "plural": "wise",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -9,37 +9,33 @@
   "properties": {
     "name": {
       "type": "string",
+      "id": true,
       "required": true,
-      "description": "Tag name"
+      "index": true,
+      "description": "Wise name",
+      "isArray": false
+    },
+    "friendly_name": {
+      "type": "string",
+      "required": true,
+      "description": "Wise friendly name",
+      "default": ""
     },
     "description": {
       "type": "string",
+      "required": false,
+      "description": "Wise description",
+      "default": ""
+    },
+    "data": {
+      "type": "string",
       "required": true,
-      "description": "Tag description"
+      "description": "Wise value or data",
+      "default": ""
     }
   },
   "validations": [],
   "relations": {
-    "detectors": {
-      "type": "hasAndBelongsToMany",
-      "model": "detector",
-      "foreignKey": ""
-    },
-    "feeds": {
-      "type": "hasAndBelongsToMany",
-      "model": "detector",
-      "foreignKey": ""
-    },
-    "rules": {
-      "type": "hasAndBelongsToMany",
-      "model": "rule",
-      "foreignKey": ""
-    },
-    "rulesets": {
-      "type": "hasAndBelongsToMany",
-      "model": "ruleset",
-      "foreignKey": ""
-    }
   },
   "acls": [
     {
@@ -61,7 +57,8 @@
       "permission": "ALLOW"
     },
     {
-      "accessType": "READ",
+      "property": "checkRoutine",
+      "accessType": "*",
       "principalType": "ROLE",
       "principalId": "read",
       "permission": "ALLOW"
@@ -69,7 +66,7 @@
     {
       "accessType": "READ",
       "principalType": "ROLE",
-      "principalId": "detector",
+      "principalId": "read",
       "permission": "ALLOW"
     }
   ],

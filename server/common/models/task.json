@@ -1,6 +1,6 @@
 {
-  "name": "system_info",
-  "plural": "system_info",
+  "name": "task",
+  "plural": "tasks",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -9,34 +9,66 @@
   "properties": {
     "name": {
       "type": "string",
-      "id": true,
       "required": true,
       "index": true,
-      "description": "Sysinfo name",
+      "description": "Task name",
       "isArray": false
+    },
+    "parent_name": {
+      "type": "string",
+      "required": true,
+      "description": "Tasker name"
     },
     "friendly_name": {
       "type": "string",
       "required": true,
-      "description": "Sysinfo name",
-      "default": ""
+      "description": "Task friendly name",
+      "default": false
     },
     "description": {
       "type": "string",
       "required": false,
-      "description": "Sysinfo description",
+      "description": "Task description",
       "default": ""
     },
-    "data": {
+    "module_name": {
       "type": "string",
       "required": true,
-      "description": "Sysinfo value or data",
-      "default": ""
+      "description": "Task module"
+    },
+    "params": {
+      "type": "object",
+      "required": false,
+      "description": "Task params",
+      "default": {}
+    },
+    "failed": {
+      "type": "boolean",
+      "required": true,
+      "description": "Task failed",
+      "default": false
+    },
+    "completed": {
+      "type": "boolean",
+      "required": true,
+      "description": "Task finished",
+      "default": false
+    },
+    "run_time": {
+      "type": "date",
+      "required": true,
+      "description": "Run time",
+      "default": "$now"
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "description": "Created time",
+      "default": "$now"
     }
   },
   "validations": [],
-  "relations": {
-  },
+  "relations": {},
   "acls": [
     {
       "accessType": "*",
@@ -58,20 +90,6 @@
     },
     {
       "accessType": "READ",
-      "principalType": "ROLE",
-      "principalId": "read",
-      "permission": "ALLOW"
-    },
-    {
-      "property": "list",
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
-    {
-      "property": "version",
-      "accessType": "*",
       "principalType": "ROLE",
       "principalId": "read",
       "permission": "ALLOW"
