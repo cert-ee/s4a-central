@@ -410,8 +410,8 @@ module.exports = function (rule) {
 
       }
 
-      // hell.o([sid, "create draft"], "checkRuleLine", "info");
-      // await rule.addToDraft(draft_input);
+      hell.o([sid, "create draft"], "checkRuleLine", "info");
+      await rule.addToDraft(draft_input);
 
 
       // rule.app.models.rule_draft.more(draft_input, null, function () {
@@ -500,7 +500,7 @@ module.exports = function (rule) {
 
         for (const t in detector.tags()) {
           tags_filter.where.or.push({"id": detector.tags()[t].id});
-          console.log( "tag", detector.tags()[t].id );
+          console.log( "tag for Where Or", detector.tags()[t].id );
         }
 
         tags_filter.include.scope = {

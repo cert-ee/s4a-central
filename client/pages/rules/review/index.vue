@@ -36,6 +36,9 @@
                       <v-switch color="primary" v-model="props.item.enabled" @change="changeEnabled(props.item)"></v-switch>
                     </td>
                     <td :class="props.item.changes_fields.includes('severity') ? 'yellow lighten-3' : ''">{{ props.item.severity }}</td>
+                    <td :class="props.item.changes_fields.includes('revision') ? 'yellow lighten-3' : ''">
+                      {{ props.item.revision }}
+                    </td>
                     <td>{{ props.item.ruleset }}</td>
                     <td :class="props.item.changes_fields.includes('classtype') ? 'yellow lighten-3' : ''">{{ props.item.classtype }}</td>
                     <td :class="props.item.changes_fields.includes('message') ? 'yellow lighten-3' : ''">{{ props.item.message }}</td>

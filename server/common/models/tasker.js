@@ -14,11 +14,10 @@ module.exports = function (tasker) {
     try {
 
       let default_taskers = [
-        /*
-              //TODO: turned off for testing
         {
           name: "detector_offline_checker",
           friendly_name: "Detectors offline checker",
+          enabled: true,
           description: "Checks how long it has passed since the last communication with a detector, status is set to offline if its more than threshold",
           task_name: "detector_offline_check",
           task_friendly_name: "Check for offline detectors",
@@ -29,7 +28,6 @@ module.exports = function (tasker) {
           interval_mm: 1,
           builtin: true
         }
-        */
       ];
 
       // await tasker.destroyAll();
@@ -37,28 +35,6 @@ module.exports = function (tasker) {
       // await tasker.app.models.task.destroyAll();
       // await tasker.app.models.rule.destroyAll();
 
-      hell.o("add feeds to default taskers", "initialize", "info");
-      let feeds = await tasker.app.models.feed.find({where: { enabled: true }} );
-      if (!feeds) throw new Error("failed to load feeds");
-
-      for (const fd of feeds) {
-        let feed_tasker = {
-          name: fd.component_name + "_" + fd.name + "_updater",
-          friendly_name: "Update content for " + fd.component_name,
-          description: fd.description,
-          task_name: fd.component_name + "_" + fd.name + "_update",
-          task_friendly_name: "Check for new " + fd.component_name + " content",
-          task_params: {feed_name: fd.name},
-          task_description: "",
-          module_name: "feed",
-          interval_hh: false,
-          // interval_mm: 240, #TODO for testing
-          interval_mm: 1,
-          builtin: true
-        };
-
-        default_taskers.push(feed_tasker)
-      }
 
       hell.o("check default taskers", "initialize", "info");
       let create_result;
@@ -68,11 +44,19 @@ module.exports = function (tasker) {
         if (!create_result) throw new Error("failed to create tasker " + tr.name);
       }
 
+      hell.o("add feeds to taskers", "initialize", "info");
+      let feeds = await tasker.app.models.feed.find({where: {enabled: true}});
+      if (!feeds) throw new Error("failed to load feeds");
+
+      for (const fd of feeds) {
+        await tasker.addFeedTasker(fd);
+      }
+
       const all_taskers = await tasker.find();
 
       //check if we have tasks and create accordingly
       for (const tr of all_taskers) {
-        tasker.loader(tr);
+        tasker.task_loader(tr);
       }
 
       //tasker ticker
@@ -87,80 +71,74 @@ module.exports = function (tasker) {
     }
   };
 
-
-  tasker.checkTasks = async function () {
-    hell.o("start", "checkTasks", "info");
-
-    try {
-      let tasks_found = await tasker.app.models.task.find({
-        where: {
-          completed: false,
-          run_time: {lt: moment().valueOf()}
-        }
-      });
-
-      if (tasks_found.length == 0) return;
-      hell.o(["found", tasks_found.length], "checkTasks", "info");
-
-      for (const t of tasks_found) {
-        let task_update = {
-          completed: true,
-          failed: false
-        };
-
-        await tasker.app.models[t.module_name].task(t.params, function (result) {
-          if (result !== null) {
-            task_update.failed = true;
-            hell.o(["task failed", t.name], "checkTasks", "info");
-          }
-        });
-
-        if (!task_update.failed) {
-          hell.o(["set task completed", t.name], "checkTasks", "info");
-          let task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
-          await tasker.loader(t.parent_name);
-        }
-      }
-
-      hell.o("done", "checkTasks", "info");
-    } catch (err) {
-      hell.o(err, "checkTasks", "error");
-    }
-  };
-
-
   /**
-   * Get the next task run time
+   * ADD TASKER FOR A FEED
    *
    * @param input
-   * @returns {number}
    */
-  tasker.timeCalc = function (input) {
-    let mm = parseInt(input.interval_mm);
-    let hh = parseInt(input.interval_hh);
-    let next = "";
+  tasker.addFeedTasker = async function (input) {
+    hell.o("start", "addFeedTasker", "info");
+    try {
+      hell.o(input, "addFeedTasker", "info");
 
-    if (Number.isInteger(hh)) {
-      next = moment().startOf("hour").add(hh, "hours").valueOf();
-    } else {
-      let start = moment();
-      let closest = mm - (start.minute() % mm);
-      next = moment(start).add(closest, "minutes").valueOf();
+      let feed_tasker = {
+        name: input.component_name + "_" + input.name + "_updater",
+        friendly_name: "Update content for " + input.component_name,
+        enabled: input.enabled,
+        description: input.description,
+        task_name: input.component_name + "_" + input.name + "_update",
+        task_friendly_name: "Check for new " + input.component_name + " content",
+        task_params: {feed_name: input.name},
+        task_description: "",
+        module_name: "feed",
+        interval_hh: false,
+        interval_mm: 240,
+        //interval_mm: 1, #TODO for testing
+        builtin: true
+      };
+
+      let create_result = await tasker.findOrCreate({where: {name: feed_tasker.name}}, feed_tasker);
+      if (!create_result) throw new Error("failed to create tasker " + feed_tasker.name);
+
+      await tasker.task_loader(feed_tasker);
+
+      hell.o("done", "addFeedTasker", "info");
+    } catch (err) {
+      hell.o(err, "addFeedTasker", "error");
     }
-
-    //TODO: for testing
-    next = moment().add(20,"seconds").valueOf();
-    if (process.env.NODE_ENV == "dev") {
-      //TODO: for testing
-      // next = moment().add(1, "minutes").valueOf();
-      next = moment().add(20,"seconds").valueOf();
-    }
-
-    return next;
   };
 
-  tasker.loader = async function (input) {
-    hell.o("start", "loader", "info");
+  /**
+   * REMOVE TASKER FOR A FEED
+   *
+   * @param input
+   */
+  tasker.removeFeedTasker = async function (input) {
+    hell.o("start", "removeFeedTasker", "info");
+    try {
+      hell.o(input.name, "removeFeedTasker", "info");
+
+      let found_tasker = await tasker.findOne({where: {name: input.component_name + "_" + input.name + "_updater"}});
+      if (!found_tasker) throw new Error("failed to find tasker " + input.name);
+
+      let remove_result = await tasker.destroyById(found_tasker.id);
+      if (!remove_result) throw new Error("failed to remove tasker " + input.name);
+
+      await tasker.task_unloader(found_tasker);
+
+      hell.o("done", "removeFeedTasker", "info");
+    } catch (err) {
+      hell.o(err, "removeFeedTasker", "error");
+    }
+  };
+
+  /**
+   * LOAD NEW TASK FOR A TASKER
+   *
+   * @param input
+   */
+  tasker.task_loader = async function (input) {
+    hell.o("start", "task_loader", "info");
 
     try {
 
@@ -168,7 +146,7 @@ module.exports = function (tasker) {
         input = await tasker.findOne({where: {name: input}});
       }
 
-      hell.o([input.task_name, "check existing task"], "loader", "info");
+      hell.o([input.task_name, "check existing task"], "task_loader", "info");
       let task_found = await tasker.app.models.task.findOne({where: {name: input.task_name, completed: false}});
       if (!task_found) {
       } else return;
@@ -184,14 +162,217 @@ module.exports = function (tasker) {
         run_time: time_calc
       };
 
-      hell.o([input.task_name, "create new task"], "loader", "info");
+      hell.o([input.task_name, "create new task"], "task_loader", "info");
       let task_create = await tasker.app.models.task.create(task_input);
 
     } catch (err) {
-      hell.o(err, "loader", "error");
+      hell.o(err, "task_loader", "error");
 
     }
 
   };
+
+  /**
+   * SET TASK AS COMPLETED FOR A TASKER
+   *
+   * @param input
+   */
+  tasker.task_unloader = async function (input) {
+    hell.o([input.task_name, "unload existing task"], "task_unloader", "info");
+    try {
+      hell.o(input, "task_unloader", "info");
+
+      let task_found = await tasker.app.models.task.findOne({where: {name: input.task_name, completed: false}});
+      if (task_found) {
+        hell.o(["task_found", task_found.name], "task_unloader", "info");
+        let task_update = {
+          completed: true,
+          failed: false
+        };
+        let task_updated = await tasker.app.models.task.update({id: task_found.id}, task_update);
+      }
+      hell.o("done", "task_unloader", "info");
+    } catch (err) {
+      hell.o(err, "task_unloader", "error");
+    }
+
+  };
+
+  /**
+   * Get the next task run time
+   *
+   * @param input
+   */
+  tasker.timeCalc = function (input) {
+    let mm = parseInt(input.interval_mm);
+    let hh = parseInt(input.interval_hh);
+    let next = "";
+
+    if (Number.isInteger(hh)) {
+      next = moment().startOf("hour").add(hh, "hours").valueOf();
+    } else {
+      let start = moment();
+      let closest = mm - (start.minute() % mm);
+      next = moment(start).add(closest, "minutes").valueOf();
+    }
+
+    if (process.env.NODE_ENV == "dev") {
+      //TODO: for testing
+      // next = moment().add(1, "minutes").valueOf();
+      next = moment().add(20, "seconds").valueOf();
+    }
+
+    return next;
+  };
+
+
+
+  /**
+   * TASK CHECKER
+   *
+   * if task is pased exec time:
+   * run task
+   * save result
+   * create a new task
+   *
+   */
+  tasker.checkTasks = async function ( task_name ) {
+    hell.o("start", "checkTasks", "info");
+
+    try {
+      let tasks_filter = {
+        where: {
+          completed: false,
+          run_time: {lt: moment().valueOf()}
+        }
+      };
+
+      if( task_name !== undefined) {
+        tasks_filter = {
+          where: {
+            completed: false,
+            name: task_name
+          }
+        };
+      }
+
+      let tasks_found = await tasker.app.models.task.find( tasks_filter );
+
+      if (tasks_found.length == 0) return;
+      hell.o(["found", tasks_found.length], "checkTasks", "info");
+
+      let task_updated, task_update;
+      for (const t of tasks_found) {
+        task_update = {
+          completed: true,
+          failed: false
+        };
+
+        await tasker.app.models[t.module_name].task(t.params, function (result) {
+          if (result !== null) {
+            task_update.failed = true;
+            hell.o(["task failed", t.name], "checkTasks", "info");
+          }
+        });
+
+        if (!task_update.failed) {
+          hell.o(["set task completed", t.name], "checkTasks", "info");
+          task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
+          await tasker.task_loader(t.parent_name);
+        }
+      }
+
+      hell.o("done", "checkTasks", "info");
+    } catch (err) {
+      hell.o(err, "checkTasks", "error");
+    }
+  };
+
+  /**
+   * RUN TASK NOW
+   *
+   * @param task_name
+   * @param cb
+   */
+  tasker.runTask = function (task_name, cb) {
+    hell.o(["start", task_name], "run_task", "info");
+
+    (async function () {
+      try {
+
+        await tasker.checkTasks( task_name );
+
+        hell.o([task_name, "done"], "run_task", "info");
+
+        cb(null, {message: "ok"});
+
+      } catch (err) {
+        hell.o(err, "run_task", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  tasker.remoteMethod('runTask', {
+    accepts: [
+      {arg: 'name', type: 'string', required: true},
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/runTask', verb: 'post', status: 201}
+  });
+
+  /**
+   * TOGGLE TASKER
+   *
+   * @param name
+   * @param enabled
+   * @param cb
+   */
+  tasker.toggleEnable = function (tasker_name, enabled, cb) {
+    hell.o(["start " + tasker_name, "enabled " + enabled], "toggleEnable", "info");
+
+    (async function () {
+      try {
+
+        let tasker_found = await tasker.find({where: {name: tasker_name}});
+        if (!tasker_found) throw new Error(tasker_name + " could not find tasker");
+
+        let update_input = {enabled: enabled, last_modified: new Date()};
+        let update_result = await tasker.update({name: tasker_name}, update_input);
+        if (!update_result) throw new Error(tasker_name + " could not update tasker ");
+
+        if (enabled) {
+          tasker.task_loader(tasker_name);
+        }
+
+        if (!enabled) {
+          tasker.task_unloader(tasker_name);
+        }
+
+        hell.o([tasker_name, update_result], "toggleEnable", "info");
+        hell.o([tasker_name, "done"], "toggleEnable", "info");
+
+        cb(null, {message: "ok"});
+
+      } catch (err) {
+        hell.o(err, "toggleEnable", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  tasker.remoteMethod('toggleEnable', {
+    accepts: [
+      {arg: 'name', type: 'string', required: true},
+      {arg: 'enabled', type: 'boolean', required: true},
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/toggleEnable', verb: 'post', status: 201}
+  });
+
 
 };

@@ -41,6 +41,33 @@
           </v-list-tile-content>
         </v-list-tile>
 
+        <v-list-tile to="/feeds" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>cloud</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.feeds') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/taskers" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>schedule</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.taskers') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/tasks" exact ripple>
+          <v-list-tile-action>
+              <v-icon dark>history</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+              <v-list-tile-title>{{ $t('menu.tasks') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
         <v-list-tile to="/rulesets" exact ripple>
           <v-list-tile-action>
             <v-icon dark>track_changes</v-icon>

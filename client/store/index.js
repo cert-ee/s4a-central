@@ -74,7 +74,6 @@ export const actions = {
             state.rule_sid_limit = 10000000;
             state.rule_sid_limit_max = 20000000;
             state.API_URL = env.API_URL;
-            state.KIBANA_URL = env.URL_KIBANA;
             state.GRAFANA_URL = env.URL_GRAFANA;
             state.debugMode = isDev;
 

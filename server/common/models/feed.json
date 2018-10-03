@@ -53,7 +53,8 @@
     "checksum": {
       "type": "string",
       "description": "Checksum of the file to check for changes",
-      "required": false
+      "required": false,
+      "default": "empty"
     },
     "description": {
       "type": "string",
@@ -105,6 +106,27 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "toggleEnable",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "tagAll",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "change",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

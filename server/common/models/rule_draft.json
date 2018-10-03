@@ -63,13 +63,13 @@
     "modified_time": {
       "type": "date",
       "required": true,
-      "description": "Registration time",
+      "description": "Modified time",
       "default": "$now"
     },
     "created_time": {
       "type": "date",
       "required": true,
-      "description": "Registration time",
+      "description": "Created time",
       "default": "$now"
     },
     "tags_changes": {

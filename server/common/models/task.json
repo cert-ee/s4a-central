@@ -65,6 +65,12 @@
       "required": true,
       "description": "Created time",
       "default": "$now"
+    },
+    "modifiedAt": {
+      "type": "date",
+      "required": true,
+      "description": "Modified time",
+      "default": "$now"
     }
   },
   "validations": [],

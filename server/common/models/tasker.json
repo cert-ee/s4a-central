@@ -9,7 +9,6 @@
   "properties": {
     "name": {
       "type": "string",
-      "id": true,
       "required": true,
       "index": true,
       "description": "Tasker name",
@@ -20,6 +19,12 @@
       "required": true,
       "description": "Tasker friendly name",
       "default": ""
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "description": "Tasker enabled",
+      "default": false
     },
     "description": {
       "type": "string",
@@ -113,6 +118,27 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "runTask",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "toggleEnable",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "change",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

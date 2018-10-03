@@ -22,9 +22,7 @@ module.exports = function (feed) {
 
     try {
       let default_feeds = [
-
-        //TODO: feeds turned off for testing
-        /*{
+        {
           name: "emerging_threats",
           friendly_name: "Emerging threats",
           enabled: true,
@@ -39,7 +37,7 @@ module.exports = function (feed) {
         {
           name: "emerging_pro",
           friendly_name: "Emerging threats PRO",
-          enabled: true,
+          enabled: false,
           type: "url",
           location: "https://rules.emergingthreats.net/open/suricata-3.0/emerging.rules.tar.gz",
           filename: "emerging.rules.tar.gz",
@@ -47,11 +45,10 @@ module.exports = function (feed) {
           component_type: "rules",
           description: "Emerging threats community rules PRO"
         },
-        */
         {
           name: "yara_rules_local",
           friendly_name: "Yara rules local",
-          enabled: false,
+          enabled: true,
           type: "file",
           location: "/srv/s4a-central/moloch/yara_rules_local/",
           filename: "yara_local.txt",
@@ -99,25 +96,6 @@ module.exports = function (feed) {
       ];
       // await feed.destroyAll();
 
-
-      //TODO: TESTING TIME IS FOR TESTING
-      // const tag = feed.app.models.tag;
-      // let tag_exists = await tag.findOne({ where: { name: "PRO"} });
-      // console.log( tag_exists );
-      // if (!tag_exists) throw new Error(ruleset_name + " could not find tag" );
-
-      // let pro_feed = await feed.findOne({where: {name: "emerging_pro"}, include: ["tags"]});
-      // console.log( pro_feed );
-      // console.log( pro_feed.tags() );
-      // let tag_found = await pro_feed.tags.exists( tag_exists );
-      // console.log( [ "tag_found: ", tag_found] );
-      // if( !tag_found ){
-      //   console.log( "add tag PRO for pro feed");
-      //   await pro_feed.tags.add( tag_exists );
-      // }
-
-
-
       hell.o("check feeds", "initialize", "info");
       let create_result;
       for (const df of default_feeds) {
@@ -125,6 +103,22 @@ module.exports = function (feed) {
         create_result = await feed.findOrCreate({where: {name: df.name}}, df);
         if (!create_result) throw new Error("failed to create feed " + df.name);
       }
+
+      // add PRO tag to emerging_pro feed
+
+      let tag_exists = await feed.app.models.tag.findOne({where: {name: "PRO"}});
+      if (!tag_exists) {
+        let tag_create = await feed.app.models.tag.create({name: "PRO"});
+      }
+      let pro_feed = await feed.findOne({where: {name: "emerging_pro"}, include: ["tags"]});
+      // console.log(pro_feed.tags());
+      let tag_found = await pro_feed.tags.exists(tag_exists);
+      if (!tag_found && pro_feed) {
+        hell.o("add PRO tag ro feed", "initialize", "info");
+        await pro_feed.tags.add(tag_exists);
+      }
+
+      hell.o("done", "initialize", "info");
       return true;
     } catch (err) {
       hell.o(err, "initialize", "error");
@@ -140,7 +134,7 @@ module.exports = function (feed) {
    */
   feed.downloadContent = function (input) {
     hell.o("start", "downloadContent", "info");
-    console.log(input)
+    // console.log(input)
     return new Promise((success, reject) => {
 
       let file = fs.createWriteStream(input.local_path);
@@ -162,6 +156,216 @@ module.exports = function (feed) {
     }); // promise
 
   };
+
+  /**
+   * UPDATE FEED or CREATE
+   *
+   * @param name
+   * @param enabled
+   * @param options
+   * @param cb
+   */
+  feed.change = function (entry, options, cb) {
+    hell.o(["start " + entry.name, "enabled " + entry.enabled], "toggleAll", "info");
+    hell.o("start", "change", "info");
+
+    (async function () {
+      try {
+
+        let found_feed;
+
+        if (entry.component_type == "rules" && entry.component_name != "suricata" ) {
+          throw new Error( "only suricata has rules" );
+        }
+        if (entry.component_type == "wise" && entry.component_name != "moloch" ) {
+          throw new Error( "only moloch has wise" );
+        }
+        if (entry.component_type == "yara" && entry.component_name != "moloch" ) {
+          throw new Error( "only moloch has yara" );
+        }
+
+        //if id, check existing
+        if (entry.id === undefined) {
+          found_feed = false;
+        } else {
+          found_feed = await feed.findOne({where: {id: entry.id}});
+        }
+
+        if (!found_feed) {
+          hell.o("create feed", "change", "info");
+          await feed.create(entry);
+        } else {
+          hell.o("update feed", "change", "info");
+          let update_input = entry;
+          delete update_input.id;
+          await feed.update({id: found_feed.id}, entry);
+        }
+
+        found_feed = await feed.findOne({where: {name: entry.name}});
+
+        hell.o("check tasker", "change", "info");
+        if (entry.enabled) {
+          await feed.app.models.tasker.addFeedTasker(found_feed);
+        } else {
+          await feed.app.models.tasker.removeFeedTasker(feed_found);
+        }
+
+        hell.o("done", "change", "info");
+        cb(null, {message: "ok"});
+        return true;
+      } catch (err) {
+        hell.o(err, "change", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  feed.remoteMethod('change', {
+    accepts: [
+      {arg: 'entry', type: 'object', required: true},
+      // {arg: 'enabled', type: 'boolean', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/change', verb: 'post', status: 201}
+  });
+
+
+  /**
+   * TOGGLE FEEDS
+   *
+   * @param name
+   * @param enabled
+   * @param options
+   * @param cb
+   */
+  feed.toggleEnable = function (feed_name, enabled, options, cb) {
+    hell.o(["start " + feed_name, "enabled " + enabled], "toggleEnable", "info");
+
+    (async function () {
+      try {
+
+        let feed_found = await feed.findOne({where: {name: feed_name}});
+        if (!feed_found) throw new Error(feed_name + " could not find feed");
+
+        let update_input = {enabled: enabled, last_modified: new Date()};
+        let update_result = await feed.update({id: feed_found.id}, update_input);
+        if (!update_result) throw new Error(feed_name + " could not update feed ");
+
+        hell.o([feed_name, update_result], "toggleEnable", "info");
+        feed_found = await feed.findOne({where: {name: feed_name}});
+
+        hell.o("check tasker", "toggleEnable", "info");
+        if (enabled) {
+          await feed.app.models.tasker.addFeedTasker(feed_found);
+        } else {
+          await feed.app.models.tasker.removeFeedTasker(feed_found);
+        }
+
+        hell.o([feed_name, "done"], "toggleEnable", "info");
+
+        cb(null, {message: "ok"});
+
+      } catch (err) {
+        hell.o(err, "toggleEnable", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  feed.remoteMethod('toggleEnable', {
+    accepts: [
+      {arg: 'name', type: 'string', required: true},
+      {arg: 'enabled', type: 'boolean', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/toggleEnable', verb: 'post', status: 201}
+  });
+
+
+  /**
+   * TOGGLE TAG FOR ALL RULES FOR A FEED
+   *
+   * @param feed_name
+   * @param name
+   * @param enabled
+   * @param options
+   * @param cb
+   */
+  feed.tagAll = function (feed_name, tag_id, enabled, options, cb) {
+    hell.o("start", "tagAll", "info");
+    hell.o([feed_name + " start", feed_name + " " + " tag: " + tag_id + " enabled: " + enabled], "tagAll", "info");
+
+    (async function () {
+      try {
+
+        const rule = feed.app.models.rule;
+        const tag = feed.app.models.tag;
+
+        hell.o([feed_name, "find feed"], "tagAll", "info");
+        let fd = await feed.findOne({where: {name: feed_name}, include: ["tags"]});
+        if (!fd) throw new Error(feed_name + " could not find feed");
+
+        if( fd.component_name != "suricata" ){
+          throw new Error( "only suricata rules can be tagged right now" );
+        }
+        if( fd.primary ){
+          throw new Error( "can not tag primary rules, +25k tags..." );
+        }
+
+        hell.o([feed_name, "find tag"], "tagAll", "info");
+        let tag_exists = await tag.findById(tag_id);
+        if (!tag_exists) throw new Error(feed_name + " could not find tag: " + tag_id);
+
+        if (enabled) {
+          hell.o([feed_name, "add tag to feed"], "tagAll", "info");
+          let feed_tag = await fd.tags.add(tag_exists);
+          let rules = await rule.find({where: {feed_name: feed_name}});
+
+          for (let i = 0, l = rules.length; i < l; i++) {
+            rules[i].tags.add(tag_exists);
+          }
+        }
+
+        if (!enabled) {
+          hell.o([feed_name, "remove tag from feed"], "tagAll", "info");
+          let feed_tag = await fd.tags.remove(tag_exists);
+          let rules = await rule.find({where: {feed_name: feed_name}});
+
+          for (let i = 0, l = rules.length; i < l; i++) {
+            rules[i].tags.remove(tag_exists);
+          }
+        }
+
+        hell.o([feed_name, "done"], "tagAll", "info");
+
+        cb(null, {message: "ok"});
+
+      } catch (err) {
+        hell.o(err, "tagAll", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  feed.remoteMethod('tagAll', {
+    accepts: [
+      {arg: 'name', type: 'string', required: true},
+      {arg: 'tag', type: 'string', required: true},
+      {arg: 'enabled', type: 'boolean', required: true},
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/tagAll', verb: 'post', status: 201}
+  });
+
 
   /**
    * EXTRACT CONTENT
