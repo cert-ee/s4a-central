@@ -92,7 +92,7 @@ export default {
                 // this.newFeed.enabled = this.newFeed.enabled === 'Yes';
                 // this.newFeed.tags_changes = undefined;
                 // delete this.newFeed.tagsStr;
-                delete this.newTasker.createdAt;
+                delete this.newTasker.created_time;
                 delete this.newTasker.modified_time;
                 // delete this.newFeed.published;
                 // console.log( this.newFeed );

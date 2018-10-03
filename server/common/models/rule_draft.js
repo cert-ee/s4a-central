@@ -45,7 +45,7 @@ module.exports = function (rule_draft) {
         for (let i = 0, l = changes.length; i < l; i++) {
 
           current = changes[i];
-          console.log( current );
+          //console.log( current );
 
           /**
            * NEW CERT/CUSTOM RULE, create
@@ -84,7 +84,7 @@ module.exports = function (rule_draft) {
           tmp = Object.keys(current);
           // console.log(Object.keys(current));
           field_to_update = tmp[1];
-          hell.o(["field_to_update", field_to_update], "more", "info");
+          // hell.o(["field_to_update", field_to_update], "more", "info");
 
           /**
            * GET ORIGINAL RULE

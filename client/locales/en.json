@@ -109,11 +109,12 @@
   },
   "tasks":{
     "name" : "Task Name",
-    "modifiedAt": "Last Modified",
+    "modified_time": "Last Modified",
     "run_time": "Scheduled time",
     "description": "Description",
     "completed": "Completed",
     "failed": "Failed",
+    "logs": "Logs",
     "parent_name": "Tasker name",
     "module_name": "Module Name"
   },

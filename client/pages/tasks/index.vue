@@ -31,25 +31,28 @@
                       <!--{{ props.item.id }}-->
                     <!--</td>-->
                     <td>
-                      {{ props.item.modifiedAt }}
+                      {{ props.item.modified_time }}
                     </td>
                     <td>
                       {{ props.item.name }}
                     </td>
-                    <td>
-                      {{ props.item.run_time }}
-                    </td>
+                    <!--<td>-->
+                      <!--{{ props.item.run_time }}-->
+                    <!--</td>-->
                     <td>
                       {{ props.item.completed }}
                     </td>
                     <td>
                       {{ props.item.failed }}
                     </td>
+                    <!--<td>-->
+                      <!--{{ props.item.module_name }}-->
+                    <!--</td>-->
+                    <!--<td>-->
+                      <!--{{ props.item.parent_name }}-->
+                    <!--</td>-->
                     <td>
-                      {{ props.item.module_name }}
-                    </td>
-                    <td>
-                      {{ props.item.parent_name }}
+                      {{ props.item.logs }}
                     </td>
                   </template>
                 </v-data-table>

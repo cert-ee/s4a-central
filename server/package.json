@@ -1,6 +1,6 @@
 {
   "name": "s4a-central-lb_server",
-  "version": "0.1.70",
+  "version": "0.1.71",
   "description": "s4a central loopback server",
   "license": "MIT",
   "private": true,

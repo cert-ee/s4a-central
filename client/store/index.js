@@ -95,17 +95,17 @@ export const actions = {
         }
     },
 
-    async updateRules({commit, dispatch}) {
-        commit('setRulesSyncing', true);
-
-        try {
-            await this.$axios.get('rules/task');
-        } catch (err) {
-            dispatch('handleError', err);
-        } finally {
-            commit('setRulesSyncing', false);
-        }
-    },
+    // async updateRules({commit, dispatch}) {
+    //     commit('setRulesSyncing', true);
+    //
+    //     try {
+    //         await this.$axios.get('rules/task');
+    //     } catch (err) {
+    //         dispatch('handleError', err);
+    //     } finally {
+    //         commit('setRulesSyncing', false);
+    //     }
+    // },
 
     handleError({commit}, err) {
         commit('showSnackbar', {

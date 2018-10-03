@@ -73,6 +73,13 @@ module.exports = function (settings) {
           description: "Path to wise domains for detectors",
           data: PATH_BASE + "moloch/SYSTEM_moloch_wise_domain_out.txt",
           locked: true
+        },
+        {
+          name: "tasks_limit",
+          friendly_name: "Tasks Limit ",
+          description: "Maximum tasks history to keep in the database",
+          data: "10000",
+          locked: false
         }
       ];
       // await settings.destroyAll();

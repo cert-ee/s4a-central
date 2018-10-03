@@ -150,7 +150,7 @@ module.exports = function (detector) {
       return cb(null, {message: "ok"});
     } catch (err) {
       hell.o(err, "task", "error");
-      cb({name: "Error", status: 400, message: err.message});
+      return cb({name: "Error", status: 400, message: err.message});
     }
 
   };

@@ -7,7 +7,7 @@ export function state() {
             descending: true,
             page: 1,
             rowsPerPage: 100,
-            sortBy: 'modifiedAt'
+            sortBy: 'modified_time'
         }
     };
 }

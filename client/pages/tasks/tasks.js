@@ -3,13 +3,14 @@ export default {
         return {
             rowsPerPage: [50, 100, {text: 'All', value: -1}],
             headers: [
-                {text: this.$t('tasks.modifiedAt'), align: 'left', value: 'modifiedAt'},
+                {text: this.$t('tasks.modified_time'), align: 'left', value: 'modified_time'},
                 {text: this.$t('tasks.name'), align: 'left', value: 'name'},
-                {text: this.$t('tasks.run_time'), align: 'left', value: 'run_time'},
+                // {text: this.$t('tasks.run_time'), align: 'left', value: 'run_time'},
                 {text: this.$t('tasks.completed'), align: 'left', value: 'completed'},
                 {text: this.$t('tasks.failed'), align: 'left', value: 'failed'},
-                {text: this.$t('tasks.module_name'), align: 'left', value: 'module_name'},
-                {text: this.$t('tasks.parent_name'), align: 'left', value: 'parent_name'}
+                // {text: this.$t('tasks.module_name'), align: 'left', value: 'module_name'},
+                // {text: this.$t('tasks.parent_name'), align: 'left', value: 'parent_name'},
+                {text: this.$t('tasks.logs'), align: 'left', value: 'logs'},
             ],
             tasksAll: [],
         }

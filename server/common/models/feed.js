@@ -108,7 +108,7 @@ module.exports = function (feed) {
 
       let tag_exists = await feed.app.models.tag.findOne({where: {name: "PRO"}});
       if (!tag_exists) {
-        let tag_create = await feed.app.models.tag.create({name: "PRO"});
+        let tag_create = await feed.app.models.tag.create({name: "PRO", description: "EM Pro rules"});
       }
       let pro_feed = await feed.findOne({where: {name: "emerging_pro"}, include: ["tags"]});
       // console.log(pro_feed.tags());
@@ -625,14 +625,14 @@ module.exports = function (feed) {
 
       feed.tasks[input.feed_name] = false;
 
-      cb(null, {message: "ok"});
+      return cb(null, {message: "ok"});
 
     } catch (err) {
       hell.o([input.feed_name, "failed"], "task", "error");
       hell.o(err, "task", "error");
       feed.tasks[input.feed_name] = false;
 
-      cb({name: "name", status: 400, message: err.message});
+      return cb({name: "name", status: 400, message: err.message});
     }
 
   }; //feed.task

@@ -86,7 +86,7 @@
       "description": "Modified time",
       "default": "$now"
     },
-    "createdAt": {
+    "created_time": {
       "type": "date",
       "required": true,
       "description": "Created time",

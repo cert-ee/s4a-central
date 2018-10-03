@@ -43,7 +43,9 @@ module.exports = function (rule) {
         if ( filename.includes("drop")
           // || ( filename.includes("pop3") && feed.name == "emerging_pro" )
         ) {}
-            else continue;
+        else continue;
+
+
           // !filename.includes("drop")
         // !filename.includes("pop3") && !filename.includes("shellcode") &&
         // !filename.includes("telnet") && !filename.includes("chat") &&
@@ -81,7 +83,7 @@ module.exports = function (rule) {
         return err;
       });
 
-      // hell.o([ruleset_name, "loop done for " + file_check], "loopRuleFiles", "info");
+      hell.o([ruleset_name, "loop done for " + file_check], "loopRuleFiles", "info");
       hell.o(["==================================="], "loopRuleFiles", "info");
 
     };
@@ -103,50 +105,43 @@ module.exports = function (rule) {
    *
    * @param params
    */
-  rule.checkRuleFile = async function (params) {
-    hell.o(["start", params.ruleset.name], "checkRuleFile", "info");
+  rule.checkRuleFile = function (params) {
+    hell.o([params.ruleset.name, "start"], "checkRuleFile", "info");
 
-    // return new Promise(function (success, reject) {
+    return new Promise(function (success, reject) {
 
     let lineno = 0;
     let lr = new LineByLineReader(params.path);
 
     lr.on('error', function (err) {
       hell.o(err, "checkRuleFile", "error");
+      reject(err);
       return err;
     });
 
     lr.on('line', function (line) {
       lineno++;
 
-      lr.pause();
+      if( lineno % 2 ) lr.pause();
+      // lr.pause();
 
-      /*
-      CHECK ONE RULE
-       */
-      // rule.checkRuleLine({ruleset: params.ruleset, line: line, feed: params.feed}).then(value => {
-      //   lr.resume();
-      // }).catch(err => {
-      //   hell.o(err, "checkRuleFile", "error");
-      //   reject("error");
-      // });
+      if ( lineno % 500 === 0 ){ //just to show activity in the logs
+        hell.o([params.ruleset.name, "looping new rules " + lineno ], "checkRuleFile", "info");
+      }
 
-
-      // await rule.checkRuleLine({ruleset: params.ruleset, line: line, feed: params.feed});
       rule.checkRuleLine({ruleset: params.ruleset, line: line, feed: params.feed}).then(value => {
         lr.resume();
       });
 
-
     }); // lr.on
 
     lr.on('end', function () {
-      hell.o("done", "checkRuleFile", "info");
-      // success(lineno);
-      return lineno;
+      hell.o([ params.ruleset.name, "done"], "checkRuleFile", "info");
+      success(lineno);
+      // return lineno;
     });
 
-    // }); // promise
+    }); // promise
 
   };
 
@@ -233,11 +228,13 @@ module.exports = function (rule) {
       }
 
       // if( sid == 2400032 ){
-      //   console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
-      //   console.log( rule_info );
-      //   console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
-      //   console.log( rule_found );
-      //   console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
+        // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
+        // console.log( rule_info );
+        // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
+        // console.log( rule_found );
+        // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
+      // } else {
+      //   return;
       // }
 
       /**
@@ -275,7 +272,7 @@ module.exports = function (rule) {
           update_current = true;
         }
         //new is not primary and new has a higher rev
-        console.log( rule_info.primary, rule_to_change.primary, rule_info.revision, rule_to_change.revision );
+        // console.log( rule_info.primary, rule_to_change.primary, rule_info.revision, rule_to_change.revision );
         if (!rule_info.primary && rule_to_change.primary && rule_info.revision > rule_to_change.revision) {
           // hell.o([sid, feed.name, "set create new"], "checkRuleLine", "info");
           create_extra = true;
@@ -332,7 +329,8 @@ module.exports = function (rule) {
        * NO RULES FOUND IN DB, CREATE
        */
       if (rule_found.length == 0 || create_extra === true) {
-        hell.o([sid, "no rule found, create"], "checkRuleLine", "info");
+        // hell.o([sid, "no rule found, create"], "checkRuleLine", "info");
+
         // if( sid == 2400032 ){
         //   console.log( "none found");
         // }
@@ -346,7 +344,7 @@ module.exports = function (rule) {
         if (!rule_create) throw new Error("failed to create rule");
 
         //add tags from ruleset
-        if (rs_tags.length > 0) {
+        if ( rs_tags !== undefined && rs_tags.length > 0) {
           for (let i = 0, l = rs_tags.length; i < l; i++) {
             tag_rule = await rule_create.tags.add(rs_tags[i]);
             if (!tag_rule) throw new Error(sid + " failed to add new tag from ruleset");
@@ -354,14 +352,16 @@ module.exports = function (rule) {
         }
 
         //add tags from feed, if not primary
-        if (!feed.primary && fd_tags.length > 0) {
-          console.log( "FEED TAGS::::::::::" );
-          console.log( fd_tags );
+        if (!feed.primary && fd_tags !== undefined && fd_tags.length > 0) {
+          // console.log( "FEED TAGS::::::::::" );
+          // console.log( fd_tags );
           for (let i = 0, l = fd_tags.length; i < l; i++) {
             tag_rule = await rule_create.tags.add(fd_tags[i]);
             if (!tag_rule) throw new Error(sid + " failed to add new tag from feed");
           }
         }
+
+        if (ruleset.automatically_enable_new_rules) return true;
 
         rule_to_change = rule_create;
 

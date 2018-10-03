@@ -27,7 +27,22 @@ module.exports = function (tasker) {
           interval_hh: false,
           interval_mm: 1,
           builtin: true
-        }
+        },
+        {
+          name: "tasks_history_cleaner",
+          friendly_name: "Tasks history cleanup",
+          enabled: false,
+          description: "Remove old completed tasks from database",
+          task_name: "tasks_history_cleanup",
+          task_friendly_name: "Tasks cleanup",
+          task_description: "Check for old tasks to remove",
+          task_params: {},
+          module_name: "task",
+          interval_hh: false,
+          interval_mm: 10,
+          builtin: true
+          }
+
       ];
 
       // await tasker.destroyAll();
@@ -56,6 +71,8 @@ module.exports = function (tasker) {
 
       //check if we have tasks and create accordingly
       for (const tr of all_taskers) {
+        if( !tr.enabled ) continue;
+        // console.log( tr );
         tasker.task_loader(tr);
       }
 
@@ -79,7 +96,7 @@ module.exports = function (tasker) {
   tasker.addFeedTasker = async function (input) {
     hell.o("start", "addFeedTasker", "info");
     try {
-      hell.o(input, "addFeedTasker", "info");
+      // hell.o(input, "addFeedTasker", "info");
 
       let feed_tasker = {
         name: input.component_name + "_" + input.name + "_updater",
@@ -136,8 +153,9 @@ module.exports = function (tasker) {
    * LOAD NEW TASK FOR A TASKER
    *
    * @param input
+   * @param time_override | if true, set next run in 60 sec
    */
-  tasker.task_loader = async function (input) {
+  tasker.task_loader = async function (input, time_override) {
     hell.o("start", "task_loader", "info");
 
     try {
@@ -145,6 +163,7 @@ module.exports = function (tasker) {
       if (input !== null && typeof input !== 'object') {
         input = await tasker.findOne({where: {name: input}});
       }
+      if( !input.enabled ) return;
 
       hell.o([input.task_name, "check existing task"], "task_loader", "info");
       let task_found = await tasker.app.models.task.findOne({where: {name: input.task_name, completed: false}});
@@ -152,6 +171,10 @@ module.exports = function (tasker) {
       } else return;
 
       let time_calc = tasker.timeCalc(input);
+      if( time_override ){
+        time_calc = moment().add(60, "seconds").valueOf();
+      }
+
       let task_input = {
         name: input.task_name,
         parent_name: input.name,
@@ -164,10 +187,10 @@ module.exports = function (tasker) {
 
       hell.o([input.task_name, "create new task"], "task_loader", "info");
       let task_create = await tasker.app.models.task.create(task_input);
-
+      return true;
     } catch (err) {
       hell.o(err, "task_loader", "error");
-
+      return false;
     }
 
   };
@@ -219,7 +242,7 @@ module.exports = function (tasker) {
     if (process.env.NODE_ENV == "dev") {
       //TODO: for testing
       // next = moment().add(1, "minutes").valueOf();
-      next = moment().add(20, "seconds").valueOf();
+      // next = moment().add(120, "seconds").valueOf();
     }
 
     return next;
@@ -268,23 +291,36 @@ module.exports = function (tasker) {
           failed: false
         };
 
-        await tasker.app.models[t.module_name].task(t.params, function (result) {
-          if (result !== null) {
+        await tasker.app.models[t.module_name].task(t.params, function (error,success) {
+          let output = { success: "", error: "" };
+          if( success ){
+            output.success = success;
+          }
+          if (error !== null) {
             task_update.failed = true;
+            output.error = error;
             hell.o(["task failed", t.name], "checkTasks", "info");
           }
+          task_update.logs = output;
         });
 
-        if (!task_update.failed) {
-          hell.o(["set task completed", t.name], "checkTasks", "info");
-          task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
-          await tasker.task_loader(t.parent_name);
+        task_update.modified_time = moment().valueOf();
+
+        hell.o(["set task completed", t.name], "checkTasks", "info");
+        task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
+
+        let check_if_tasker_enabled = await tasker.findOne({where: {task_name: t.name, enabled: true}});
+        if( check_if_tasker_enabled ) {
+          await tasker.task_loader(t.parent_name, task_update.failed);
         }
+
       }
 
       hell.o("done", "checkTasks", "info");
+      return true;
     } catch (err) {
       hell.o(err, "checkTasks", "error");
+      return false;
     }
   };
 

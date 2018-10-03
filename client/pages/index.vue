@@ -74,11 +74,11 @@
           <v-flex xs6 sm4 lg3>
             <dashboard-card icon="security" title="Rules">
               <div class="headline mt-3">
-                <v-btn flat block color="primary" style="height: auto;"
-                       :loading="$store.state.rulesSyncing" @click="$store.dispatch('updateRules')"
-                >
-                  <span style="white-space: normal;">Check and Download Updates</span>
-                </v-btn>
+                <!--<v-btn flat block color="primary" style="height: auto;"-->
+                       <!--:loading="$store.state.rulesSyncing" @click="$store.dispatch('updateRules')"-->
+                <!--&gt;-->
+                  <!--<span style="white-space: normal;">Check and Download Updates</span>-->
+                <!--</v-btn>-->
               </div>
             </dashboard-card>
           </v-flex>

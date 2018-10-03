@@ -60,13 +60,19 @@
       "description": "Run time",
       "default": "$now"
     },
-    "createdAt": {
+    "logs": {
+      "type": "object",
+      "required": false,
+      "description": "Logs",
+      "default": {}
+    },
+    "created_time": {
       "type": "date",
       "required": true,
       "description": "Created time",
       "default": "$now"
     },
-    "modifiedAt": {
+    "modified_time": {
       "type": "date",
       "required": true,
       "description": "Modified time",
