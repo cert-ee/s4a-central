@@ -69,15 +69,13 @@
                         <v-subheader>Comment</v-subheader>
                       </v-flex>
                       <v-flex xs8 sm10>
-                        <v-text-field v-model="feedback.comment" multi-line readonly></v-text-field>
+                        <v-textarea v-model="feedback.comment" readonly></v-textarea>
                       </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Internal Comment</v-subheader>
                       </v-flex>
                       <v-flex xs8 sm10>
-                        <v-text-field v-model="feedback.internal_comment"
-                                      multi-line @blur="saveInternalComment">
-                        </v-text-field>
+                        <v-textarea v-model="feedback.internal_comment" @blur="saveInternalComment"></v-textarea>
                       </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Solved</v-subheader>
@@ -175,7 +173,7 @@
                   <v-card-text>
                     <v-layout row wrap align-center>
                       <v-flex xs12>
-                        <v-text-field v-model="feedback.logs" multi-line readonly rows="30"></v-text-field>
+                        <v-textarea v-model="feedback.logs" readonly rows="30"></v-textarea>
                       </v-flex>
                     </v-layout>
                   </v-card-text>

@@ -115,11 +115,25 @@ export default {
 
         async saveTags() {
             try {
-                await this.$axios.delete(`detectors/${this.detector.id}/tags`);
-                let promises = [];
 
+                let current_tags = await this.$axios.get(`detectors/${this.detector.id}/tags?filter[fields][id]=true`);
+                let promises = [];
+                current_tags = current_tags.data;
+
+                let current_index;
                 for (const tagId of this.detector.tags) {
-                    promises.push(this.$axios.put(`detectors/${this.detector.id}/tags/rel/${tagId}`));
+
+                    current_index = current_tags.findIndex(e => e.id === tagId);
+                    if( current_index > -1 ){
+                        current_tags.splice(current_tags.findIndex(e => e.id === tagId),1);
+                    } else {
+                        promises.push(this.$axios.put(`detectors/${this.detector.id}/tags/rel/${tagId}`));
+                    }
+                }
+
+                for( let tag_remove of current_tags ){
+                    await this.$axios.post('rules/addJobForDeleteRules', {detectorId: this.detector.id, tagId: tag_remove.id });
+                    await this.$axios.delete(`detectors/${this.detector.id}/tags/rel/${tag_remove.id}`);
                 }
 
                 await Promise.all(promises);

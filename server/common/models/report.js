@@ -50,7 +50,7 @@ module.exports = function (report) {
         hell.o([ token_detector, "check jobs"], "status", "info");
         let job_queue = await JobSchedule.find({
           where: {detectorId: token_detector, transferred: false, completed: false},
-          fields: ["id", "name"]
+          fields: ["id", "name", "data"]
         });
         if (!job_queue) throw new Error( token_detector + " failed to get detector job queue");
 

@@ -479,15 +479,13 @@ module.exports = function (rule) {
       });
 
       let detector_tags = detector.tags();
-      if (detector_tags.length > 0) {
-        hell.o(["found tags for detector", detector_tags], "checkNewRulesForDetector", "info");
-      }
 
       /**
        * DETECTOR HAS TAGS
        */
       let rules_with_tags = [];
       if (detector.tags().length > 0) {
+        hell.o(["found tags for detector", detector_tags], "checkNewRulesForDetector", "info");
 
         let tags_filter = {
           where: {
@@ -532,6 +530,7 @@ module.exports = function (rule) {
         hell.o(["rules with tags", rules_with_tags.length], "checkNewRulesForDetector", "info");
 
       } // DETECTOR HAS TAGS
+
 
       let public_filter =
         {
@@ -580,5 +579,102 @@ module.exports = function (rule) {
     // }); //promise
 
   };
+
+
+
+
+
+
+
+
+
+
+
+  /**
+   * Add a job to job_schedule to remove rules
+   *
+   * @param detectorId
+   * @param tagId
+   */
+  rule.addJobForDeleteRules = function (detectorId, tagId, cb) {
+    hell.o( "start", "addJobForDeleteRules", "info");
+
+    (async function () {
+      try {
+
+        hell.o([detectorId, "detectorId"], "addJobForDeleteRules", "info");
+        let detector = await rule.app.models.detector.findOne({where: {id: detectorId}});
+        if (!detector) throw new Error("can not find detector");
+
+        let tag = await rule.app.models.tag.findOne({where: {id: tagId}});
+        if (!tag) throw new Error("can not find tag");
+
+        /**
+         * find rules with the tag
+         */
+        let tags_filter = {
+          where: {
+            id: tag.id
+          },
+          include: {
+            relation: "rules",
+            scope: {
+              fields: [ "sid" ]
+            }
+          }
+        };
+
+        // console.log( "tags_filter" );
+        // console.log( tags_filter );
+        let look_for_rules_w_this_tag = await rule.app.models.tag.find(tags_filter);
+        if( look_for_rules_w_this_tag.length == 0 && look_for_rules_w_this_tag[0].rules().length > 0 ){
+          if (cb) return cb(null, {message: "ok"});
+          return true;
+        }
+
+        let output_rules = [];
+        look_for_rules_w_this_tag[0].rules().forEach(function(v){
+          output_rules.push( { sid: v.sid });
+        });
+
+        let job = {
+          target: detector.name,
+          targetId: detector.id,
+          detectorId: detector.id,
+          data: { rules: output_rules },
+          name: "removeRules",
+          description: "Remove some rules"
+        };
+
+        // console.log( job.data );
+        hell.o( "add remove rules job to schedule", "addJobForDeleteRules", "info" );
+        let job_result = await rule.app.models.job_schedule.jobAdd(job);
+        if (!job_result) throw new Error("failed to add addJobForDeleteRules job to schedule, detector will have current rules");
+        hell.o( "job added", "addJobForDeleteRules", "info" );
+
+        hell.o([ detectorId, "done"], "jobDone", "info");
+        if (cb) return cb(null, {message: "ok"});
+        return true;
+      } catch (err) {
+        hell.o( err, "jobDone", "error");
+        if (cb) return cb({name: "Error", status: 400, message: "Central failed to process the request"});
+        return false;
+      }
+
+    })(); // async
+
+  }
+
+  rule.remoteMethod('addJobForDeleteRules', {
+    accepts: [
+      {arg: 'detectorId', type: 'string', required: true},
+      {arg: 'tagId', type: 'string', required: true},
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/addJobForDeleteRules', verb: 'post', status: 201}
+  });
+
+
+
 
 };

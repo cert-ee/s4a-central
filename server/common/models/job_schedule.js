@@ -23,6 +23,10 @@ module.exports = function (job_schedule) {
             description: input.description
           };
 
+          if( input.data !== undefined ){
+            job.data = input.data;
+          }
+
           //check for duplicates
           hell.o([input.targetId, " find duplicate"], "jobAdd", "info");
           let job_find = await job_schedule.find({

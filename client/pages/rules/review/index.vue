@@ -119,9 +119,9 @@
                         <v-text-field :label="$t('rules.message')" v-model="editRule.message" required :rules="[formRules.required]"></v-text-field>
                       </v-flex>
                       <v-flex xs12>
-                        <v-text-field :label="$t('rules.rule_data')" v-model="editRule.rule_data" required multi-line
-                                      :rules="[formRules.required]">
-                        </v-text-field>
+                        <v-textarea :label="$t('rules.rule_data')" v-model="editRule.rule_data" required
+                                    :rules="[formRules.required]">
+                        </v-textarea>
                       </v-flex>
                     </v-layout>
                   </v-container>
@@ -138,8 +138,7 @@
           <v-dialog v-model="ruleDataDialog" width="30%" lazy>
             <v-card>
               <v-card-text>
-                <v-text-field :label="$t('rules.rule_data')" v-model="editRule.rule_data" readonly multi-line auto-grow>
-                </v-text-field>
+                <v-textarea :label="$t('rules.rule_data')" v-model="editRule.rule_data" readonly auto-grow></v-textarea>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>

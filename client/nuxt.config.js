@@ -21,9 +21,6 @@ module.exports = {
 	/*
 	 ** Build configuration
 	 */
-	build: {
-		vendor: ['vuetify', 'vue-moment', 'vue-i18n']
-	},
 	plugins: ['~/plugins/vuetify.js', '~/plugins/moment.js', '~/plugins/axios.js', '~/plugins/i18n.js'],
 	css: [
 		{src: '~/assets/style/app.styl', lang: 'styl'}

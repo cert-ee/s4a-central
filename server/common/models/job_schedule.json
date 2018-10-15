@@ -17,6 +17,11 @@
       "required": true,
       "description": "Name of the job to be called on the detector side"
     },
+    "data": {
+      "type": "object",
+      "required": false,
+      "description": "Details"
+    },
     "transferred": {
       "type": "boolean",
       "required": true,
