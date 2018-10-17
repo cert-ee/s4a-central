@@ -127,6 +127,13 @@
       "permission": "ALLOW"
     },
     {
+      "property": "addJobForFullSync",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
       "property": "task",
       "accessType": "*",
       "principalType": "ROLE",

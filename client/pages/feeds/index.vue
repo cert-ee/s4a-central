@@ -115,47 +115,47 @@
                   <v-container grid-list-lg>
                     <v-layout row wrap>
                       <v-flex xs4>
-                        <v-text-field :label="$t('feeds.name')" v-model="newFeed.name" required
+                        <v-text-field :label="$t('feeds.name')" v-model="editFeed.name" required
                                       :rules="[formFeeds.required]">
                         </v-text-field>
                       </v-flex>
                       <v-flex xs8>
-                        <v-text-field :label="$t('feeds.friendly_name')" v-model="newFeed.friendly_name" required
+                        <v-text-field :label="$t('feeds.friendly_name')" v-model="editFeed.friendly_name" required
                                       :rules="[formFeeds.required]">
                         </v-text-field>
                       </v-flex>
 
                       <v-flex xs4>
-                        <v-select :label="$t('feeds.component_name')" :items="feedComponents" v-model="newFeed.component_name" required
+                        <v-select :label="$t('feeds.component_name')" :items="feedComponents" v-model="editFeed.component_name" required
                                   :rules="[formFeeds.required]">
                         </v-select>
                       </v-flex>
 
                       <v-flex xs4>
-                        <v-select :label="$t('feeds.component_type')" :items="feedComponentTypes" v-model="newFeed.component_type" required
+                        <v-select :label="$t('feeds.component_type')" :items="feedComponentTypes" v-model="editFeed.component_type" required
                                   :rules="[formFeeds.required]">
                         </v-select>
                       </v-flex>
 
 
                       <v-flex xs2>
-                        <v-checkbox color="primary" :label="$t('enabled')" v-model="newFeed.enabled"></v-checkbox>
+                        <v-checkbox color="primary" :label="$t('enabled')" v-model="editFeed.enabled"></v-checkbox>
                       </v-flex>
 
                       <v-flex xs3>
-                        <v-select :label="$t('feeds.type')" :items="feedTypes" v-model="newFeed.type" required
+                        <v-select :label="$t('feeds.type')" :items="feedTypes" v-model="editFeed.type" required
                                   :rules="[formFeeds.required]">
                         </v-select>
                       </v-flex>
 
                       <v-flex xs9>
-                        <v-text-field :label="$t('feeds.filename')" v-model="newFeed.filename" required
+                        <v-text-field :label="$t('feeds.filename')" v-model="editFeed.filename" required
                                       :rules="[formFeeds.required]">
                         </v-text-field>
                       </v-flex>
 
                       <v-flex xs12>
-                        <v-text-field :label="$t('feeds.location')" v-model="newFeed.location" required
+                        <v-text-field :label="$t('feeds.location')" v-model="editFeed.location" required
                                       :rules="[formFeeds.required]">
                         </v-text-field>
                       </v-flex>
@@ -168,7 +168,7 @@
                         <!--</v-select>-->
                       <!--</v-flex>-->
                       <v-flex xs12>
-                        <v-text-field :label="$t('feeds.description')" v-model="newFeed.description" ></v-text-field>
+                        <v-text-field :label="$t('feeds.description')" v-model="editFeed.description" ></v-text-field>
                       </v-flex>
                       <!--<v-flex xs12>-->
                         <!--<v-text-field :label="$t('rules.rule_data')" v-model="newRule.rule_data" required multi-line-->

@@ -36,8 +36,13 @@ module.exports = function (job_schedule) {
               completed: false
             }
           });
+
           if (job_find.length > 0) {
             hell.o([input.targetId, " found duplicate"], "jobAdd", "warn");
+            if( input.ignore_duplicate ){
+              hell.o([input.targetId, " ignore duplicate"], "jobAdd", "warn");
+              return success( { message: "ok"} );
+            }
             throw new Error(input.detectorId + " found");
           }
 

@@ -31,7 +31,7 @@ module.exports = function (tasker) {
         {
           name: "tasks_history_cleaner",
           friendly_name: "Tasks history cleanup",
-          enabled: false,
+          enabled: true,
           description: "Remove old completed tasks from database",
           task_name: "tasks_history_cleanup",
           task_friendly_name: "Tasks cleanup",

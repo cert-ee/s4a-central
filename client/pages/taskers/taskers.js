@@ -85,6 +85,7 @@ export default {
             console.log( "OPEN");
             console.log(tasker);
             if (tasker) {
+                this.taskerRef = tasker;
                 Object.assign(this.newTasker, tasker);
                 // this.newFeed.enabled = false;
                 // delete this.newFeed.tags;
@@ -96,6 +97,9 @@ export default {
                 delete this.newTasker.modified_time;
                 // delete this.newFeed.published;
                 // console.log( this.newFeed );
+            }
+            else {
+                console.log( "HAT")
             }
 
             this.editTaskerDialog.open = true;
@@ -111,6 +115,7 @@ export default {
                 await this.$axios.patch(`taskers/${this.newTasker.id}`,
                     {interval_mm: this.newTasker.interval_mm}
                 );
+                Object.assign(this.taskerRef, this.newTasker);
                 this.editTaskerDialog.open = false;
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('taskers.saved')});
             } catch (err) {

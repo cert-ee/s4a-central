@@ -43,7 +43,7 @@ module.exports = function (feed) {
           filename: "emerging.rules.tar.gz",
           component_name: "suricata",
           component_type: "rules",
-          description: "Emerging threats community rules PRO"
+          description: "Emerging threats PRO rules"
         },
         {
           name: "yara_rules_local",
@@ -184,12 +184,7 @@ module.exports = function (feed) {
           throw new Error( "only moloch has yara" );
         }
 
-        //if id, check existing
-        if (entry.id === undefined) {
-          found_feed = false;
-        } else {
-          found_feed = await feed.findOne({where: {id: entry.id}});
-        }
+        found_feed = await feed.findOne({where: {name: entry.name}});
 
         if (!found_feed) {
           hell.o("create feed", "change", "info");
@@ -207,7 +202,7 @@ module.exports = function (feed) {
         if (entry.enabled) {
           await feed.app.models.tasker.addFeedTasker(found_feed);
         } else {
-          await feed.app.models.tasker.removeFeedTasker(feed_found);
+          await feed.app.models.tasker.removeFeedTasker(found_feed);
         }
 
         hell.o("done", "change", "info");
@@ -247,21 +242,21 @@ module.exports = function (feed) {
     (async function () {
       try {
 
-        let feed_found = await feed.findOne({where: {name: feed_name}});
-        if (!feed_found) throw new Error(feed_name + " could not find feed");
+        let found_feed = await feed.findOne({where: {name: feed_name}});
+        if (!found_feed) throw new Error(feed_name + " could not find feed");
 
         let update_input = {enabled: enabled, last_modified: new Date()};
-        let update_result = await feed.update({id: feed_found.id}, update_input);
+        let update_result = await feed.update({id: found_feed.id}, update_input);
         if (!update_result) throw new Error(feed_name + " could not update feed ");
 
         hell.o([feed_name, update_result], "toggleEnable", "info");
-        feed_found = await feed.findOne({where: {name: feed_name}});
+        found_feed = await feed.findOne({where: {name: feed_name}});
 
         hell.o("check tasker", "toggleEnable", "info");
         if (enabled) {
-          await feed.app.models.tasker.addFeedTasker(feed_found);
+          await feed.app.models.tasker.addFeedTasker(found_feed);
         } else {
-          await feed.app.models.tasker.removeFeedTasker(feed_found);
+          await feed.app.models.tasker.removeFeedTasker(found_feed);
         }
 
         hell.o([feed_name, "done"], "toggleEnable", "info");

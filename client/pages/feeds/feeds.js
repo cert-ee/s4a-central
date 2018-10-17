@@ -3,14 +3,15 @@ export default {
         return {
             rowsPerPage: [50, 100, {text: 'All', value: -1}],
             headers: [
-                { text: this.$t('name'), align: 'left', value: 'name' },
-                { text: this.$t('enabled'), align: 'left', value: 'enabled' },
-                { text: this.$t('feeds.component_name'), align: 'left', value: 'component_name' },
-                { text: this.$t('menu.tags'), align: 'left', value: 'tagsStr' }
+                {text: this.$t('feeds.name'), align: 'left', value: 'name'},
+                {text: this.$t('feeds.enabled'), align: 'left', value: 'enabled'},
+                {text: this.$t('feeds.component_name'), align: 'left', value: 'component_name'},
+                {text: this.$t('feeds.tags'), align: 'left', value: 'tagsStr'},
+                {text: this.$t('feeds.actions'), align: 'left', sortable: false}
             ],
             feedTypes: ['url', 'file'], //TODO load
             feedComponents: ['suricata', 'moloch'], //TODO load
-            feedComponentTypes: ['rules','wise', 'yara'], //TODO load
+            feedComponentTypes: ['rules', 'wise_ip', 'wise_url', 'wise_domain', 'yara'], //TODO load
             addEditFeedDialog: {
                 open: false,
                 isEditDialog: false
@@ -38,17 +39,29 @@ export default {
                 // checksum: "empty"
 
                 name: '',
-                enabled: true,
+                enabled: false,
                 friendly_name: '',
                 description: '',
                 type: '',
                 location: '',
                 component_name: '',
                 component_type: '',
+                new_feed: false,
                 // message: ''
                 // new_feed: false
                 // rule_data: ''
 
+            },
+            editFeed: {
+                name: '',
+                enabled: false,
+                friendly_name: '',
+                description: '',
+                type: '',
+                location: '',
+                component_name: '',
+                component_type: '',
+                new_feed: false
             },
             tagNames: [],
             feedsAll: [],
@@ -58,13 +71,21 @@ export default {
 
     computed: {
         search: {
-            get() { return this.$store.state.feeds.search; },
-            set(value) { this.$store.commit('feeds/setSearch', value); }
+            get() {
+                return this.$store.state.feeds.search;
+            },
+            set(value) {
+                this.$store.commit('feeds/setSearch', value);
+            }
         },
 
         pagination: {
-            get() { return this.$store.state.feeds.pagination; },
-            set(value) { this.$store.commit('feeds/setPagination', value); }
+            get() {
+                return this.$store.state.feeds.pagination;
+            },
+            set(value) {
+                this.$store.commit('feeds/setPagination', value);
+            }
         },
 
         feeds() {
@@ -114,26 +135,18 @@ export default {
         openAddEditFeedDialog(feed) {
             this.$refs.addEditFeedForm.reset();
 
-            console.log( "OPEN");
-            console.log(feed);
+            // console.log( feed );
             if (feed) {
-                Object.assign(this.newFeed, feed);
-                // this.newFeed.enabled = false;
-                // delete this.newFeed.tags;
-                // console.log( this.newFeed );
-                // this.newFeed.enabled = this.newFeed.enabled === 'Yes';
-                // this.newFeed.tags_changes = undefined;
-                // delete this.newFeed.tagsStr;
-                delete this.newFeed.created_time;
-                delete this.newFeed.modified_time;
-                // delete this.newFeed.published;
-                // console.log( this.newFeed );
+                this.feedRef = feed;
+                Object.assign(this.editFeed, feed);
+                this.editFeed.new_feed = false;
+                delete this.editFeed.created_time;
+                delete this.editFeed.modified_time;
+            } else {
+                this.editFeed.new_feed = true;
             }
-             else {
-                 this.newFeed.new_feed = true;
-             }
 
-            this.addEditFeedDialog.isEditDialog = !!feed;
+            this.addEditFeedDialog.isEditDialog = !this.editFeed.new_feed;
             this.addEditFeedDialog.open = true;
         },
 
@@ -141,10 +154,15 @@ export default {
             try {
                 this.$refs.addEditFeedForm.validate();
                 if (!this.formValid) return;
-                this.newFeed.enabled = !!this.newFeed.enabled;
-                console.log( [ "enabled:", this.newFeed.enabled ] );
-                await this.$axios.post('feeds/change', { entry: this.newFeed } );
+                this.editFeed.enabled = !!this.editFeed.enabled;
+                // console.log( [ "enabled:", this.editFeed.enabled ] );
+                await this.$axios.post('feeds/change', {entry: this.editFeed});
                 this.addEditFeedDialog.open = false;
+                if (this.editFeed.new_feed === true) {
+                    this.feedsAll.push(this.editFeed);
+                } else {
+                    Object.assign(this.feedRef, this.editFeed);
+                }
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('feeds.saved')});
             } catch (err) {
                 this.$store.dispatch('handleError', err);
@@ -156,7 +174,7 @@ export default {
         try {
             const params = {filter: {include: 'tags'}};
 
-            let [ feedsAll, tagNames ] = await Promise.all([
+            let [feedsAll, tagNames] = await Promise.all([
                 $axios.$get('feeds', {params}), $axios.$get('tags')
             ]);
 
@@ -165,7 +183,7 @@ export default {
                 feed.tagsStr = feed.tags.map(t => t.name).join(', ');
             }
 
-            return { feedsAll, tagNames };
+            return {feedsAll, tagNames};
         } catch (err) {
             if (err.response && err.response.status === 401) {
                 return error({statusCode: 401, message: store.state.unauthorized});

@@ -117,7 +117,7 @@ module.exports = function (report) {
         let update_detector = {last_seen: new Date(), online: true};
 
         hell.o([ token_detector, "update detector"], "jobDone", "info");
-        let update_result = await Detector.update({id: token_detector}, update_detector);
+        let update_result = await report.app.models.detector.update({id: token_detector}, update_detector);
         if (!update_result) throw new Error( token_detector + " failed to update detector status");
 
         let update_job = {completed: true, completed_time: new Date()};
