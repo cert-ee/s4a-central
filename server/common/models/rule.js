@@ -29,19 +29,23 @@ module.exports = function (rule) {
 
       filename = file_full_path.split("/").pop();
 
-      if (!filename.includes(".rules")) {
+      if (!filename.includes(".rules") || filename == feed.filename ) {
         // hell.o([filename, " not rules file - ignore"], "loopRuleFiles", "info");
         continue;
       }
 
-      // hell.o([filename, "loop"], "loopRuleFiles", "info");
+      hell.o([filename, "loop"], "loopRuleFiles", "info");
+      hell.o([file_full_path, "loop"], "loopRuleFiles", "info");
 
       // if (!/\.rules$/.test(filename)) continue; // ignore not .rules files
 
       //import only a subset of all the rules while development / testing
       if (process.env.NODE_ENV == "dev") {
-        if (filename.includes("drop")
-        // || ( filename.includes("pop3") && feed.name == "emerging_pro" )
+        if (
+          filename.includes("drop")
+          ||
+          filename.includes("pop3")
+          // && feed.name == "emerging_pro" )
         ) {
         }
         // else continue;
@@ -128,7 +132,7 @@ module.exports = function (rule) {
         //if( lineno % 6 ) lr.pause();
         lr.pause();
 
-        if (lineno % 500 === 0) { //just to show activity in the logs
+        if (lineno % 250 === 0) { //just to show activity in the logs
           hell.o([params.ruleset.name, "looping new rules " + lineno], "checkRuleFile", "info");
         }
 
@@ -230,7 +234,7 @@ module.exports = function (rule) {
         return false;
       }
 
-      // if( sid == 2400032 ){
+      // if( sid == 2102409 ){ // if( sid == 2400032 ){
       // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
       // console.log( rule_info );
       // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
@@ -252,10 +256,18 @@ module.exports = function (rule) {
         //same feed and same rev, no changes
         rule_to_change = rule_found[0];
 
+        //same rule, no changes
         if (rule_info.primary == rule_to_change.primary && rule_info.revision == rule_to_change.revision) {
           // hell.o([sid, feed.name, "no changes "], "checkRuleLine", "info");
           return true;
         }
+
+        //if new is not primary, rev same
+        if ( !rule_info.primary && rule_to_change.primary && rule_info.revision == rule_to_change.revision) {
+          // hell.o([sid, feed.name, "no changes "], "checkRuleLine", "info");
+          return true;
+        }
+
         //if new is primary, existing is not and same rev
         if (rule_info.primary && !rule_to_change.primary && rule_info.revision == rule_to_change.revision) {
           // hell.o([sid, feed.name, "existing and primary now the same, replace with primary"], "checkRuleLine", "info");
@@ -404,7 +416,7 @@ module.exports = function (rule) {
       // }
       if (rule_to_change.revision == revision && rule_to_change.enabled != enabled) {
         //toggle enabled
-        hell.o([sid, "enable change " + enabled], "checkRuleLine", "info");
+        // hell.o([sid, "enable change " + enabled], "checkRuleLine", "info");
         draft_input = {id: rule_to_change.id, enabled: enabled};
       } else { //must be new revision
         delete rule_to_change.modified_time;
@@ -442,7 +454,7 @@ module.exports = function (rule) {
     hell.o([draft_input.sid, "add to draft"], "addToDraft", "info");
 
     rule.app.models.rule_draft.more([draft_input], null, function () {
-      // hell.o([draft_input.sid, "done"], "addToDraft", "info");
+      hell.o([draft_input.sid, "done"], "addToDraft", "info");
       // return success(true);
       return true;
     });

@@ -14,6 +14,17 @@ module.exports = function (boot) {
 
     try {
 
+      //this also builds indexes
+      let check_for_data_models_changes = await boot.app.dataSources.db.autoupdate();
+
+      hell.o("connect to mongo to check indexes", "initialize", "info");
+      let index_result = await boot.app.dataSources.db.connector.connect( function (err, db) {
+        if( err ) throw new Error("could not connect to mongo");
+        let collection = db.collection('tagrule');
+        collection.createIndex({"ruleId": 1});
+        hell.o("index check done", "initialize", "info");
+      });
+
       let versions_load = util.promisify(boot.app.models.system_info.version);
       let versions = await versions_load();
       let server_numbers = parseInt(versions.server.replace(/[^0-9]/g, ''));
