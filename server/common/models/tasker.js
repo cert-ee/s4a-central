@@ -105,7 +105,7 @@ module.exports = function (tasker) {
         description: input.description,
         task_name: input.component_name + "_" + input.name + "_update",
         task_friendly_name: "Check for new " + input.component_name + " content",
-        task_params: {feed_name: input.name},
+        task_params: { feed_name: input.name, component_name: input.component_name },
         task_description: "",
         module_name: "feed",
         interval_hh: false,
@@ -262,6 +262,8 @@ module.exports = function (tasker) {
   tasker.checkTasks = async function ( task_name ) {
     hell.o("start", "checkTasks", "info");
 
+    let current_tasker;
+
     try {
       let tasks_filter = {
         where: {
@@ -291,6 +293,9 @@ module.exports = function (tasker) {
           failed: false
         };
 
+        current_tasker = t.parent_name;
+        await tasker.update({ name: current_tasker},{ loading: true });
+
         await tasker.app.models[t.module_name].task(t.params, function (error,success) {
           let output = { success: "", error: "" };
           if( success ){
@@ -307,10 +312,11 @@ module.exports = function (tasker) {
         task_update.modified_time = moment().valueOf();
 
         hell.o(["set task completed", t.name], "checkTasks", "info");
+        await tasker.update({ name: current_tasker},{ loading: false });
         task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
 
-        let check_if_tasker_enabled = await tasker.findOne({where: {task_name: t.name, enabled: true}});
-        if( check_if_tasker_enabled ) {
+        let check_if_tasker_enabled = await tasker.find({where: {task_name: t.name, enabled: true}});
+        if( check_if_tasker_enabled.length > 1 ) {
           await tasker.task_loader(t.parent_name, task_update.failed);
         }
 
@@ -320,6 +326,7 @@ module.exports = function (tasker) {
       return true;
     } catch (err) {
       hell.o(err, "checkTasks", "error");
+      await tasker.update({ name: current_tasker},{ loading: false });
       return false;
     }
   };

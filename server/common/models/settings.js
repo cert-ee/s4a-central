@@ -78,7 +78,7 @@ module.exports = function (settings) {
           name: "tasks_limit",
           friendly_name: "Tasks Limit ",
           description: "Maximum tasks history to keep in the database",
-          data: "10000",
+          data: "5000",
           locked: false
         }
       ];

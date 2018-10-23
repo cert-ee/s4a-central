@@ -69,7 +69,7 @@
                     </td>
                     <td>
                       <v-btn small info v-if="props.item.enabled === true"
-
+                             :loading="props.item.loading"
                              @click="runTask(props.item)">
                         {{ $t('taskers.run_task') }}
                       </v-btn>

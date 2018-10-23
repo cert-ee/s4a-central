@@ -37,8 +37,9 @@ export default {
             set(value) { this.$store.commit('taskers/setPagination', value); }
         },
 
-        taskers() {
-            return this.taskersAll;
+        taskers: {
+            get() { return this.$store.state.taskers.taskers; },
+            set(value) { return this.$store.commit('components/setTaskers', value); }
         }
     },
 
@@ -59,50 +60,45 @@ export default {
             }
         },
 
-        async runTask(params) {
-            // let comp = Object.assign({}, component);
+        async runTask(raw_tasker) {
+            let tasker = Object.assign({}, raw_tasker);
 
             try {
-                //TODO loading
-                // comp.loading = true;
-                // this.$store.commit('components/updateComponent', comp);
-                // let params = {component_name: comp.name};
-                await this.$axios.post('taskers/runTask', { name: params.task_name });
-                // comp = await this.$axios.$get(`components/${comp.name}`);
+                tasker.loading = true;
+                this.$store.commit('taskers/updateTasker', tasker);
+                await this.$axios.post('taskers/runTask', { name: tasker.task_name });
+                tasker = await this.$axios.$get(`taskers/${tasker.id}`);
                 const text = "Task completed";
                 this.$store.commit('showSnackbar', {type: 'success', text});
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             } finally {
-                // comp.loading = false;
-                // this.$store.commit('components/updateComponent', comp);
+                tasker.loading = false;
+                this.$store.commit('taskers/updateTasker', tasker);
             }
         },
 
         async openEditTaskerDialog(tasker) {
             this.$refs.editTaskerForm.reset();
 
-            console.log( "OPEN");
-            console.log(tasker);
-            if (tasker) {
-                this.taskerRef = tasker;
-                Object.assign(this.newTasker, tasker);
-                // this.newFeed.enabled = false;
-                // delete this.newFeed.tags;
-                // console.log( this.newFeed );
-                // this.newFeed.enabled = this.newFeed.enabled === 'Yes';
-                // this.newFeed.tags_changes = undefined;
-                // delete this.newFeed.tagsStr;
-                delete this.newTasker.created_time;
-                delete this.newTasker.modified_time;
-                // delete this.newFeed.published;
-                // console.log( this.newFeed );
-            }
-            else {
-                console.log( "HAT")
-            }
+            this.$nextTick(() => {
+                if (tasker) {
+                    this.taskerRef = tasker;
+                    Object.assign(this.newTasker, tasker);
+                    // this.newFeed.enabled = false;
+                    // delete this.newFeed.tags;
+                    // console.log( this.newFeed );
+                    // this.newFeed.enabled = this.newFeed.enabled === 'Yes';
+                    // this.newFeed.tags_changes = undefined;
+                    // delete this.newFeed.tagsStr;
+                    delete this.newTasker.created_time;
+                    delete this.newTasker.modified_time;
+                    // delete this.newFeed.published;
+                    // console.log( this.newFeed );
+                }
 
-            this.editTaskerDialog.open = true;
+                this.editTaskerDialog.open = true;
+            });
         },
 
         async editTasker() {
@@ -133,16 +129,21 @@ export default {
             //     $axios.$get('taskers', {params}), $axios.$get('tags')
             // ]);
 
-            let [ taskersAll ] = await Promise.all([
-                $axios.$get('taskers', {params})
-            ]);
+            // let [ taskersAll ] = await Promise.all([
+            //     $axios.$get('taskers', {params})
+            // ]);
 
             // for (let tasker of taskersAll) {
             //     tasker.tagsStr = tasker.tags.map(t => t.name).join(', ');
             // }
 
+            let [ taskers ] = await Promise.all([
+                $axios.$get('taskers', {params})
+            ]);
+
+            store.commit('taskers/setTaskers', taskers);
             // return { taskersAll, tagNames };
-            return { taskersAll };
+            // return { taskersAll };
         } catch (err) {
             if (err.response && err.response.status === 401) {
                 return error({statusCode: 401, message: store.state.unauthorized});

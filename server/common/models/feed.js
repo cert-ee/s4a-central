@@ -507,12 +507,13 @@ module.exports = function (feed) {
     hell.o([input.feed_name, "start"], "task", "info");
     //console.log(input);
 
-    if (!feed.tasks.hasOwnProperty(input.feed_name)) {
-      feed.tasks[input.feed_name] = false;
+    if (!feed.tasks.hasOwnProperty(input.component_name)) {
+      feed.tasks[input.component_name] = false;
     }
 
-    if (feed.tasks[input.feed_name] == true) {
-      hell.o("feed check in progress", "task", "warn");
+
+    if (feed.tasks[input.component_name] == true) {
+      hell.o(["feed check in progress for", input.component_name ], "task", "warn");
       if (cb) return cb({name: "Error", status: 400, message: "worker_busy"});
       return;
     }
@@ -521,7 +522,7 @@ module.exports = function (feed) {
 
     try {
 
-      feed.tasks[input.feed_name] = true;
+      feed.tasks[input.component_name] = true;
 
       let entry = await feed.findOne({where: {name: input.feed_name}, include: ["tags"]});
       if (!entry) throw new Error("failed to load feed: " + input.feed_name);
@@ -572,7 +573,7 @@ module.exports = function (feed) {
           hell.o([input.feed_name, "remove files"], "task", "info");
           // let remove_files = await feed.removeFilesR(content_params);
 
-          hell.o([input.feed_name, "done"], "task", "info");
+
 
 
           break;
@@ -618,16 +619,19 @@ module.exports = function (feed) {
           throw new Error("failed to match feed type " + entry.type);
       }
 
-      feed.tasks[input.feed_name] = false;
+      hell.o([input.feed_name, "done"], "task", "info");
+      feed.tasks[input.component_name] = false;
 
-      return cb(null, {message: "ok"});
+      if( cb ) return cb(null, {message: "ok"});
+      return true;
 
     } catch (err) {
       hell.o([input.feed_name, "failed"], "task", "error");
       hell.o(err, "task", "error");
-      feed.tasks[input.feed_name] = false;
+      feed.tasks[input.component_name] = false;
 
-      return cb({name: "name", status: 400, message: err.message});
+      if( cb ) return  cb({name: "name", status: 400, message: err.message});
+      return false;
     }
 
   }; //feed.task

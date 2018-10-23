@@ -45,10 +45,14 @@ module.exports = function (rule) {
           filename.includes("drop")
           ||
           filename.includes("pop3")
+          ||
+          filename.includes("shellcode")
+          ||
+          filename.includes("chat")
           // && feed.name == "emerging_pro" )
         ) {
         }
-        // else continue;
+        else continue;
 
 
         // !filename.includes("drop")

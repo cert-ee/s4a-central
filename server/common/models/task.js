@@ -27,6 +27,8 @@ module.exports = function (task) {
 
       let tasks_limit_result = await task.app.models.settings.findOne({where: {name: "tasks_limit"}});
       let tasks_limit = tasks_limit_result.data;
+      hell.o(["tasks_limit", tasks_limit], "task", "info");
+
       let to_remove = 0;
 
       if (tasks_found.length > tasks_limit) {

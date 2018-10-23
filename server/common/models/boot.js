@@ -20,8 +20,14 @@ module.exports = function (boot) {
       hell.o("connect to mongo to check indexes", "initialize", "info");
       let index_result = await boot.app.dataSources.db.connector.connect( function (err, db) {
         if( err ) throw new Error("could not connect to mongo");
-        let collection = db.collection('tagrule');
+        let collection;
+        collection = db.collection('tagrule');
         collection.createIndex({"ruleId": 1});
+
+        collection = db.collection('tagruleset');
+        collection.createIndex({"rulesetId": 1});
+        collection.createIndex({"tagId": 1});
+
         hell.o("index check done", "initialize", "info");
       });
 

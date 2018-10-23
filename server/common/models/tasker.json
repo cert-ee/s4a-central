@@ -32,6 +32,12 @@
       "description": "Tasker description",
       "default": ""
     },
+    "loading": {
+      "type": "boolean",
+      "required": true,
+      "description": "Tasker busy",
+      "default": false
+    },
     "task_name": {
       "type": "string",
       "required": true,

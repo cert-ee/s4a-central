@@ -135,19 +135,20 @@ export default {
         openAddEditFeedDialog(feed) {
             this.$refs.addEditFeedForm.reset();
 
-            // console.log( feed );
-            if (feed) {
-                this.feedRef = feed;
-                Object.assign(this.editFeed, feed);
-                this.editFeed.new_feed = false;
-                delete this.editFeed.created_time;
-                delete this.editFeed.modified_time;
-            } else {
-                this.editFeed.new_feed = true;
-            }
+            this.$nextTick(() => {
+                if (feed) {
+                    this.feedRef = feed;
+                    Object.assign(this.editFeed, feed);
+                    this.editFeed.new_feed = false;
+                    delete this.editFeed.created_time;
+                    delete this.editFeed.modified_time;
+                } else {
+                    this.editFeed.new_feed = true;
+                }
 
-            this.addEditFeedDialog.isEditDialog = !this.editFeed.new_feed;
-            this.addEditFeedDialog.open = true;
+                this.addEditFeedDialog.isEditDialog = !this.editFeed.new_feed;
+                this.addEditFeedDialog.open = true;
+            });
         },
 
         async addEditFeed() {
