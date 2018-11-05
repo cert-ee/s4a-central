@@ -432,7 +432,7 @@ module.exports = function (rule_draft) {
 
             for (let ti = 0, tl = draft_tags.length; ti < tl; ti++) {
 
-              if (draft_tags[i].added === undefined) continue;
+              if (draft_tags[ti].added === undefined) continue;
 
               hell.o([draft.sid, "find tag"], "publish", "info");
               tag_exists = await tag.findOne({where: {id: draft_tags[ti].id}});
