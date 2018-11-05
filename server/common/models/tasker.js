@@ -316,7 +316,7 @@ module.exports = function (tasker) {
         task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
 
         let check_if_tasker_enabled = await tasker.find({where: {task_name: t.name, enabled: true}});
-        if( check_if_tasker_enabled.length > 1 ) {
+        if( check_if_tasker_enabled.length > 0 ) {
           await tasker.task_loader(t.parent_name, task_update.failed);
         }
 
