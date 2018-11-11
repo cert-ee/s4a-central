@@ -55,6 +55,7 @@
                               :pagination.sync="pagination" v-model="selectedtaskers" select-all="primary" item-key="name"
                 >
                   <template slot="items" slot-scope="props">
+                  <tr v-bind:class="{ 'grey--text': props.item.enabled == false }" >
                     <td>
                       <v-checkbox color="primary" hide-details v-model="props.selected"></v-checkbox>
                     </td>
@@ -84,6 +85,7 @@
                                 <!--@change="saveAutomaticUpdates(props.item)">-->
                       <!--</v-switch>-->
                     <!--</td>-->
+                  </tr>
                   </template>
                 </v-data-table>
               </v-card-text>

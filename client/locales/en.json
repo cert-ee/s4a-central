@@ -112,14 +112,23 @@
   },
   "tasks":{
     "name" : "Task Name",
+    "loading" : "Running",
     "modified_time": "Last Modified",
     "run_time": "Scheduled time",
     "description": "Description",
+    "start_time": "Start time",
     "completed": "Completed",
+    "completed_time": "Completed time",
     "failed": "Failed",
     "logs": "Logs",
     "parent_name": "Tasker name",
-    "module_name": "Module Name"
+    "module_name": "Module Name",
+    "load_all_tasks": "Show all tasks, currently showing 1000",
+    "loading_set_to_false": "Loading set to false",
+    "stop": "Stop",
+    "clear_tasks_history": "Clear tasks history",
+    "taskers": "Taskers",
+    "tasks_removed": "Tasks removed"
   },
   "rulesets": {
     "enable_all": "Enable All",

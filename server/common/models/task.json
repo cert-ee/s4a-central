@@ -54,10 +54,22 @@
       "description": "Task finished",
       "default": false
     },
-    "run_time": {
+    "completed_time": {
+      "type": "date",
+      "required": false,
+      "description": "Completed time",
+      "default": false
+    },
+    "loading": {
+      "type": "boolean",
+      "required": true,
+      "description": "Task loading",
+      "default": false
+    },
+    "start_time": {
       "type": "date",
       "required": true,
-      "description": "Run time",
+      "description": "Start time",
       "default": "$now"
     },
     "logs": {
@@ -104,6 +116,13 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "clearTasksHistory",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

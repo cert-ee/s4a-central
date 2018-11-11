@@ -514,7 +514,7 @@ module.exports = function (feed) {
 
     if (feed.tasks[input.component_name] == true) {
       hell.o(["feed check in progress for", input.component_name ], "task", "warn");
-      if (cb) return cb({name: "Error", status: 400, message: "worker_busy"});
+      if (cb) return cb({name: "Error", status: 400, message: "worker_busy", worker_busy: true });
       return;
     }
 

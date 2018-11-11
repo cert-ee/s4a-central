@@ -1,6 +1,6 @@
 {
   "name": "s4a-central-lb_server",
-  "version": "0.1.82",
+  "version": "0.1.94",
   "description": "s4a central loopback server",
   "license": "MIT",
   "private": true,
@@ -20,6 +20,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bunyan-mongodb-logger": "^0.0.2",
+    "chalk": "^2.4.1",
     "checksum": "^0.1.1",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.3",

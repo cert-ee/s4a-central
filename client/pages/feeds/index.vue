@@ -56,7 +56,11 @@
                 <v-data-table :headers="headers" :items="feeds" :rows-per-page-items="rowsPerPage" :search="search"
                               :pagination.sync="pagination" v-model="selectedfeeds" select-all="primary" item-key="name"
                 >
-                  <template slot="items" slot-scope="props">
+                  <template slot="items" slot-scope="props" >
+
+
+                    <tr v-bind:class="{ 'grey--text': props.item.enabled == false }" >
+
                     <td>
                       <v-checkbox color="primary" hide-details v-model="props.selected"></v-checkbox>
                     </td>
@@ -95,6 +99,7 @@
                       </v-icon>
                       <v-icon v-else color="error">block</v-icon>
                     </td>
+                    </tr>
                   </template>
                 </v-data-table>
               </v-card-text>

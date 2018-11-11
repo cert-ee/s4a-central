@@ -1,14 +1,16 @@
 export function state() {
     return {
         search: '',
-        onlyWithParent: false,
-        onlyMissing: false,
         pagination: {
             descending: true,
             page: 1,
             rowsPerPage: 100,
-            sortBy: 'modified_time'
-        }
+            sortBy: 'start_time'
+        },
+        taskerFilter: [],
+        completedFilter: '',
+        failedFilter: '',
+
     };
 }
 
@@ -19,5 +21,17 @@ export const mutations = {
 
     setPagination(state, value) {
         state.pagination = value;
+    },
+
+    setTaskerFilter(state, value) {
+        state.taskerFilter = value;
+    },
+
+    setCompletedFilter(state, value) {
+        state.completedFilter = value;
+    },
+
+    setFailedFilter(state, value) {
+        state.failedFilter = value;
     }
 };
