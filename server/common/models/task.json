@@ -48,6 +48,12 @@
       "description": "Task failed",
       "default": false
     },
+    "cancelled": {
+      "type": "boolean",
+      "required": true,
+      "description": "Task cancelled",
+      "default": false
+    },
     "completed": {
       "type": "boolean",
       "required": true,
@@ -57,8 +63,7 @@
     "completed_time": {
       "type": "date",
       "required": false,
-      "description": "Completed time",
-      "default": false
+      "description": "Completed time"
     },
     "loading": {
       "type": "boolean",

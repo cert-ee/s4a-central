@@ -41,7 +41,7 @@ module.exports = function (tasker) {
           interval_hh: false,
           interval_mm: 10,
           builtin: true
-          }
+        }
 
       ];
 
@@ -71,7 +71,7 @@ module.exports = function (tasker) {
 
       //check if we have tasks and create accordingly
       for (const tr of all_taskers) {
-        if( !tr.enabled ) continue;
+        if (!tr.enabled) continue;
         // console.log( tr );
         tasker.task_loader(tr);
       }
@@ -105,7 +105,7 @@ module.exports = function (tasker) {
         description: input.description,
         task_name: input.component_name + "_" + input.name + "_update",
         task_friendly_name: "Check for new " + input.component_name + " content",
-        task_params: { feed_name: input.name, component_name: input.component_name },
+        task_params: {feed_name: input.name, component_name: input.component_name},
         task_description: "",
         module_name: "feed",
         interval_hh: false,
@@ -117,7 +117,7 @@ module.exports = function (tasker) {
       let create_result = await tasker.findOrCreate({where: {name: feed_tasker.name}}, feed_tasker);
       if (!create_result) throw new Error("failed to create tasker " + feed_tasker.name);
 
-      if( create_result[0].enabled ) {
+      if (create_result[0].enabled) {
         await tasker.task_loader(feed_tasker);
       }
 
@@ -165,15 +165,22 @@ module.exports = function (tasker) {
       if (input !== null && typeof input !== 'object') {
         input = await tasker.findOne({where: {name: input}});
       }
-      if( !input.enabled ) return;
+      if (!input.enabled) return;
 
       hell.o([input.task_name, "check existing task"], "task_loader", "info");
-      let task_found = await tasker.app.models.task.findOne({where: {name: input.task_name, completed: false}});
+      let task_found = await tasker.app.models.task.findOne({
+        where:
+          {
+            name: input.task_name,
+            completed: false,
+            cancelled: false
+          }
+      });
       if (!task_found) {
       } else return;
 
       let time_calc = tasker.timeCalc(input);
-      if( time_override ){
+      if (time_override) {
         time_calc = moment().add(60, "seconds").valueOf();
       }
 
@@ -207,12 +214,27 @@ module.exports = function (tasker) {
     try {
       hell.o(input, "task_unloader", "info");
 
-      let task_found = await tasker.app.models.task.findOne({where: {name: input.task_name, completed: false}});
+      let task_found = await tasker.app.models.task.findOne({
+        where: {
+          name: input.task_name,
+          completed: false,
+          cancelled: false
+        }
+      });
       if (task_found) {
         hell.o(["task_found", task_found.name], "task_unloader", "info");
         let task_update = {
-          completed: true,
-          failed: false
+          completed: false,
+          failed: false,
+          cancelled: true,
+          start_time: moment().valueOf(),
+          completed_time: moment().valueOf(),
+          logs: {
+            "success": {
+              message: "tasker disabled"
+            },
+            error: ""
+          }
         };
         let task_updated = await tasker.app.models.task.update({id: task_found.id}, task_update);
       }
@@ -251,17 +273,16 @@ module.exports = function (tasker) {
   };
 
 
-
   /**
    * TASK CHECKER
    *
-   * if task is pased exec time:
+   * if task has start time in the past:
    * run task
    * save result
    * create a new task
    *
    */
-  tasker.checkTasks = async function ( task_name ) {
+  tasker.checkTasks = async function (task_name) {
     hell.o("start", "checkTasks", "info");
 
     let current_tasker;
@@ -270,20 +291,22 @@ module.exports = function (tasker) {
       let tasks_filter = {
         where: {
           completed: false,
+          cancelled: false,
           start_time: {lt: moment().valueOf()}
         }
       };
 
-      if( task_name !== undefined) {
+      if (task_name !== undefined) {
         tasks_filter = {
           where: {
             completed: false,
+            cancelled: false,
             name: task_name
           }
         };
       }
 
-      let tasks_found = await tasker.app.models.task.find( tasks_filter );
+      let tasks_found = await tasker.app.models.task.find(tasks_filter);
 
       if (tasks_found.length == 0) return;
       hell.o(["found", tasks_found.length], "checkTasks", "info");
@@ -296,18 +319,22 @@ module.exports = function (tasker) {
           failed: false
         };
 
-        current_tasker = t.parent_name;
-        await tasker.app.models.task.update({ id: t.id },{ loading: true } );
-        await tasker.update({ name: current_tasker},{ loading: true });
+        if (task_name !== undefined) {
+          task_update.start_time = moment().valueOf();
+        }
 
-        await tasker.app.models[t.module_name].task(t.params, function (error,success) {
-          let output = { success: "", error: "" };
-          if( success ){
+        current_tasker = t.parent_name;
+        await tasker.app.models.task.update({id: t.id}, {loading: true});
+        await tasker.update({name: current_tasker}, {loading: true});
+
+        await tasker.app.models[t.module_name].task(t.params, function (error, success) {
+          let output = {success: "", error: ""};
+          if (success) {
             output.success = success;
           }
 
           if (error !== null) {
-            if( error.hasOwnProperty("worker_busy") && error.worker_busy ){
+            if (error.hasOwnProperty("worker_busy") && error.worker_busy) {
               worker_busy = true;
               return;
             }
@@ -318,17 +345,17 @@ module.exports = function (tasker) {
           }
           task_update.logs = output;
         });
-        if( worker_busy ){
+        if (worker_busy) {
           hell.o(["task postponed because worker is busy", t.name], "checkTasks", "info");
           task_update = {
-            logs: { message: "worker busy, trying again in 60 seconds" },
+            logs: {message: "worker busy, trying again in 60 seconds"},
             start_time: moment().add(60, "seconds").valueOf(),
             modified_time: moment().valueOf(),
             loading: false
           };
-          await tasker.app.models.task.update({id: t.id}, task_update );
-          if( task_name !== undefined ){
-            return { worker_busy: true };
+          await tasker.app.models.task.update({id: t.id}, task_update);
+          if (task_name !== undefined) {
+            return {worker_busy: true};
           }
           continue;
         }
@@ -338,11 +365,11 @@ module.exports = function (tasker) {
         task_update.loading = false;
 
         hell.o(["set task completed", t.name], "checkTasks", "info");
-        await tasker.update({ name: current_tasker},{ loading: false });
+        await tasker.update({name: current_tasker}, {loading: false});
         task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
 
         let check_if_tasker_enabled = await tasker.find({where: {task_name: t.name, enabled: true}});
-        if( check_if_tasker_enabled.length > 0 ) {
+        if (check_if_tasker_enabled.length > 0) {
           await tasker.task_loader(t.parent_name, task_update.failed);
         }
 
@@ -352,7 +379,7 @@ module.exports = function (tasker) {
       return true;
     } catch (err) {
       hell.o(err, "checkTasks", "error");
-      await tasker.update({ name: current_tasker},{ loading: false });
+      await tasker.update({name: current_tasker}, {loading: false});
       return false;
     }
   };
@@ -369,11 +396,11 @@ module.exports = function (tasker) {
     (async function () {
       try {
 
-        let result = await tasker.checkTasks( task_name );
-        console.log( result );
+        let result = await tasker.checkTasks(task_name);
+        console.log(result);
 
         let output = {message: "ok"};
-        if( typeof result === 'object' && result.hasOwnProperty(worker_busy) ){
+        if (typeof result === 'object' && result.hasOwnProperty(worker_busy)) {
           hell.o([task_name, "worker_busy"], "run_task", "error");
           return cb({name: "Error", status: 400, message: "worker_busy"});
         }
@@ -414,7 +441,7 @@ module.exports = function (tasker) {
         let tasker_found = await tasker.find({where: {name: tasker_name}});
         if (!tasker_found) throw new Error(tasker_name + " could not find tasker");
 
-        let update_input = {enabled: enabled, last_modified: new Date()};
+        let update_input = {enabled: enabled, last_modified: moment().valueOf(), loading: false };
         let update_result = await tasker.update({name: tasker_name}, update_input);
         if (!update_result) throw new Error(tasker_name + " could not update tasker ");
 

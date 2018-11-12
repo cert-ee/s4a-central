@@ -13,7 +13,7 @@ export default {
                 // {text: this.$t('tasks.module_name'), align: 'left', value: 'module_name'},
                 // {text: this.$t('tasks.parent_name'), align: 'left', value: 'parent_name'},
                 {text: this.$t('tasks.logs'), align: 'left', value: 'logs', sortable: false},
-                {text: this.$t('tasks.stop'), align: 'left', sortable: false},
+                {text: this.$t('tasks.actions'), align: 'left', sortable: false},
             ],
             clear_tasks_history_button_show: false,
             taskerNames: [],

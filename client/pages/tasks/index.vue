@@ -67,12 +67,13 @@
                   <template slot="items" slot-scope="props">
                     <tr v-bind:class="{
                         'success--text': props.item.loading == $t('yes'), 'error--text': props.item.failed == $t('yes'),
-                        'grey--text': props.item.completed == $t('no') && props.item.loading == $t('no') }" >
+                        'warning--text': props.item.cancelled == true, 'grey--text': props.item.completed == $t('no') &&
+                        props.item.cancelled == false && props.item.loading == $t('no') }" >
                     <!--<td>-->
                       <!--{{ props.item.id }}-->
                     <!--</td>-->
-                    <td>
-                      {{ props.item.start_time }}
+                    <td v-if="props.item.start_time">
+                      {{ props.item.start_time | moment('ddd, MMM DD YYYY HH:mm:ss') }}
                     </td>
                     <!--<td>-->
                       <!--{{ props.item.modified_time }}-->
@@ -86,8 +87,8 @@
                     <td>
                       {{ props.item.completed }}
                     </td>
-                    <td>
-                      {{ props.item.completed_time }}
+                    <td v-if="props.item.completed_time">
+                        {{ props.item.completed_time | moment('ddd, MMM DD YYYY HH:mm:ss') }}
                     </td>
                     <td>
                       {{ props.item.failed }}

@@ -89,7 +89,7 @@ module.exports = function (task) {
         }
       }
 
-      let success_message = to_remove + " old tasks_removed, found " + tasks_found.length + " vs limit" + tasks_limit;
+      let success_message = to_remove + " old tasks_removed, found " + tasks_found.length + " vs limit " + tasks_limit;
       hell.o(success_message, "task", "info");
       if (cb) return cb(null, {message: success_message});
       return true;

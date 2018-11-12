@@ -68,7 +68,7 @@ module.exports = function (boot) {
           await boot.app.models.system_info.create(
             {name: "update_version", friendly_name: "App version", description: "", data: server_numbers}
           );
-        } else if ( server_numbers <= 194 ) {
+        } else if ( server_numbers <= 196 ) {
           hell.o("need to make sure taskers are running after fix", "boot", "info");
           await boot.app.models.tasker.destroyAll();
           await boot.app.models.task.destroyAll();
