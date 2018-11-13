@@ -471,7 +471,7 @@ module.exports = function (feed) {
    * @param feed_name
    * @param feed_file
    */
-  feed.pathCheck = async function (base_path, feed_name, feed_file) {
+  feed.pathCheck = async function (base_path, feed_name, feed_file, out_path) {
     hell.o("start", "pathCheck", "info");
     try {
       // console.log(base_path, feed_name);
@@ -494,6 +494,14 @@ module.exports = function (feed) {
       if (!file_exists) {
         hell.o(["make empty file", base_path + feed_name + '/' + feed_file], "pathCheck", "info");
         await fs.writeFileSync(base_path + feed_name + '/' + feed_file, "");
+      }
+
+      if( out_path ){
+        let out_path_exists = await fs.existsSync(out_path);
+        if (!out_path_exists) {
+          hell.o(["make empty file for out path", out_path ], "pathCheck", "info");
+          await fs.writeFileSync( out_path, "");
+        }
       }
 
     } catch (err) {
@@ -528,8 +536,14 @@ module.exports = function (feed) {
       if (!entry) throw new Error("failed to load feed: " + input.feed_name);
 
       let content_path = await feed.app.models.settings.findOne({where: {name: "path_" + entry.component_name + "_content"}});
+      let content_out_path_check = await feed.app.models.settings.findOne({where: {name: "path_" + entry.component_name + "_" + entry.component_type + "_out"}});
 
-      await feed.pathCheck(content_path.data, entry.name, entry.filename);
+      let content_out_path = false;
+      if( content_out_path_check && content_out_path_check.data.length > 10 ) {
+        content_out_path = content_out_path_check.data;
+      }
+
+      await feed.pathCheck(content_path.data, entry.name, entry.filename, content_out_path);
 
       let content_params = {
         folder: content_path.data + entry.name,

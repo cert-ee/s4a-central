@@ -22,7 +22,7 @@ export default {
     mounted() {
         this.syncInterval = setInterval(() => {
             this.refreshDetectors();
-        }, 5000);
+        }, 300000);
     },
 
     beforeDestroy() {

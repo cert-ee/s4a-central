@@ -73,7 +73,7 @@ module.exports = function (tasker) {
       for (const tr of all_taskers) {
         if (!tr.enabled) continue;
         // console.log( tr );
-        tasker.task_loader(tr);
+        await tasker.task_loader(tr);
       }
 
       //tasker ticker
@@ -159,13 +159,15 @@ module.exports = function (tasker) {
    */
   tasker.task_loader = async function (input, time_override) {
     hell.o("start", "task_loader", "info");
-
     try {
 
       if (input !== null && typeof input !== 'object') {
         input = await tasker.findOne({where: {name: input}});
       }
-      if (!input.enabled) return;
+      if (!input.enabled){
+        hell.o([ input.task_name, "trying to load task for inactive tasker, ignoring"], "task_loader", "warn");
+        return;
+      }
 
       hell.o([input.task_name, "check existing task"], "task_loader", "info");
       let task_found = await tasker.app.models.task.findOne({
@@ -311,7 +313,7 @@ module.exports = function (tasker) {
       if (tasks_found.length == 0) return;
       hell.o(["found", tasks_found.length], "checkTasks", "info");
 
-      let task_updated, task_update, worker_busy;
+      let task_updated, task_update, worker_busy = false;
       for (const t of tasks_found) {
         worker_busy = false;
         task_update = {
@@ -397,7 +399,7 @@ module.exports = function (tasker) {
       try {
 
         let result = await tasker.checkTasks(task_name);
-        console.log(result);
+        // console.log(result);
 
         let output = {message: "ok"};
         if (typeof result === 'object' && result.hasOwnProperty(worker_busy)) {
@@ -438,19 +440,22 @@ module.exports = function (tasker) {
     (async function () {
       try {
 
-        let tasker_found = await tasker.find({where: {name: tasker_name}});
+        let tasker_found = await tasker.findOne({where: {name: tasker_name}});
         if (!tasker_found) throw new Error(tasker_name + " could not find tasker");
 
         let update_input = {enabled: enabled, last_modified: moment().valueOf(), loading: false };
         let update_result = await tasker.update({name: tasker_name}, update_input);
         if (!update_result) throw new Error(tasker_name + " could not update tasker ");
 
+        tasker_found = await tasker.findOne({where: {name: tasker_name}});
+        if (!tasker_found) throw new Error(tasker_name + " could not find tasker");
+
         if (enabled) {
-          tasker.task_loader(tasker_name);
+          await tasker.task_loader(tasker_found);
         }
 
         if (!enabled) {
-          tasker.task_unloader(tasker_name);
+          await tasker.task_unloader(tasker_found);
         }
 
         hell.o([tasker_name, update_result], "toggleEnable", "info");
