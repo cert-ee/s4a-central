@@ -108,19 +108,20 @@ export default {
             try {
                 const result = await this.$axios.$post('tasks/clearTasksHistory', {});
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('tasks.tasks_removed')});
-                const params = {filter: {}};
-                this.tasksAll = await this.$axios.$get('tasks', {params});
+                await this.loadAllTasks();
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
         },
 
         async loadAllTasks() {
-            const params = {filter: {}};
+            const params = {filter: {order: 'start_time DESC'}};
+
             let tasksAll = await this.$axios.$get('tasks', {params});
             for (const task of tasksAll) {
                 task.completed = task.completed ? this.$t('yes') : this.$t('no');
                 task.failed = task.failed ? this.$t('yes') : this.$t('no');
+                task.loading = task.loading ? this.$t('yes') : this.$t('no');
             }
             this.tasksAll = tasksAll;
         },
@@ -150,7 +151,7 @@ export default {
 
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
-            const params = {filter: {limit: 1000}};
+            const params = {filter: {order: 'start_time DESC', limit: 1000}};
 
             let [tasksAll, taskerNames] = await Promise.all([
                 $axios.$get('tasks', {params}),

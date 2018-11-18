@@ -77,7 +77,7 @@ export default {
                 let result_text = await this.$axios.post('taskers/runTask', { name: tasker.task_name });
                 tasker = await this.$axios.$get(`taskers/${tasker.id}`);
                 // const text = "Task completed";
-                console.log( result_text );
+                // console.log( result_text );
                 const text = result_text.data.message;
                 this.$store.commit('showSnackbar', {type: 'success', text});
             } catch (err) {
