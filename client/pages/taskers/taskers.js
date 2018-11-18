@@ -46,13 +46,21 @@ export default {
     methods: {
         async toggleEnable(enabled) {
             try {
-                let promises = [];
+                let promises = [], taskers = [];
 
                 for (const tasker of this.selectedtaskers) {
+                    let taskerCopy = Object.assign({}, tasker);
+                    taskerCopy.enabled = enabled;
+                    taskers.push(taskerCopy);
                     promises.push(this.$axios.post('taskers/toggleEnable', {name: tasker.name, enabled}));
                 }
 
                 await Promise.all(promises);
+
+                for (const tasker of taskers) {
+                    this.$store.commit('taskers/updateTasker', tasker);
+                }
+
                 const text = `${enabled ? this.$t('enabled') : this.$t('disabled') } all selected.`;
                 this.$store.commit('showSnackbar', {type: 'success', text});
             } catch (err) {

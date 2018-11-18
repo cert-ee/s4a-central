@@ -25,8 +25,6 @@ export const mutations = {
     },
     updateTasker(state, tasker) {
         const i = state.taskers.findIndex(t => t.name === tasker.name);
-        // const i18n = this.app.i18n;
-        // component.statusStr = component.status === true ? i18n.t('ok') : i18n.t('fail');
         Vue.set(state.taskers, i, tasker);
     }
 };

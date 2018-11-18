@@ -98,6 +98,11 @@
                         edit
                       </v-icon>
                       <v-icon v-else color="error">block</v-icon>
+
+                      <v-icon v-if="props.item.primary !== true" class="red--text pointer"
+                              @click.stop="openDeleteDialog(props.item)">delete
+                      </v-icon>
+                      <v-icon v-else color="error">block</v-icon>
                     </td>
                     </tr>
                   </template>
@@ -192,6 +197,18 @@
             </v-card>
           </v-dialog>
 
+          <v-dialog v-model="deleteEntryDialog.open" width="20%" lazy>
+            <v-card>
+              <v-card-text>
+                {{ $t('feeds.delete') }} {{ deleteEntryDialog.title }}?
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn flat @click="deleteEntryDialog.open = false">{{ $t('feeds.cancel') }}</v-btn>
+                <v-btn flat color="error" @click="deleteEntryConfirm">{{ $t('feeds.delete') }}</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
 
         </v-layout>
       </v-container>

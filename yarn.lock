@@ -12,9 +12,9 @@
     ws "^6.0.0"
 
 "@pm2/agent@^0.5.11":
-  version "0.5.17"
-  resolved "https://registry.yarnpkg.com/@pm2/agent/-/agent-0.5.17.tgz#af0f622bff750570ab07fefc05a2ebe1fc85b424"
-  integrity sha512-F+Dki1W4QKRQUlp2pQzrs9vSlQ8S/ItbiDH4LrKZRGXxSfK6s90iv6kJ/UycmaDXpfK12POi0dCui6ptB967Sg==
+  version "0.5.19"
+  resolved "https://registry.yarnpkg.com/@pm2/agent/-/agent-0.5.19.tgz#e558fc3919d968f52adceefa12ee175945b4bbd4"
+  integrity sha512-vf5YGKXDv3so1MJi713NwACQViqq+hLrcULUJlDKLr7M3tZQ3nNKWy7B6CC+V3VBMyzS5uXtcfRuETGvBgRULA==
   dependencies:
     async "^2.6.0"
     eventemitter2 "^5.0.1"
@@ -44,9 +44,9 @@
     vxx "1.2.2"
 
 "@pm2/js-api@^0.5.15":
-  version "0.5.29"
-  resolved "https://registry.yarnpkg.com/@pm2/js-api/-/js-api-0.5.29.tgz#80a34713ccfa8a7d810677ab20f97c6bd5d4700e"
-  integrity sha512-Ysncol61c55Tw+OoZm1ZcGR9WIPOf09mvUHH0wO6R3hglXW0OnuZWshy/CuS5Yp4UHwHCIwlxp5OTB95u1WVtQ==
+  version "0.5.33"
+  resolved "https://registry.yarnpkg.com/@pm2/js-api/-/js-api-0.5.33.tgz#e4a8470241742cab20826b7aeef3ff1d6c389f3b"
+  integrity sha512-u2PO9n/1Iq1ZY4fgGuVMOFRuCbN+6+D42MiDD2h0eHmNWaQgSKLwnwKtRmE51BBMk2f10XROMP9I8GiZNuDZEw==
   dependencies:
     async "^2.4.1"
     axios "^0.16.2"
@@ -306,7 +306,7 @@ chokidar@^2.0.4:
   optionalDependencies:
     fsevents "^1.2.2"
 
-chownr@^1.0.1:
+chownr@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.1.tgz#54726b8b8fff4df053c42187e801fb4412df1494"
   integrity sha512-j38EvO5+LHX84jlo6h4UzmOwi0UgW61WRyPtJz4qaadK5eY3BTS5TY/S1Stc3Uk2lIM6TPevAlULiEJwie860g==
@@ -1043,7 +1043,7 @@ minimist@^1.2.0:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
   integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
 
-minipass@^2.2.1, minipass@^2.3.3:
+minipass@^2.2.1, minipass@^2.3.4:
   version "2.3.5"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.3.5.tgz#cacebe492022497f656b0f0f51e2682a9ed2d848"
   integrity sha512-Gi1W4k059gyRbyVUZQ4mEqLm0YIUiGYfvxhF6SIlk3ui1WVxMTGfGdQ2SInh3PDrRTVvPKgULkpJtT4RH10+VA==
@@ -1051,7 +1051,7 @@ minipass@^2.2.1, minipass@^2.3.3:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
 
-minizlib@^1.1.0:
+minizlib@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-1.1.1.tgz#6734acc045a46e61d596a43bb9d9cd326e19cc42"
   integrity sha512-TrfjCjk4jLhcJyGMYymBH6oTXcWjYbUAXTHDbtnWHjZC25h0cdajHuPE1zxb4DVmu8crfh+HwH/WMuyLG0nHBg==
@@ -1522,9 +1522,9 @@ set-value@^2.0.0:
     split-string "^3.0.1"
 
 shelljs@~0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.2.tgz#345b7df7763f4c2340d584abb532c5f752ca9e35"
-  integrity sha512-pRXeNrCA2Wd9itwhvLp5LZQvPJ0wU6bcjaTMywHHGX5XWhVN2nzSu7WV0q+oUY7mGK3mgSkDDzP3MgjqdyIgbQ==
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.3.tgz#a7f3319520ebf09ee81275b2368adb286659b097"
+  integrity sha512-fc0BKlAWiLpwZljmOvAOTE/gXawtCoNrP5oaY7KIaQbbyHeQVg01pSEuEGvGh3HEdBU4baCD7wQBwADmM/7f7A==
   dependencies:
     glob "^7.0.0"
     interpret "^1.0.0"
@@ -1685,14 +1685,14 @@ supports-color@^5.3.0:
     has-flag "^3.0.0"
 
 tar@^4:
-  version "4.4.6"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.6.tgz#63110f09c00b4e60ac8bcfe1bf3c8660235fbc9b"
-  integrity sha512-tMkTnh9EdzxyfW+6GK6fCahagXsnYk6kE6S9Gr9pjVdys769+laCTbodXDhPAjzVtEBazRgP0gYqOjnk9dQzLg==
+  version "4.4.8"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.8.tgz#b19eec3fde2a96e64666df9fdb40c5ca1bc3747d"
+  integrity sha512-LzHF64s5chPQQS0IYBn9IN5h3i98c12bo4NCO7e0sGM2llXQ3p2FGC5sdENN4cTW48O915Sh+x+EXx7XW96xYQ==
   dependencies:
-    chownr "^1.0.1"
+    chownr "^1.1.1"
     fs-minipass "^1.2.5"
-    minipass "^2.3.3"
-    minizlib "^1.1.0"
+    minipass "^2.3.4"
+    minizlib "^1.1.1"
     mkdirp "^0.5.0"
     safe-buffer "^5.1.2"
     yallist "^3.0.2"
@@ -1845,9 +1845,9 @@ ws@^5.1.0:
     async-limiter "~1.0.0"
 
 ws@^6.0.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-6.1.0.tgz#119a9dbf92c54e190ec18d10e871d55c95cf9373"
-  integrity sha512-H3dGVdGvW2H8bnYpIDc3u3LH8Wue3Qh+Zto6aXXFzvESkTVT6rAfKR6tR/+coaUvxs8yHtmNV0uioBF62ZGSTg==
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-6.1.2.tgz#3cc7462e98792f0ac679424148903ded3b9c3ad8"
+  integrity sha512-rfUqzvz0WxmSXtJpPMX2EeASXabOrSMk1ruMOV3JBTBjo4ac2lDjGGsbQSyxj8Odhw5fBib8ZKEjDNvgouNKYw==
   dependencies:
     async-limiter "~1.0.0"
 

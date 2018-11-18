@@ -90,6 +90,8 @@
                     <td v-if="props.item.completed_time">
                         {{ props.item.completed_time | moment('ddd, MMM DD YYYY HH:mm:ss') }}
                     </td>
+                        <td v-else="!props.item.completed_time">
+                        </td>
                     <td>
                       {{ props.item.failed }}
                     </td>
@@ -100,7 +102,10 @@
                       <!--{{ props.item.parent_name }}-->
                     <!--</td>-->
                     <td>
-                      {{ props.item.logs }}
+                        <v-btn v-if="props.item.completed_time" slot="activator" class="info--text" icon
+                               @click.stop="openObjectDialog(props.item)">
+                            <v-icon>view_list</v-icon>
+                        </v-btn>
                     </td>
                       <td>
                         <v-btn small info v-if="props.item.loading === true || props.item.loading === 'Yes'"
@@ -113,6 +118,19 @@
                 </v-data-table>
               </v-card-text>
             </v-card>
+
+              <v-dialog v-model="objectDialog.open" width="50%" lazy>
+                  <v-card>
+                      <v-card-text>
+                          <highlight>{{ objectDialog.data }}</highlight>
+                      </v-card-text>
+                      <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn flat @click="objectDialog.open = false">{{ $t('tasks.close') }}</v-btn>
+                      </v-card-actions>
+                  </v-card>
+              </v-dialog>
+
           </v-flex>
         </v-layout>
       </v-container>

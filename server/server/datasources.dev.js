@@ -6,6 +6,7 @@ module.exports = {
     "username": process.env.MONGODB_USER,
     "password": process.env.MONGODB_PASSWORD,
     "name": "db",
-    "connector": "mongodb"
+    "connector": "mongodb",
+    "useNewUrlParser": "true"
   }
-}
+};

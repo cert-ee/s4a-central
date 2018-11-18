@@ -16,41 +16,14 @@ export default {
                 open: false,
                 isEditDialog: false
             },
+            deleteEntryDialog: {
+                open: false,
+                title: ""
+            },
+            deleteEntry: {},
             formValid: false,
             formFeeds: {
                 required: (value) => !!value || this.$t('feeds.required'),
-                //TODO check that suricata: rules, moloch: yara or wise
-                // sid: (value) => this.$store.state.rule_sid_limit_max >= value &&
-                //     value >= this.$store.state.rule_sid_limit ||
-                //     this.$t('rules.sid_format') + " " + this.$store.state.rule_sid_limit + " " +
-                //     this.$t('rules.sid_format_max') + " " + this.$store.state.rule_sid_limit_max
-            },
-            newFeed: {
-
-                // name: "yara_rules_local",
-                // friendly_name: "",
-                // enabled: false,
-                // type: "file",
-                // location: "/srv/s4a-central/moloch/yara_rules_local/",
-                // filename: "yara_local.txt",
-                // component_name: "moloch",
-                // component_type: "yara",
-                // description: "Yara rules local",
-                // checksum: "empty"
-
-                name: '',
-                enabled: false,
-                friendly_name: '',
-                description: '',
-                type: '',
-                location: '',
-                component_name: '',
-                component_type: '',
-                new_feed: false,
-                // message: ''
-                // new_feed: false
-                // rule_data: ''
-
             },
             editFeed: {
                 name: '',
@@ -64,7 +37,6 @@ export default {
                 new_feed: false
             },
             tagNames: [],
-            feedsAll: [],
             selectedfeeds: []
         }
     },
@@ -88,21 +60,34 @@ export default {
             }
         },
 
-        feeds() {
-            return this.feedsAll;
+        feeds: {
+            get() {
+                return this.$store.state.feeds.feeds;
+            },
+            set(value) {
+                return this.$store.commit('components/setFeeds', value);
+            }
         }
     },
 
     methods: {
         async toggleEnable(enabled) {
             try {
-                let promises = [];
+                let promises = [], feeds = [];
 
                 for (const feed of this.selectedfeeds) {
-                    promises.push(this.$axios.post('feeds/toggleEnable', {name: feed.name, enabled}));
+                    let feedCopy = Object.assign({}, feed);
+                    feedCopy.enabled = enabled;
+                    feeds.push(feedCopy);
+                    promises.push(this.$axios.post('feeds/toggleEnable', {name: feed.name, enabled: enabled}));
                 }
 
                 await Promise.all(promises);
+
+                for (const feed of feeds) {
+                    this.$store.commit('feeds/updateFeed', feed);
+                }
+
                 const text = `${enabled ? this.$t('enabled') : this.$t('disabled') }`;
                 this.$store.commit('showSnackbar', {type: 'success', text});
             } catch (err) {
@@ -115,7 +100,7 @@ export default {
                 let promises = [];
 
                 for (const feed of this.selectedfeeds) {
-                    promises.push(this.$axios.post('feeds/tagAll', {name: feed.name, tag: tag.id, enabled}));
+                    promises.push(this.$axios.post('feeds/tagAll', {name: feed.name, tag: tag.id, enabled: enabled}));
                     const index = feed.tags.findIndex(t => t.id === tag.id);
 
                     if (enabled && index === -1) {
@@ -132,19 +117,47 @@ export default {
                 this.$store.dispatch('handleError', err);
             }
         },
+
+
+        async openDeleteDialog(entry) {
+            this.deleteEntryDialog.open = true;
+            this.deleteEntryDialog.title = entry.name;
+            Object.assign(this.deleteEntry, entry);
+        },
+
+        async deleteEntryConfirm() {
+            try {
+
+                const disable_result = await this.$axios.post('feeds/toggleEnable', {
+                    name: this.deleteEntry.name,
+                    enabled: false
+                });
+                const deleted = await this.$axios.delete(`feeds/${this.deleteEntry.id}`);
+
+                this.$store.commit('feeds/deleteEntry', this.deleteEntry);
+                this.deleteEntryDialog.open = false;
+
+                this.$store.commit('showSnackbar', {type: 'success', text: this.$t('feeds.deleted')});
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
         openAddEditFeedDialog(feed) {
             this.$refs.addEditFeedForm.reset();
 
             this.$nextTick(() => {
+
                 if (feed) {
-                    this.feedRef = feed;
                     Object.assign(this.editFeed, feed);
                     this.editFeed.new_feed = false;
-                    delete this.editFeed.created_time;
-                    delete this.editFeed.modified_time;
                 } else {
+                    delete this.editFeed.id;
                     this.editFeed.new_feed = true;
                 }
+
+                delete this.editFeed.created_time;
+                delete this.editFeed.modified_time;
 
                 this.addEditFeedDialog.isEditDialog = !this.editFeed.new_feed;
                 this.addEditFeedDialog.open = true;
@@ -156,13 +169,14 @@ export default {
                 this.$refs.addEditFeedForm.validate();
                 if (!this.formValid) return;
                 this.editFeed.enabled = !!this.editFeed.enabled;
-                // console.log( [ "enabled:", this.editFeed.enabled ] );
-                await this.$axios.post('feeds/change', {entry: this.editFeed});
+
+                const changed = await this.$axios.$post('feeds/change', {entry: this.editFeed});
+
                 this.addEditFeedDialog.open = false;
                 if (this.editFeed.new_feed === true) {
-                    this.feedsAll.push(this.editFeed);
+                    this.$store.commit('feeds/addFeed', changed.data);
                 } else {
-                    Object.assign(this.feedRef, this.editFeed);
+                    this.$store.commit('feeds/updateFeed', changed.data);
                 }
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('feeds.saved')});
             } catch (err) {
@@ -175,16 +189,18 @@ export default {
         try {
             const params = {filter: {include: 'tags'}};
 
-            let [feedsAll, tagNames] = await Promise.all([
+            let [feeds, tagNames] = await Promise.all([
                 $axios.$get('feeds', {params}), $axios.$get('tags')
             ]);
 
-            for (let feed of feedsAll) {
+            for (let feed of feeds) {
                 // feed.enabled = feed.enabled ? i18n.t('yes') : i18n.t('no');
                 feed.tagsStr = feed.tags.map(t => t.name).join(', ');
             }
 
-            return {feedsAll, tagNames};
+            store.commit('feeds/setFeeds', feeds);
+
+            return {tagNames};
         } catch (err) {
             if (err.response && err.response.status === 401) {
                 return error({statusCode: 401, message: store.state.unauthorized});

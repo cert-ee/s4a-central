@@ -23,7 +23,7 @@
                 Logs
                 <v-icon>view_list</v-icon>
               </v-tab>
-              <v-tab-item id="roles">
+              <v-tab-item value="roles">
                 <v-card>
                   <v-form @submit.prevent="updatePassword">
                     <v-card-title>
@@ -31,7 +31,7 @@
                         <v-flex xs6>
                           <v-text-field label="Password" v-model="password"
                                         :append-icon="passwordVisible ? 'visibility_off' : 'visibility'"
-                                        :append-icon-cb="() => (passwordVisible = !passwordVisible)"
+                                        @click:append="() => (passwordVisible = !passwordVisible)"
                                         :type="passwordVisible ? 'text' : 'password'">
                           </v-text-field>
                         </v-flex>
@@ -63,7 +63,7 @@
                   </v-card-text>
                 </v-card>
               </v-tab-item>
-              <v-tab-item id="logs">
+              <v-tab-item value="logs">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-layout row wrap>

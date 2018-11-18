@@ -78,6 +78,9 @@
   },
   "feeds": {
     "required" : "Required",
+    "delete": "Delete",
+    "deleted": "Deleted",
+    "cancel": "Cancel",
     "add_feed": "Add Feed",
     "edit_feed": "Edit Feed",
     "enabled": "Enabled",
@@ -129,7 +132,8 @@
     "stop": "Stop",
     "clear_tasks_history": "Clear tasks history",
     "taskers": "Taskers",
-    "tasks_removed": "Tasks removed"
+    "tasks_removed": "Tasks removed",
+    "close": "Close"
   },
   "rulesets": {
     "enable_all": "Enable All",

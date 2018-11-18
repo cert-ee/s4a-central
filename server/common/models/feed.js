@@ -27,6 +27,7 @@ module.exports = function (feed) {
           friendly_name: "Emerging threats",
           enabled: true,
           primary: true,
+          builtin: true,
           type: "url",
           location: "https://rules.emergingthreats.net/open/suricata-3.0/emerging.rules.tar.gz",
           filename: "emerging.rules.tar.gz",
@@ -38,6 +39,7 @@ module.exports = function (feed) {
           name: "emerging_pro",
           friendly_name: "Emerging threats PRO",
           enabled: false,
+          builtin: true,
           type: "url",
           location: "https://rules.emergingthreats.net/open/suricata-3.0/emerging.rules.tar.gz",
           filename: "emerging.rules.tar.gz",
@@ -49,6 +51,7 @@ module.exports = function (feed) {
           name: "yara_rules_local",
           friendly_name: "Yara rules local",
           enabled: true,
+          builtin: true,
           type: "file",
           location: "/srv/s4a-central/moloch/yara_rules_local/",
           filename: "yara_local.txt",
@@ -61,6 +64,7 @@ module.exports = function (feed) {
           name: "wise_ip_local",
           friendly_name: "Wise IPs local",
           enabled: true,
+          builtin: true,
           type: "file",
           location: "/srv/s4a-central/moloch/wise_ip_local/",
           filename: "wise_ip_local.txt",
@@ -73,6 +77,7 @@ module.exports = function (feed) {
           name: "wise_url_local",
           friendly_name: "Wise URLs local",
           enabled: true,
+          builtin: true,
           type: "file",
           location: "/srv/s4a-central/moloch/wise_url_local/",
           filename: "wise_url_local.txt",
@@ -85,6 +90,7 @@ module.exports = function (feed) {
           name: "wise_domain_local",
           friendly_name: "Wise domains local",
           enabled: true,
+          builtin: true,
           type: "file",
           location: "/srv/s4a-central/moloch/wise_domain_local/",
           filename: "wise_domain_local.txt",
@@ -206,7 +212,7 @@ module.exports = function (feed) {
         }
 
         hell.o("done", "change", "info");
-        cb(null, {message: "ok"});
+        cb(null, {message: "ok", data: found_feed});
         return true;
       } catch (err) {
         hell.o(err, "change", "error");

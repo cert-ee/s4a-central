@@ -1,4 +1,8 @@
+import Highlight from 'vue-highlight-component';
+
 export default {
+    components: {Highlight},
+
     data() {
         return {
             rowsPerPage: [50, 100, {text: 'All', value: -1}],
@@ -15,6 +19,10 @@ export default {
                 {text: this.$t('tasks.logs'), align: 'left', value: 'logs', sortable: false},
                 {text: this.$t('tasks.actions'), align: 'left', sortable: false},
             ],
+            objectDialog: {
+                data: {},
+                open: false
+            },
             clear_tasks_history_button_show: false,
             taskerNames: [],
             tasksAll: [],
@@ -91,6 +99,11 @@ export default {
     },
 
     methods: {
+        async openObjectDialog(entry) {
+            this.objectDialog.data = entry.logs;
+            this.objectDialog.open = true;
+        },
+
         async clearTasksHistory() {
             try {
                 const result = await this.$axios.$post('tasks/clearTasksHistory', {});

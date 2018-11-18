@@ -35,7 +35,7 @@
                 Components
               </v-tab>
 
-              <v-tab-item id="details">
+              <v-tab-item value="details">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -168,7 +168,7 @@
                 </v-card>
               </v-tab-item>
 
-              <v-tab-item id="logs">
+              <v-tab-item value="logs">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -180,7 +180,7 @@
                 </v-card>
               </v-tab-item>
 
-              <v-tab-item id="components">
+              <v-tab-item value="components">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-text-field append-icon="search" label="Search" single-line hide-details

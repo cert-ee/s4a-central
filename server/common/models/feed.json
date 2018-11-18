@@ -25,6 +25,12 @@
       "description": "Feed primary",
       "default": false
     },
+    "builtin": {
+      "type": "boolean",
+      "required": true,
+      "description": "Feed builtin",
+      "default": false
+    },
     "type": {
       "type": "string",
       "description": "Feed type, url or local file",
