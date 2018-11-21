@@ -14,6 +14,7 @@ module.exports = {
                 MONGODB_DATABASE: process.env.MONGODB_DATABASE,
                 MONGODB_USER: process.env.MONGODB_USER,
                 MONGODB_PASSWORD: process.env.MONGODB_PASSWORD,
+                // SHELL: process.SHELL,
                 API_HOST: process.env.API_HOST,
                 API_PORT: process.env.API_PORT,
                 API_REST_ROOT_URL: process.env.API_REST_ROOT_URL,

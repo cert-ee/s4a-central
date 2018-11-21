@@ -1432,16 +1432,16 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
 eslint-config-loopback@^12.0.0:
-  version "12.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-loopback/-/eslint-config-loopback-12.0.0.tgz#9dbec533c4a14fb77841908a700a9534eafc8d1a"
-  integrity sha512-Pxz7ecK+/4ufJIMMtQ+XimQUP8qpM9IdVvIg78N17w6/PMBoFEeX1ef+ylb3c4BrAGcTzm+gb8VFtFW2JXoWKA==
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-loopback/-/eslint-config-loopback-12.1.0.tgz#70c0d700161a91fd8486870af473c521f9386e51"
+  integrity sha512-3YuzaOdfw5DwZuwmAZdFoBNpQDCDovyWITCY95gfyz9aYt5A8Zr95cEVfxcbTl3xQEyf/9wFUqEe8IbhrURkrA==
   dependencies:
-    eslint-plugin-mocha "^4.11.0"
+    eslint-plugin-mocha "^5.2.0"
 
-eslint-plugin-mocha@^4.11.0:
-  version "4.12.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-mocha/-/eslint-plugin-mocha-4.12.1.tgz#dbacc543b178b4536ec5b19d7f8e8864d85404bf"
-  integrity sha512-hxWtYHvLA0p/PKymRfDYh9Mxt5dYkg2Goy1vZDarTEEYfELP9ksga7kKG1NUKSQy27C8Qjc7YrSWTLUhOEOksA==
+eslint-plugin-mocha@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-mocha/-/eslint-plugin-mocha-5.2.0.tgz#d8786d9fff8cb8b5f6e4b61e40395d6568a5c4e2"
+  integrity sha512-4VTX/qIoxUFRnXLNm6bEhEJyfGnGagmQzV4TWXKzkZgIYyP2FSubEdCjEFTyS/dGwSVRWCWGX7jO7BK8R0kppg==
   dependencies:
     ramda "^0.25.0"
 
@@ -1829,9 +1829,9 @@ flatmap-stream@^0.1.0:
   integrity sha512-ucyr6WkLXjyMuHPtOUq4l+nSAxgWi7v4QO508eQ9resnGj+lSup26oIsUI5aH8k4Qfpjsxa8dDf9UCKkS2KHzQ==
 
 follow-redirects@^1.3.0:
-  version "1.5.9"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.5.9.tgz#c9ed9d748b814a39535716e531b9196a845d89c6"
-  integrity sha512-Bh65EZI/RU8nx0wbYF9shkFZlqLP+6WT/5FnA3cE/djNSuKNHJEinGGZgu/cQEkeeb2GdFOgenAmn8qaqYke2w==
+  version "1.5.10"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.5.10.tgz#7b7a9f9aea2fdff36786a94ff643ed07f4ff5e2a"
+  integrity sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==
   dependencies:
     debug "=3.1.0"
 
@@ -1961,9 +1961,9 @@ gauge@~2.7.3:
     wide-align "^1.1.0"
 
 generator-loopback@^6.0.0:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/generator-loopback/-/generator-loopback-6.0.1.tgz#20dfe4552fbb6aeab8c9b279ab9eb39d35dab02f"
-  integrity sha512-fOZoSUAJhnQTVw1dGFNJRJLA1yTl3+zQoERwCURA8fRKUQtlblRdgBEwkhdzGva3jP7rPhhZ0AmIBSwG7a+qEA==
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/generator-loopback/-/generator-loopback-6.0.2.tgz#d44925c009d6566eafc7e745d549a2c679e3954b"
+  integrity sha512-46WH0KLn9Ehja/RiFuH07y0K6G4iyO5Ceqaf6mK74pkjHwx0lsSu8DwS/HftUm01kgNUC9j1WM9My+21MdNTQA==
   dependencies:
     async "^2.1.4"
     chalk "^1.1.0"
@@ -3858,9 +3858,9 @@ nodemailer@^2.5.0:
     socks "1.1.9"
 
 nodemailer@^4.0.1:
-  version "4.6.8"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.6.8.tgz#f82fb407828bf2e76d92acc34b823d83e774f89c"
-  integrity sha512-A3s7EM/426OBIZbLHXq2KkgvmKbn2Xga4m4G+ZUA4IaZvG8PcZXrFh+2E4VaS2o+emhuUVRnzKN2YmpkXQ9qwA==
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.7.0.tgz#4420e06abfffd77d0618f184ea49047db84f4ad8"
+  integrity sha512-IludxDypFpYw4xpzKdMAozBSkzKHmNBvGanUREjJItgJ2NYcK/s8+PggVhj7c2yGFQykKsnnmv1+Aqo0ZfjHmw==
 
 nodemon@^1.18.3:
   version "1.18.6"
