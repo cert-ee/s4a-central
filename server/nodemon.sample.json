@@ -1,6 +1,7 @@
 {
   "env": {
     "NODE_ENV": "dev",
+    "SHELL": "/bin/bash",
     "MONGODB_HOST": "localhost",
     "MONGODB_PORT": "27017",
     "MONGODB_DATABASE": "s4a-central",
