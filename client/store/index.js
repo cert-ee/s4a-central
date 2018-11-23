@@ -74,7 +74,6 @@ export const actions = {
             state.rule_sid_limit = 10000000;
             state.rule_sid_limit_max = 20000000;
             state.API_URL = env.API_URL;
-            state.KIBANA_URL = env.URL_KIBANA;
             state.GRAFANA_URL = env.URL_GRAFANA;
             state.debugMode = isDev;
 
@@ -96,17 +95,17 @@ export const actions = {
         }
     },
 
-    async updateRules({commit, dispatch}) {
-        commit('setRulesSyncing', true);
-
-        try {
-            await this.$axios.get('rules/checkRoutine');
-        } catch (err) {
-            dispatch('handleError', err);
-        } finally {
-            commit('setRulesSyncing', false);
-        }
-    },
+    // async updateRules({commit, dispatch}) {
+    //     commit('setRulesSyncing', true);
+    //
+    //     try {
+    //         await this.$axios.get('rules/task');
+    //     } catch (err) {
+    //         dispatch('handleError', err);
+    //     } finally {
+    //         commit('setRulesSyncing', false);
+    //     }
+    // },
 
     handleError({commit}, err) {
         commit('showSnackbar', {

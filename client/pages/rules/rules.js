@@ -236,19 +236,21 @@ export default {
         openAddEditRuleDialog(rule) {
             this.$refs.addEditRuleForm.reset();
 
-            if (rule) {
-                Object.assign(this.newRule, rule);
-                this.newRule.enabled = this.newRule.enabled === 'Yes';
-                this.newRule.tags_changes = undefined;
-                delete this.newRule.tags;
-                delete this.newRule.tagsStr;
-                delete this.newRule.created_time;
-                delete this.newRule.modified_time;
-                delete this.newRule.published;
-            }
+            this.$nextTick(() => {
+                if (rule) {
+                    Object.assign(this.newRule, rule);
+                    this.newRule.enabled = this.newRule.enabled === 'Yes';
+                    this.newRule.tags_changes = undefined;
+                    delete this.newRule.tags;
+                    delete this.newRule.tagsStr;
+                    delete this.newRule.created_time;
+                    delete this.newRule.modified_time;
+                    delete this.newRule.published;
+                }
 
-            this.addEditRuleDialog.isEditDialog = !!rule;
-            this.addEditRuleDialog.open = true;
+                this.addEditRuleDialog.isEditDialog = !!rule;
+                this.addEditRuleDialog.open = true;
+            });
         },
 
         async addEditRule() {

@@ -1,5 +1,7 @@
 const bunyanMongoDbLogger = require('bunyan-mongodb-logger');
 
+//TODO redo to single fancy function for all modules, after save etc...
+
 module.exports = function(app) {
   const mongoURL = app.datasources.db.settings.url;
 

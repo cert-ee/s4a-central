@@ -4,7 +4,23 @@
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>Detector Details - {{detector.friendly_name}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="error" v-if="$store.getters.hasAdminRole" @click="deleteDetector">Delete Detector</v-btn>
+      <v-btn color="error" v-if="$store.getters.hasAdminRole" @click.stop="openDetectorDeleteDialog">{{ $t('detectors.delete_detector') }}</v-btn>
+
+      <v-dialog v-model="deleteDetectorDialog" width="30%" lazy>
+        <v-card>
+          <v-card-text>
+            {{ $t('detectors.delete_detector') }}
+            <br/>
+            {{detector.friendly_name}} ?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn flat @click="deleteDetectorDialog = false">{{ $t('cancel') }}</v-btn>
+            <v-btn flat color="error" @click="deleteDetector">{{ $t('delete') }}</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     </v-toolbar>
     <v-content>
       <v-container fluid>
@@ -40,7 +56,7 @@
                 </v-badge>
               </v-tab>
 
-              <v-tab-item id="details">
+              <v-tab-item value="details">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -120,7 +136,7 @@
                 </v-card>
               </v-tab-item>
 
-              <v-tab-item id="components">
+              <v-tab-item value="components">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-text-field append-icon="search" label="Search" single-line hide-details
@@ -147,7 +163,7 @@
                 </v-card>
               </v-tab-item>
 
-              <v-tab-item id="registration">
+              <v-tab-item value="registration">
                 <v-stepper v-model="registration_step" vertical>
                   <v-stepper-step step="1"
                                   :editable="registration_steps[0].complete && !registration_steps[2].complete"

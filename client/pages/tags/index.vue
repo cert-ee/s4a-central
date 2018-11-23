@@ -46,9 +46,8 @@
           <v-dialog v-model="addEditTagDialog.open" width="30%">
             <v-card>
               <v-form v-model="formValid" ref="addEditTagForm" @submit.prevent="addEditTag">
-                <v-card-title>
-                  <span class="headline">{{ addEditTagDialog.isEditDialog ? $t('tags.edit_tag') : $t('tags.add_tag')
-                    }}</span>
+                <v-card-title class="headline">
+                  {{ addEditTagDialog.isEditDialog ? $t('tags.edit_tag') : $t('tags.add_tag') }}
                 </v-card-title>
                 <v-card-text>
                   <v-container grid-list-lg>

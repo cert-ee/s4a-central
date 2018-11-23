@@ -45,6 +45,10 @@
     "dataSource": "db",
     "public": true
   },
+  "feed": {
+    "dataSource": "db",
+    "public": true
+  },
   "feedback": {
     "dataSource": "db",
     "public": true
@@ -81,15 +85,35 @@
     "dataSource": "db",
     "public": true
   },
-  "tag": {
-    "dataSource": "db",
-    "public": true
-  },
   "settings": {
     "dataSource": "db",
     "public": true
   },
   "system_info": {
+    "dataSource": "db",
+    "public": true
+  },
+  "tag": {
+    "dataSource": "db",
+    "public": true
+  },
+  "task": {
+    "dataSource": "db",
+    "public": true
+  },
+  "tasker": {
+    "dataSource": "db",
+    "public": true
+  },
+  "yara": {
+    "dataSource": "db",
+    "public": true
+  },
+  "wise": {
+    "dataSource": "db",
+    "public": true
+  },
+  "boot": {
     "dataSource": "db",
     "public": true
   }

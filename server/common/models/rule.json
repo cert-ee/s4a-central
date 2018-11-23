@@ -10,26 +10,45 @@
     "sid": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Suricata rule ID"
     },
     "revision": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Rule revision number"
+    },
+    "primary": {
+      "type": "boolean",
+      "required": true,
+      "index": true,
+      "description": "Rule is from primary feed",
+      "default": false
+    },
+    "feed_name": {
+      "type": "string",
+      "required": true,
+      "index": true,
+      "description": "Feed name",
+      "default": "emerging_threats"
     },
     "classtype": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Rule classtype from emerging threats"
     },
     "severity": {
       "type": "string",
       "required": false,
+      "index": true,
       "description": "Rule severity"
     },
     "ruleset": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Rule categories like malware and worm"
     },
     "enabled": {
@@ -98,6 +117,27 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "detector",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "addJobForDeleteRules",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "addJobForFullSync",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "task",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

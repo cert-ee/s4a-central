@@ -10,26 +10,45 @@
     "sid": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Suricata rule ID"
     },
     "revision": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Rule revision number"
+    },
+    "primary": {
+      "type": "boolean",
+      "required": true,
+      "index": true,
+      "description": "Rule is from primary feed",
+      "default": false
+    },
+    "feed_name": {
+      "type": "string",
+      "required": true,
+      "index": true,
+      "description": "Feed name",
+      "default": "emerging_threats"
     },
     "classtype": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Rule classtype"
     },
     "severity": {
       "type": "string",
       "required": false,
+      "index": true,
       "description": "Rule severity"
     },
     "ruleset": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Rule categories like malware and worm"
     },
     "enabled": {
@@ -51,13 +70,13 @@
     "modified_time": {
       "type": "date",
       "required": true,
-      "description": "Registration time",
+      "description": "Modified time",
       "default": "$now"
     },
     "created_time": {
       "type": "date",
       "required": true,
-      "description": "Registration time",
+      "description": "Created time",
       "default": "$now"
     },
     "tags_changes": {

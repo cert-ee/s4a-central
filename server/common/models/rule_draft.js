@@ -19,11 +19,10 @@ module.exports = function (rule_draft) {
     (async function () {
       try {
 
-        /*
-        HACK EDIT MODAL to smaller pieces if more changes
+        /**
+         * HACK EDIT MODAL to smaller pieces if more changes
          */
-        if ( changes.length == 1 && changes[0].id !== undefined && Object.keys(changes[0]).length > 5
-        ) {
+        if (changes.length == 1 && changes[0].id !== undefined && Object.keys(changes[0]).length > 5) {
           //hell.o("more changes, hack to objects", "more", "info");
 
           let edit_fields = [];
@@ -46,17 +45,18 @@ module.exports = function (rule_draft) {
         for (let i = 0, l = changes.length; i < l; i++) {
 
           current = changes[i];
+          //console.log( current );
 
-          /*
-           IF NEW CERT/CUSTOM RULE, create
+          /**
+           * NEW CERT/CUSTOM RULE, create
            */
           if (current.ruleset == CUSTOM_RULESET_NAME && current.id === undefined) {
             hell.o([current.sid, "new rule"], "more", "info");
 
-            find_draft_sid = await rule_draft.find({where: {sid: current.sid},fields:["sid"]});
-            find_sid = await rule_draft.app.models.rule.find({where: {sid: current.sid},fields:["sid"]});
+            find_draft_sid = await rule_draft.find({where: {sid: current.sid}, fields: ["sid"]});
+            find_sid = await rule_draft.app.models.rule.find({where: {sid: current.sid}, fields: ["sid"]});
             hell.o([current.sid, "look for duplicate sid"], "more", "info");
-            hell.o( [ find_draft_sid, find_sid ],"more","info");
+            hell.o([find_draft_sid, find_sid], "more", "info");
 
             if (!find_draft_sid) throw new Error(current.sid + " failed to look for draft sid ");
             if (find_draft_sid.length > 0) throw new Error(current.sid + " draft SID already exists ");
@@ -84,10 +84,10 @@ module.exports = function (rule_draft) {
           tmp = Object.keys(current);
           // console.log(Object.keys(current));
           field_to_update = tmp[1];
-          hell.o(["field_to_update", field_to_update], "more", "info");
+          // hell.o(["field_to_update", field_to_update], "more", "info");
 
-          /*
-          GET ORIGINAL RULE
+          /**
+           * GET ORIGINAL RULE
            */
           original = await rule.findOne({where: {id: current.id}, include: ['tags']});
           hell.o([original.sid, "original sid"], "more", "info");
@@ -98,8 +98,8 @@ module.exports = function (rule_draft) {
             draft = draft[0];
           } else draft = false;
 
-          /*
-          TAGS UNCHANGED, ignore
+          /**
+           * TAGS UNCHANGED, ignore
            */
           if (current.tags_changes !== undefined && current.tags_changes[0].added) {
             try {
@@ -109,7 +109,7 @@ module.exports = function (rule_draft) {
 
               if (!draft || draft.tags_changes.length == 0) continue;
 
-              hell.o([original.sid, "his rule has a draft, check if we have opposite tag change stored"], "more", "info");
+              hell.o([original.sid, "this rule has a draft, check if we have opposite tag change stored"], "more", "info");
               found = false, update_input = [];
 
               for (let i = 0, l = draft.tags_changes.length; i < l; i++) {
@@ -132,8 +132,8 @@ module.exports = function (rule_draft) {
             }
           }
 
-          /*
-          ORIGINAL AND UPDATE SAME, ignore
+          /**
+           * ORIGINAL AND UPDATE SAME, ignore
            */
           if (!draft && original[field_to_update] == current[field_to_update]) {
             hell.o([original.sid, "no draft: original and update same, return"], "more", "info");
@@ -142,8 +142,8 @@ module.exports = function (rule_draft) {
             continue;
           }
 
-          /*
-          DRAFT AND UPDATE SAME, ignore
+          /**
+           * DRAFT AND UPDATE SAME, ignore
            */
           if (draft !== false && draft[field_to_update] == current[field_to_update]) {
             hell.o([original.sid, "original and draft same, return"], "more", "info");
@@ -152,8 +152,8 @@ module.exports = function (rule_draft) {
             continue;
           }
 
-          /*
-          NO DRAFT, create it
+          /**
+           * NO DRAFT, create it
            */
           if (!draft) {
             hell.o([original.sid, "create draft"], "more", "info");
@@ -167,6 +167,7 @@ module.exports = function (rule_draft) {
             add_result = await rule_draft.create(input_to_draft);
             if (!add_result) throw new Error(original.sid + " failed to create draft");
 
+            hell.o([original.sid, "created draft"], "more", "info");
           }
 
           hell.o([original.sid, " try to find ruleId: " + current.id], "more", "info");
@@ -174,8 +175,8 @@ module.exports = function (rule_draft) {
           draft = await rule_draft.findOne({where: {ruleId: current.id}});
           if (!draft) throw new Error(original.sid + " failed to find draft ");
 
-          /*
-          IF NO TAGS, add | CHECK remove tag part...
+          /**
+           * IF NO TAGS, add | CHECK remove tag part...
            */
           let update_result;
           if (field_to_update == "tags_changes" && draft.tags_changes.length == 0) {
@@ -186,8 +187,8 @@ module.exports = function (rule_draft) {
             if (!update_result) throw new Error(original.sid + " failed add tags to draft ");
           }
 
-          /*
-          HAS TAGS, update
+          /**
+           * HAS TAGS, update
            */
           if (field_to_update == "tags_changes" && draft.tags_changes.length > 0) {
             hell.o([original.sid, " has tags, check draft"], "more", "info");
@@ -231,8 +232,8 @@ module.exports = function (rule_draft) {
 
           } // tags check
 
-          /*
-          UPDATE DRAFT
+          /**
+           * UPDATE DRAFT
            */
           if (field_to_update != "tags_changes" && draft[field_to_update] != current[field_to_update]) {
             hell.o([original.sid, " draft make change: " + draft.sid], "more", "info");
@@ -245,8 +246,8 @@ module.exports = function (rule_draft) {
 
           }
 
-          /*
-          RELOAD
+          /**
+           * RELOAD
            */
           draft = await rule_draft.findOne({where: {ruleId: current.id}});
           if (!draft) throw new Error(original.sid + " failed to reload draft ");
@@ -280,7 +281,7 @@ module.exports = function (rule_draft) {
         } // end of changes for loop
 
         let final_sid = "new";
-        if( original && original.sid ) final_sid = original.sid;
+        if (original && original.sid) final_sid = original.sid;
         hell.o([final_sid, "done"], "more", "info");
         cb(null, {message: "ok"});
 
@@ -361,21 +362,23 @@ module.exports = function (rule_draft) {
 
           hell.o([draft.sid, "loop"], "publish", "info");
 
-          /*
-          NEW RULE
+          /**
+           * NEW RULE
            */
           if (draft.new_rule) {
             hell.o([draft.sid, "new rule"], "publish", "info");
 
-            let dup_sid = await rule.findOne({where: {sid: draft.sid}});
-            if (dup_sid && dup_sid.sid == draft.sid) {
-              hell.o([draft.sid, "duplicated SID"], "publish", "info");
-              throw new Error(draft.sid + " duplicate SID for rule draft " + draft.sid);
-            }
+            // let dup_sid = await rule.findOne({where: {sid: draft.sid}});
+            // if (dup_sid && dup_sid.sid == draft.sid) {
+            //   hell.o([draft.sid, "duplicated SID"], "publish", "info");
+            //   throw new Error(draft.sid + " duplicate SID for rule draft " + draft.sid);
+            // }
 
             let new_rule_input = {
               sid: draft.sid,
               revision: 1, // new rule
+              primary: draft.primary,
+              feed_name: draft.feed_name,
               message: draft.message,
               classtype: draft.classtype,
               ruleset: draft.ruleset,
@@ -391,8 +394,9 @@ module.exports = function (rule_draft) {
             draft.ruleId = update_result.id;
           }
 
-          /*
-          GET PUBLISHED RULE
+
+          /**
+           * GET PUBLISHED RULE
            */
           hell.o([draft.sid, "published rule " + draft.ruleId], "publish", "info");
           [published_rule] = await rule.find({where: {id: draft.ruleId}, include: ["tags"]});
@@ -407,8 +411,8 @@ module.exports = function (rule_draft) {
               update_input[cur_up] = draft[cur_up];
             }
 
-            if( draft.ruleset == CUSTOM_RULESET_NAME ) {
-              update_input.revision = parseInt( published_rule.revision ) + 1; //increment revision
+            if (draft.ruleset == CUSTOM_RULESET_NAME) {
+              update_input.revision = parseInt(published_rule.revision) + 1; //increment revision
             }
             update_input.modified_time = new Date();
 
@@ -418,8 +422,9 @@ module.exports = function (rule_draft) {
             hell.o([draft.sid, "updated"], "publish", "info");
           }
 
-          /*
-            HAS TAGS TO CHANGE?
+
+          /**
+           * HAS TAGS TO CHANGE?
            */
           draft_tags = draft.tags_changes;
           if (draft_tags.length > 0) {
@@ -427,7 +432,7 @@ module.exports = function (rule_draft) {
 
             for (let ti = 0, tl = draft_tags.length; ti < tl; ti++) {
 
-              if( draft_tags[i].added === undefined ) continue;
+              if (draft_tags[ti].added === undefined) continue;
 
               hell.o([draft.sid, "find tag"], "publish", "info");
               tag_exists = await tag.findOne({where: {id: draft_tags[ti].id}});

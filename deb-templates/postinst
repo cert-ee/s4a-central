@@ -149,33 +149,21 @@ create_mongodb_users() {
 add_group '{{ node_deb_group }}' ''
 add_user '{{ node_deb_user }}' '' '{{ node_deb_group }}' '{{ node_deb_user }} user-daemon' '/bin/false'
 
-# em - EMerging threats
-mkdir -p '/var/log/{{ node_deb_package_name }}' '/srv/data/suricata_em' '/var/log/suricata/'
+source /etc/default/{{ node_deb_package_name }}
 
-touch /var/log/suricata/eve.json
+# em - EMerging threats
+mkdir -p $PATH_BASE '/var/log/{{ node_deb_package_name }}' ${PATH_SURICATA_ALERTS%/*}
+
+touch $PATH_SURICATA_ALERTS
 
 chown -R '{{ node_deb_user }}:{{ node_deb_group }}' \
 	'/var/log/{{ node_deb_package_name }}' \
 	'/usr/share/{{ node_deb_package_name }}/app' \
-	'/srv/data/suricata_em' \
-	'/var/log/suricata/eve.json'
+	$PATH_SURICATA_ALERTS \
+	$PATH_BASE
 
 dependency_install '{{ node_deb_package_name }}'
 create_mongodb_users '{{ node_deb_package_name }}'
-
-# logrotate for pm2
-cat > '/etc/logrotate.d/s4a-detector'  <<EOF
-/home/{{ node_deb_user }}/.pm2/pm2.log /home/{{ node_deb_user }}/.pm2/logs/*.log {
-	rotate 12
-	daily
-	missingok
-	notifempty
-	compress
-	delaycompress
-	copytruncate
-	create 0640 {{ node_deb_user }} {{ node_deb_group }}
-}
-EOF
 
 if [[ "$init_type" != 'none' ]]; then
   start_service '{{ node_deb_package_name }}'

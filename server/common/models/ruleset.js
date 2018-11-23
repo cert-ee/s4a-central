@@ -7,36 +7,31 @@ module.exports = function (ruleset) {
   /**
    * INITIALIZE RULESETS
    *
-   * create default rulesets
-   *
-   * @param cb
+   * create defaults
    */
-  ruleset.initialize = function (cb) {
+  ruleset.initialize = async function () {
     hell.o("start", "initialize", "info");
 
-    //create the default rulesets
-    let default_rulesets = [
-      {name: "cert", description: "Cert Ruleset"}
-      //{name: "custom", description: "Custom Ruleset"}
-    ];
+    try {
 
-    (async function () {
-      try {
+      let default_rulesets = [
+        {name: "cert", description: "Cert Ruleset"}
+        //{name: "custom", description: "Custom Ruleset"}
+      ];
 
-        hell.o("check rulesets", "initialize", "info");
-        let create_result;
-        for (const rs of default_rulesets) {
-          hell.o(["check ruleset", rs.name], "initialize", "info");
-          create_result = await ruleset.findOrCreate({where: rs}, rs);
-          if (!create_result) throw new Error("failed to create ruleset " + rs.name);
-        }
-        cb(null, true);
-      } catch (err) {
-        hell.o(err, "initialize", "error");
-        cb(err);
+
+      hell.o("check rulesets", "initialize", "info");
+      let create_result;
+      for (const rs of default_rulesets) {
+        hell.o(["check ruleset", rs.name], "initialize", "info");
+        create_result = await ruleset.findOrCreate({where: rs}, rs);
+        if (!create_result) throw new Error("failed to create ruleset " + rs.name);
       }
-
-    })(); // async
+      return true;
+    } catch (err) {
+      hell.o(err, "initialize", "error");
+      return false;
+    }
 
   };
 

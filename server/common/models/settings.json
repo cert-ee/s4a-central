@@ -7,26 +7,37 @@
     "validateUpsert": true
   },
   "properties": {
-    "id": {
+    "name": {
       "type": "string",
       "id": true,
       "required": true,
       "index": true,
-      "description": "",
-      "isArray": false,
-      "default" : "settingid"
+      "description": "Setting name",
+      "isArray": false
     },
-    "job_interval_rules_check": {
-      "type": "number",
+    "friendly_name": {
+      "type": "string",
       "required": true,
-      "description": "Rules check interval in minutes",
-      "default" : 720
+      "description": "Setting friendly name",
+      "default": ""
     },
-    "job_interval_detectors_online_check": {
-      "type": "number",
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Setting description",
+      "default": ""
+    },
+    "data": {
+      "type": "string",
       "required": true,
-      "description": "Detectors online check interval in minutes",
-      "default" : 1
+      "description": "Setting value or data",
+      "default": ""
+    },
+    "locked": {
+      "type": "boolean",
+      "required": true,
+      "description": "Setting should be locked",
+      "default": false
     }
   },
   "validations": [],
