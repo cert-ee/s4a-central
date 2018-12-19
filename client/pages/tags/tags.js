@@ -38,17 +38,20 @@ export default {
     methods: {
         openAddEditTagDialog(tag) {
             this.$refs.addEditTagForm.reset();
-            this.tagId = undefined;
 
-            if (tag) {
-                this.tagId = tag.id;
-                this.name = tag.name;
-                this.description = tag.description;
-                this.tagRef = tag;
-            }
+            this.$nextTick(() => {
+                this.tagId = undefined;
 
-            this.addEditTagDialog.isEditDialog = !!tag;
-            this.addEditTagDialog.open = true;
+                if (tag) {
+                    this.tagId = tag.id;
+                    this.name = tag.name;
+                    this.description = tag.description;
+                    this.tagRef = tag;
+                }
+
+                this.addEditTagDialog.isEditDialog = !!tag;
+                this.addEditTagDialog.open = true;
+            });
         },
 
         async addEditTag() {
@@ -88,9 +91,9 @@ export default {
         }
     },
 
-    async asyncData({store, error, app: {$axios, i18n}}) {
+    async asyncData({store, error, app: {$axios}}) {
         try {
-            let tags = await $axios.$get('tags');
+            const tags = await $axios.$get('tags');
             if (!tags || !tags.length) return;
             return { tags };
         } catch (err) {

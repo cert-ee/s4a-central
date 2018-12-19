@@ -27,7 +27,7 @@
       "description": "Automatically enable new rules",
       "default": true
     },
-    "createdAt": {
+    "created_time": {
       "type": "date",
       "required": true,
       "description": "Created time",

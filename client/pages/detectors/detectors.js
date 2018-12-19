@@ -14,8 +14,19 @@ export default {
                 {text: this.$t('detectors.table.graphs'), align: 'left', sortable: false}
             ],
             tagNames: [],
-            detectorsAll: []
-        }
+            detectorsAll: [],
+            refreshing: false
+        };
+    },
+
+    mounted() {
+        this.syncInterval = setInterval(() => {
+            this.refreshDetectors();
+        }, 300000);
+    },
+
+    beforeDestroy() {
+        clearInterval(this.syncInterval);
     },
 
     computed: {
@@ -96,12 +107,34 @@ export default {
             return detectors;
         }
     },
+    methods: {
+        async refreshDetectors() {
+            this.refreshing = true;
 
+            const params = {filter: {include: 'tags'}};
+
+            let [detectorsAll, tagNames] = await Promise.all([
+                this.$axios.$get('detectors', {params}), this.$axios.$get('tags')
+            ]);
+
+            this.detectorsAll = detectorsAll;
+
+            for (let detector of this.detectorsAll) {
+                detector.onlineStr = detector.online ? this.$t('detectors.table.yes') : this.$t('detectors.table.no');
+                detector.componentsStatus = detector.components_overall ? this.$t('detectors.table.ok') : this.$t('detectors.table.fail');
+                detector.tagsStr = detector.tags.map(t => t.name).join(', ');
+            }
+
+            setTimeout(() => {
+                this.refreshing = false;
+            }, 1000);
+        }
+    },
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
             const params = {filter: {include: 'tags'}};
 
-            let [ detectorsAll, tagNames ] = await Promise.all([
+            let [detectorsAll, tagNames] = await Promise.all([
                 $axios.$get('detectors', {params}), $axios.$get('tags')
             ]);
 

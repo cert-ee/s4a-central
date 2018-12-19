@@ -10,6 +10,7 @@
     "name": {
       "type": "string",
       "required": true,
+      "index": true,
       "description": "Tag name"
     },
     "description": {
@@ -21,6 +22,11 @@
   "validations": [],
   "relations": {
     "detectors": {
+      "type": "hasAndBelongsToMany",
+      "model": "detector",
+      "foreignKey": ""
+    },
+    "feeds": {
       "type": "hasAndBelongsToMany",
       "model": "detector",
       "foreignKey": ""

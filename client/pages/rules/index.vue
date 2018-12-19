@@ -147,9 +147,9 @@
                         <v-text-field :label="$t('rules.message')" v-model="newRule.message" required :rules="[formRules.required]"></v-text-field>
                       </v-flex>
                       <v-flex xs12>
-                        <v-text-field :label="$t('rules.rule_data')" v-model="newRule.rule_data" required multi-line
-                                      :rules="[formRules.required]">
-                        </v-text-field>
+                        <v-textarea :label="$t('rules.rule_data')" v-model="newRule.rule_data" required
+                                    :rules="[formRules.required]">
+                        </v-textarea>
                       </v-flex>
                     </v-layout>
                   </v-container>

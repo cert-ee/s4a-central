@@ -6,6 +6,7 @@ export default {
                 {text: 'SID', align: 'left', value: 'sid'},
                 {text: this.$t('enabled'), align: 'left', value: 'enabled'},
                 {text: this.$t('rules.severity'), align: 'left', value: 'severity'},
+                {text: this.$t('rules.revision'), align: 'left', value: 'revision'},
                 {text: this.$t('rules.ruleset'), align: 'left', value: 'ruleset'},
                 {text: this.$t('rules.classtype'), align: 'left', value: 'classtype'},
                 {text: this.$t('rules.message'), align: 'left', value: 'message'},

@@ -21,7 +21,7 @@
       "description": "Classtype description",
       "default": ""
     },
-    "createdAt": {
+    "created_time": {
       "type": "date",
       "required": true,
       "description": "Created time",

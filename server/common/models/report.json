@@ -52,6 +52,20 @@
       "permission": "ALLOW"
     },
     {
+      "property": "yara",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "detector",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "wise",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "detector",
+      "permission": "ALLOW"
+    },
+    {
       "property": "alerts",
       "accessType": "*",
       "principalType": "ROLE",

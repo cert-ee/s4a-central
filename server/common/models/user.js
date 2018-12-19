@@ -189,7 +189,7 @@ module.exports = function(user) {
 
         if (process.env.NODE_ENV == "dev") { return next(); }
 
-        let change_input = "htpasswd -b /etc/nginx/.htpasswd " + username + " " + password;
+        let change_input = "htpasswd -b /etc/nginx/.htpasswd " + username + " \"" + password + "\"";
         shelljs.exec(change_input, {silent: true}, function (exit_code, stdout, stderr) {
           hell.o(["shelljs result ", exit_code], "updatePassword", "info");
           //let message = stderr;

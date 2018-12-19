@@ -698,6 +698,7 @@ module.exports = function (registration) {
         hell.o("destroy database", "resetDetector", "warn");
         await registration.app.models.detector.destroyAll();
         await registration.app.models.accessToken.destroyAll();
+        await registration.app.models.feed.destroyAll();
         await registration.app.models.feedback.destroyAll();
         await registration.app.models.tag.destroyAll();
         await registration.app.models.rule.destroyAll();
@@ -705,6 +706,8 @@ module.exports = function (registration) {
         await registration.app.models.ruleset.destroyAll();
         await registration.app.models.role.destroyAll();
         await registration.app.models.log.destroyAll();
+        await registration.app.models.tasker.destroyAll();
+        await registration.app.models.task.destroyAll();
         //await registration.app.models.User.destroyAll();
 
         let output = {message: "reset done"};

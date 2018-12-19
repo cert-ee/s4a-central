@@ -35,7 +35,7 @@
                 Components
               </v-tab>
 
-              <v-tab-item id="details">
+              <v-tab-item value="details">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
@@ -69,15 +69,13 @@
                         <v-subheader>Comment</v-subheader>
                       </v-flex>
                       <v-flex xs8 sm10>
-                        <v-text-field v-model="feedback.comment" multi-line readonly></v-text-field>
+                        <v-textarea v-model="feedback.comment" readonly></v-textarea>
                       </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Internal Comment</v-subheader>
                       </v-flex>
                       <v-flex xs8 sm10>
-                        <v-text-field v-model="feedback.internal_comment"
-                                      multi-line @blur="saveInternalComment">
-                        </v-text-field>
+                        <v-textarea v-model="feedback.internal_comment" @blur="saveInternalComment"></v-textarea>
                       </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Solved</v-subheader>
@@ -170,19 +168,19 @@
                 </v-card>
               </v-tab-item>
 
-              <v-tab-item id="logs">
+              <v-tab-item value="logs">
                 <v-card>
                   <v-card-text>
                     <v-layout row wrap align-center>
                       <v-flex xs12>
-                        <v-text-field v-model="feedback.logs" multi-line readonly rows="30"></v-text-field>
+                        <v-textarea v-model="feedback.logs" readonly rows="30"></v-textarea>
                       </v-flex>
                     </v-layout>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
 
-              <v-tab-item id="components">
+              <v-tab-item value="components">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-text-field append-icon="search" label="Search" single-line hide-details

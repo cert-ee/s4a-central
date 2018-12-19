@@ -20,7 +20,7 @@
                 {{ $t('logs') }}
                 <v-icon>view_list</v-icon>
               </v-tab>
-              <v-tab-item id="users">
+              <v-tab-item value="users">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-layout row wrap>
@@ -77,7 +77,7 @@
                   </v-card-text>
                 </v-card>
               </v-tab-item>
-              <v-tab-item id="logs">
+              <v-tab-item value="logs">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-text-field append-icon="search" :label="$t('search')" single-line hide-details v-model="logSearch" clearable></v-text-field>
