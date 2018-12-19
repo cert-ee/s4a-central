@@ -1,5 +1,6 @@
 'use strict';
 const moment = require("moment");
+const cronParser = require("cron-parser");
 const hell = new (require(__dirname + "/helper.js"))({module_name: "tasker"});
 module.exports = function (tasker) {
 
@@ -22,10 +23,26 @@ module.exports = function (tasker) {
           task_name: "detector_offline_check",
           task_friendly_name: "Check for offline detectors",
           task_description: "",
-          task_params: {},
+          task_params: {
+            check_name: "offline"
+          },
           module_name: "detector",
-          interval_hh: false,
-          interval_mm: 1,
+          cron_expression: "*/1 * * * *",
+          builtin: true
+        },
+        {
+          name: "detector_rule_count_checker",
+          friendly_name: "Detectors rule count checker",
+          enabled: true,
+          description: "Checks if some rules are enabled",
+          task_name: "detector_rule_count_check",
+          task_friendly_name: "Check for detector rule count",
+          task_description: "",
+          task_params: {
+            check_name: "rule_count"
+          },
+          module_name: "detector",
+          cron_expression: "*/30 * * * *",
           builtin: true
         },
         {
@@ -38,8 +55,7 @@ module.exports = function (tasker) {
           task_description: "Check for old tasks to remove",
           task_params: {},
           module_name: "task",
-          interval_hh: false,
-          interval_mm: 10,
+          cron_expression: "*/10 * * * *",
           builtin: true
         }
 
@@ -76,6 +92,10 @@ module.exports = function (tasker) {
         await tasker.task_loader(tr);
       }
 
+      //moloch_wise_domain_local_updater
+      //await tasker.task_loader(tr);
+
+
       //tasker ticker
       setInterval(function () {
         tasker.checkTasks();
@@ -97,6 +117,8 @@ module.exports = function (tasker) {
     hell.o("start", "addFeedTasker", "info");
     try {
       // hell.o(input, "addFeedTasker", "info");
+      let settings = await tasker.app.models.settings.findOne();
+      if (!settings) throw new Error("could not load settings");
 
       let feed_tasker = {
         name: input.component_name + "_" + input.name + "_updater",
@@ -108,9 +130,7 @@ module.exports = function (tasker) {
         task_params: {feed_name: input.name, component_name: input.component_name},
         task_description: "",
         module_name: "feed",
-        interval_hh: false,
-        interval_mm: 240,
-        //interval_mm: 1, #TODO for testing
+        cron_expression: settings['tasker_default_cron_expression'],
         builtin: true
       };
 
@@ -140,10 +160,10 @@ module.exports = function (tasker) {
       let found_tasker = await tasker.findOne({where: {name: input.component_name + "_" + input.name + "_updater"}});
       if (!found_tasker) throw new Error("failed to find tasker " + input.name);
 
+      await tasker.task_unloader(found_tasker);
+
       let remove_result = await tasker.destroyById(found_tasker.id);
       if (!remove_result) throw new Error("failed to remove tasker " + input.name);
-
-      await tasker.task_unloader(found_tasker);
 
       hell.o("done", "removeFeedTasker", "info");
     } catch (err) {
@@ -164,8 +184,10 @@ module.exports = function (tasker) {
       if (input !== null && typeof input !== 'object') {
         input = await tasker.findOne({where: {name: input}});
       }
-      if (!input.enabled){
-        hell.o([ input.task_name, "trying to load task for inactive tasker, ignoring"], "task_loader", "warn");
+      if (input.name === undefined) throw new Error("no_data");
+
+      if (!input.enabled) {
+        hell.o([input.task_name, "trying to load task for inactive tasker, ignoring"], "task_loader", "warn");
         return;
       }
 
@@ -178,8 +200,12 @@ module.exports = function (tasker) {
             cancelled: false
           }
       });
-      if (!task_found) {
-      } else return;
+
+      if (!!task_found) {
+        hell.o([input.task_name, "existing task found not creating"], "task_loader", "warn");
+        return true;
+      }
+
 
       let time_calc = tasker.timeCalc(input);
       if (time_override) {
@@ -207,7 +233,7 @@ module.exports = function (tasker) {
   };
 
   /**
-   * SET TASK AS COMPLETED FOR A TASKER
+   * SET TASK AS CANCELLED FOR A TASKER
    *
    * @param input
    */
@@ -248,28 +274,64 @@ module.exports = function (tasker) {
   };
 
   /**
+   * RELOAD TASKER TASKS
+   *
+   * if cron changes for example
+   *
+   * @param tasker_name
+   * @param cb
+   */
+  tasker.reloadTaskerTasks = function (tasker_name, cb) {
+    hell.o(["start", tasker_name], "reloadTaskerTasks", "info");
+
+    (async function () {
+      try {
+
+        let tasker_found = await tasker.findOne({where: {name: tasker_name}});
+        // console.log(result);
+        if (!tasker_found) throw new Error("no_data");
+
+        //remove current task
+        await tasker.task_unloader(tasker_found);
+        //recreate task with
+        await tasker.task_loader(tasker_found);
+
+        let output = {message: "Tasker tasks reloaded"};
+
+        hell.o([tasker_name, "done"], "reloadTaskerTasks", "info");
+        cb(null, output);
+      } catch (err) {
+        hell.o(err, "reloadTaskerTasks", "error");
+        cb({name: "Error", status: 400, message: err.message});
+      }
+
+    })(); // async
+
+  };
+
+  tasker.remoteMethod('reloadTaskerTasks', {
+    accepts: [
+      {arg: 'name', type: 'string', required: true},
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/reloadTaskerTasks', verb: 'post', status: 201}
+  });
+
+  /**
    * Get the next task run time
    *
    * @param input
    */
   tasker.timeCalc = function (input) {
-    let mm = parseInt(input.interval_mm);
-    let hh = parseInt(input.interval_hh);
-    let next = "";
+    let cron_expression = input.cron_expression;
+    let interval = cronParser.parseExpression(cron_expression);
+    let next = interval.next();
 
-    if (Number.isInteger(hh)) {
-      next = moment().startOf("hour").add(hh, "hours").valueOf();
-    } else {
-      let start = moment();
-      let closest = mm - (start.minute() % mm);
-      next = moment(start).add(closest, "minutes").valueOf();
-    }
-
-    if (process.env.NODE_ENV == "dev") {
-      //TODO: for testing
-      // next = moment().add(1, "minutes").valueOf();
-      // next = moment().add(120, "seconds").valueOf();
-    }
+    // if (process.env.NODE_ENV == "dev") {
+    //TODO: for testing
+    // next = moment().add(1, "minutes").valueOf();
+    // next = moment().add(120, "seconds").valueOf();
+    // }
 
     return next;
   };
@@ -290,6 +352,30 @@ module.exports = function (tasker) {
     let current_tasker;
 
     try {
+
+      let duplicates_filter = {
+        where: {
+          completed: false,
+          cancelled: false
+        }
+      };
+
+      //cancel duplicates
+      let duplicates_check = await tasker.app.models.task.find(duplicates_filter);
+      let duplicate_update = {cancelled: true};
+      let check_dups = [];
+      for (const t of duplicates_check) {
+        if (check_dups.includes(t.name)) {
+          duplicate_update.modified_time = moment().valueOf();
+          duplicate_update.logs = {error: "automatically cancelled as duplicate task at " + duplicate_update.modified_time};
+          await tasker.app.models.task.update({id: t.id}, duplicate_update);
+          console.log(duplicate_update);
+          hell.o(["cancelled duplicate task for", t.name], "checkTasks", "warn");
+        } else {
+          check_dups.push(t.name);
+        }
+      }
+
       let tasks_filter = {
         where: {
           completed: false,
@@ -336,9 +422,8 @@ module.exports = function (tasker) {
           }
 
           if (error !== null) {
-            if (error.hasOwnProperty("worker_busy") && error.worker_busy) {
-              worker_busy = true;
-              return;
+            if (typeof error === 'object' && error.hasOwnProperty("worker_busy") && error.worker_busy) {
+              return worker_busy = true;
             }
 
             task_update.failed = true;
@@ -347,6 +432,7 @@ module.exports = function (tasker) {
           }
           task_update.logs = output;
         });
+
         if (worker_busy) {
           hell.o(["task postponed because worker is busy", t.name], "checkTasks", "info");
           task_update = {
@@ -393,7 +479,7 @@ module.exports = function (tasker) {
    * @param cb
    */
   tasker.runTask = function (task_name, cb) {
-    hell.o(["start", task_name], "run_task", "info");
+    hell.o(["start", task_name], "runTask", "info");
 
     (async function () {
       try {
@@ -401,17 +487,17 @@ module.exports = function (tasker) {
         let result = await tasker.checkTasks(task_name);
         // console.log(result);
 
-        let output = {message: "ok"};
+        let output = {message: "Task finished, check logs"};
         if (typeof result === 'object' && result.hasOwnProperty(worker_busy)) {
-          hell.o([task_name, "worker_busy"], "run_task", "error");
+          hell.o([task_name, "worker_busy"], "runTask", "error");
           return cb({name: "Error", status: 400, message: "worker_busy"});
         }
-        hell.o([task_name, "done"], "run_task", "info");
+        hell.o([task_name, "done"], "runTask", "info");
 
         cb(null, output);
 
       } catch (err) {
-        hell.o(err, "run_task", "error");
+        hell.o(err, "runTask", "error");
         cb({name: "Error", status: 400, message: err.message});
       }
 
@@ -443,7 +529,7 @@ module.exports = function (tasker) {
         let tasker_found = await tasker.findOne({where: {name: tasker_name}});
         if (!tasker_found) throw new Error(tasker_name + " could not find tasker");
 
-        let update_input = {enabled: enabled, last_modified: moment().valueOf(), loading: false };
+        let update_input = {enabled: enabled, last_modified: moment().valueOf(), loading: false};
         let update_result = await tasker.update({name: tasker_name}, update_input);
         if (!update_result) throw new Error(tasker_name + " could not update tasker ");
 

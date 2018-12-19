@@ -9,10 +9,10 @@ export default {
                 {text: this.$t('feeds.tags'), align: 'left', value: 'tagsStr'},
                 {text: this.$t('feeds.actions'), align: 'left', sortable: false}
             ],
-            feedTypes: ['url', 'file'], //TODO load
-            feedComponents: ['suricata', 'moloch'], //TODO load
-            feedComponentTypes: ['rules', 'wise_ip', 'wise_url', 'wise_domain', 'yara'], //TODO load
-            addEditFeedDialog: {
+            feedTypes: ['url', 'file'],
+            feedComponents: ['suricata', 'moloch'],
+            feedComponentTypes: ['rules', 'wise_ip', 'wise_url', 'wise_domain', 'yara'],
+            addEditEntryDialog: {
                 open: false,
                 isEditDialog: false
             },
@@ -22,22 +22,26 @@ export default {
             },
             deleteEntry: {},
             formValid: false,
-            formFeeds: {
+            form_entry: {
                 required: (value) => !!value || this.$t('feeds.required'),
+                tagger_name: (value) => /^[a-zA-Z0-9-_.]*$/.test(value) || 'Illegal characters'
             },
-            editFeed: {
+            entry: {
                 name: '',
                 enabled: false,
                 friendly_name: '',
                 description: '',
                 type: '',
                 location: '',
+                location_url: '',
+                location_folder: '',
                 component_name: '',
                 component_type: '',
-                new_feed: false
+                component_tag_name: '',
+                new_entry: false
             },
             tagNames: [],
-            selectedfeeds: []
+            selected_entries: []
         }
     },
 
@@ -71,11 +75,32 @@ export default {
     },
 
     methods: {
+
+        changeComponent() {
+            if (this.entry.component_name == 'moloch') {
+                this.feedComponentTypes = ['wise_ip', 'wise_url', 'wise_domain', 'yara'];
+                // this.component_type = "wise_ip";
+                this.component_tag_name = "";
+            }
+            if (this.entry.component_name == 'suricata') {
+                this.feedComponentTypes = ['rules'];
+                this.component_tag_name = "default";
+            }
+        },
+        changeComponentType() {
+            console.log("Change")
+            if (this.entry.type == 'file' && (this.entry.location === undefined || this.entry.location.length == 0)) {
+                this.entry.location = "Will be auto generated";
+            }
+            if (this.entry.type == 'url') {
+                this.entry.location = "";
+            }
+        },
         async toggleEnable(enabled) {
             try {
                 let promises = [], feeds = [];
 
-                for (const feed of this.selectedfeeds) {
+                for (const feed of this.selected_entries) {
                     let feedCopy = Object.assign({}, feed);
                     feedCopy.enabled = enabled;
                     feeds.push(feedCopy);
@@ -97,22 +122,20 @@ export default {
 
         async toggleTag(tag, enabled) {
             try {
-                let promises = [];
+                let promises = [], current;
 
-                for (const feed of this.selectedfeeds) {
-                    promises.push(this.$axios.post('feeds/tagAll', {name: feed.name, tag: tag.id, enabled: enabled}));
-                    const index = feed.tags.findIndex(t => t.id === tag.id);
+                for (const feed of this.selected_entries) {
 
-                    if (enabled && index === -1) {
-                        feed.tags.push(tag);
-                    } else if (!enabled && index !== -1) {
-                        feed.tags.splice(index, 1);
+                    current = await this.$axios.post('feeds/tagAll', {name: feed.name, tag: tag.id, enabled: enabled});
+                    current = current.data.data;
+                    current.tagsStr = "";
+                    if (current.tags.length > 0) {
+                        current.tagsStr = current.tags.map(t => t.name).join(', ');
                     }
 
-                    feed.tagsStr = feed.tags.map(t => t.name).join(', ');
+                    this.$store.commit('feeds/updateFeed', current);
                 }
 
-                await Promise.all(promises);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -143,37 +166,55 @@ export default {
             }
         },
 
-        openAddEditFeedDialog(feed) {
-            this.$refs.addEditFeedForm.reset();
+        openAddEditEntryDialog(entry) {
+            this.$refs.addEditEntryForm.reset();
 
             this.$nextTick(() => {
 
-                if (feed) {
-                    Object.assign(this.editFeed, feed);
-                    this.editFeed.new_feed = false;
+                if (entry) {
+                    Object.assign(this.entry, entry);
+                    this.entry.new_entry = false;
                 } else {
-                    delete this.editFeed.id;
-                    this.editFeed.new_feed = true;
+                    delete this.entry.id;
+                    this.location_folder = '';
+                    this.location_url = '';
+                    this.entry.new_entry = true;
+                    this.entry.component_name = 'moloch';
+                    this.entry.component_type = 'wise_ip';
+                    this.changeComponent();
+                    this.entry.type = 'file';
+                    this.changeComponentType();
                 }
 
-                delete this.editFeed.created_time;
-                delete this.editFeed.modified_time;
+                delete this.entry.created_time;
+                delete this.entry.modified_time;
 
-                this.addEditFeedDialog.isEditDialog = !this.editFeed.new_feed;
-                this.addEditFeedDialog.open = true;
+                this.addEditEntryDialog.isEditDialog = !this.entry.new_entry;
+                this.addEditEntryDialog.open = true;
             });
         },
 
-        async addEditFeed() {
+        async addEditEntry() {
             try {
-                this.$refs.addEditFeedForm.validate();
+                this.$refs.addEditEntryForm.validate();
                 if (!this.formValid) return;
-                this.editFeed.enabled = !!this.editFeed.enabled;
+                this.entry.enabled = !!this.entry.enabled;
 
-                const changed = await this.$axios.$post('feeds/change', {entry: this.editFeed});
+                if (this.entry.type == 'file') {
+                    this.entry.location_folder = '';
+                    this.entry.location_url = '';
+                }
 
-                this.addEditFeedDialog.open = false;
-                if (this.editFeed.new_feed === true) {
+                if (this.entry.type == 'url') {
+                    this.entry.location_folder = '';
+                    this.entry.location_url = this.entry.location;
+                }
+
+                const changed = await this.$axios.$post('feeds/change', {entry: this.entry});
+
+                changed.tagsStr = "";
+                this.addEditEntryDialog.open = false;
+                if (this.entry.new_entry === true) {
                     this.$store.commit('feeds/addFeed', changed.data);
                 } else {
                     this.$store.commit('feeds/updateFeed', changed.data);
@@ -189,16 +230,16 @@ export default {
         try {
             const params = {filter: {include: 'tags'}};
 
-            let [feeds, tagNames] = await Promise.all([
+            let [entries, tagNames] = await Promise.all([
                 $axios.$get('feeds', {params}), $axios.$get('tags')
             ]);
 
-            for (let feed of feeds) {
+            for (let entry of entries) {
                 // feed.enabled = feed.enabled ? i18n.t('yes') : i18n.t('no');
-                feed.tagsStr = feed.tags.map(t => t.name).join(', ');
+                entry.tagsStr = entry.tags.map(t => t.name).join(', ');
             }
 
-            store.commit('feeds/setFeeds', feeds);
+            store.commit('feeds/setFeeds', entries);
 
             return {tagNames};
         } catch (err) {

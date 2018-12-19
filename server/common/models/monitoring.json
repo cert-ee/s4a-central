@@ -1,15 +1,10 @@
 {
-  "name": "wise",
-  "plural": "wise",
+  "name": "monitoring",
+  "plural": "monitoring",
   "base": "PersistedModel",
-  "idInjection": true,
-  "options": {
-    "validateUpsert": true
-  },
   "properties": {},
   "validations": [],
-  "relations": {
-  },
+  "relations": {},
   "acls": [
     {
       "accessType": "*",
@@ -30,16 +25,16 @@
       "permission": "ALLOW"
     },
     {
-      "property": "checkRoutine",
-      "accessType": "*",
+      "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
       "permission": "ALLOW"
     },
     {
+      "property": "detectors",
       "accessType": "READ",
       "principalType": "ROLE",
-      "principalId": "read",
+      "principalId": "monitoring",
       "permission": "ALLOW"
     }
   ],

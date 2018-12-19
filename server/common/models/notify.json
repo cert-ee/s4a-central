@@ -1,14 +1,10 @@
 {
-  "name": "wise",
-  "plural": "wise",
+  "name": "notify",
+  "plural": "notify",
   "base": "PersistedModel",
   "idInjection": true,
-  "options": {
-    "validateUpsert": true
-  },
-  "properties": {},
-  "validations": [],
-  "relations": {
+  "properties": {
+    "methods": {}
   },
   "acls": [
     {
@@ -30,18 +26,10 @@
       "permission": "ALLOW"
     },
     {
-      "property": "checkRoutine",
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "read",
-      "permission": "ALLOW"
-    },
-    {
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
       "permission": "ALLOW"
     }
-  ],
-  "methods": {}
+  ]
 }

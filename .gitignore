@@ -1,8 +1,9 @@
-# IntelliJ project files
 .idea
 *.iml
-node_modules/
 out
 gen
-notes
 *~
+*.attach_pid*
+node_modules/
+/server/server.js
+notes

@@ -9,6 +9,7 @@ module.exports = function (app) {
 
       await app.models.boot.initialize();
       await app.models.settings.initialize();
+      await app.models.notify.initialize();
       await app.models.ruleset.initialize();
       await app.models.yara.initialize();
       await app.models.wise.initialize();

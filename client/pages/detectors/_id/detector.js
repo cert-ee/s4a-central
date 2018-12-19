@@ -22,6 +22,8 @@ export default {
             headers: [
                 { text: 'Name', align: 'left', value: 'friendly_name' },
                 { text: 'Status', align: 'left', value: 'statusStr' },
+                { text: 'Software', align: 'left', value: 'versionStr' },
+                {text: 'Installed', align: 'left', value: 'version_installed'},
                 { text: 'Message', align: 'left', value: 'message' }
             ],
             nameValid: true,
@@ -172,6 +174,7 @@ export default {
 
             for (let component of detector.components) {
                 component.statusStr = component.status ? 'OK' : 'Fail';
+                component.updateStr = component.version_status ? 'OK' : 'Update available';
             }
 
             let registration_step = 1;

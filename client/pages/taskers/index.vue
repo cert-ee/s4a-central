@@ -66,7 +66,7 @@
                         {{ props.item.enabled }}
                       </td>
                       <td>
-                        {{ props.item.interval_mm }}
+                        {{ props.item.cron_expression }}
                       </td>
                       <td>
                         <v-btn small info v-if="props.item.enabled === true"
@@ -102,10 +102,10 @@
                   <v-container grid-list-lg>
                     <v-layout row wrap>
                       <v-flex xs4>
-                        <v-text-field :label="$t('taskers.interval_mm')" v-model="newTasker.interval_mm" required
-                                      :rules="[formTaskers.required]">
+                        <v-text-field :label="$t('taskers.cron_expression')" v-model="newTasker.cron_expression"
+                                      required
+                                      :rules="[formTaskers.cron]">
                         </v-text-field>
-                        in minutes...
                       </v-flex>
 
                     </v-layout>
@@ -120,6 +120,18 @@
             </v-card>
           </v-dialog>
 
+
+          <v-dialog v-model="objectDialog.open" width="50%" lazy>
+            <v-card>
+              <v-card-text>
+                <highlight>{{ objectDialog.data }}</highlight>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn flat @click="objectDialog.open = false">{{ $t('tasks.close') }}</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
 
         </v-layout>
       </v-container>

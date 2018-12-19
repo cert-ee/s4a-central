@@ -41,7 +41,7 @@ export default {
         async resetDemo() {
             console.log("resetDemo");
             this.resetDemoDialog = false;
-            const result = await this.$axios.get('registration/resetCentral');
+            const result = await this.$axios.get('settings/resetApp');
             console.log(result);
 
             this.$router.push('/');

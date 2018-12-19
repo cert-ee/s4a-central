@@ -88,7 +88,7 @@ dependency_install() {
         if hash yarn 2> /dev/null; then
           echo "Running 'yarn install'"
           # yarn install --production
-          su {{ node_deb_user }} -s /bin/bash -c yarn
+          su {{ node_deb_user }} -s /bin/bash -c "yarn install --production"
 	  #if [ $app == "client" ] ; then
           #  su {{ node_deb_user }} -s /bin/bash -c "yarn build"
           #fi

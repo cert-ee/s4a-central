@@ -76,7 +76,7 @@ module.exports = function (registration) {
         hell.o( token, "request", "info" );
 
         hell.o( "end " + organization_name, "request", "info" );
-        cb(null, {token: token.id, temporary: true, temporary_name: username });
+        return cb(null, {token: token.id, temporary: true, temporary_name: username});
 
       } catch (err) {
         hell.o( err.message, "request", "error" );
@@ -672,72 +672,6 @@ module.exports = function (registration) {
     ],
     returns: {type: 'object', root: true},
     http: {path: '/rollToken', verb: 'get', status: 200}
-  });
-
-
-  /**
-   * RESET FUNCTION
-   *
-   * for development
-   *
-   * @param options
-   * @param cb
-   */
-  registration.resetCentral = function (options, cb) {
-    hell.o("start", "resetCentral", "warn");
-
-    if( process.env.NODE_ENV !== "dev" ) {
-      hell.o("ENV is not DEV, fail", "resetCentral", "warn");
-      cb("error");
-      return false;
-    }
-
-    (async function () {
-      try {
-
-        hell.o("destroy database", "resetDetector", "warn");
-        await registration.app.models.detector.destroyAll();
-        await registration.app.models.accessToken.destroyAll();
-        await registration.app.models.feed.destroyAll();
-        await registration.app.models.feedback.destroyAll();
-        await registration.app.models.tag.destroyAll();
-        await registration.app.models.rule.destroyAll();
-        await registration.app.models.rule_draft.destroyAll();
-        await registration.app.models.ruleset.destroyAll();
-        await registration.app.models.role.destroyAll();
-        await registration.app.models.log.destroyAll();
-        await registration.app.models.tasker.destroyAll();
-        await registration.app.models.task.destroyAll();
-        //await registration.app.models.User.destroyAll();
-
-        let output = {message: "reset done"};
-
-        cb(null, output);
-
-        hell.o("restart proccess", "resetCentral", "warn");
-        if (process.env.NODE_ENV == "dev") {
-          hell.o("restart nodemon", "resetCentral", "warn");
-          shelljs.touch("server.js"); // kick nodemon
-        } else {
-          hell.o("pm2 restart", "resetCentral", "warn");
-          //process.exit(1); //pm2
-        }
-
-      } catch (err) {
-        hell.o( err, "resetCentral", "error" );
-        cb({ name:"Error", status: 400, message: err.message });
-      }
-
-    })(); // async
-
-  };
-
-  registration.remoteMethod('resetCentral', {
-    accepts: [
-      {arg: "options", type: "object", http: "optionsFromRequest"}
-    ],
-    returns: {type: 'object', root: true},
-    http: {path: '/resetCentral', verb: 'get', status: 200}
   });
 
 };

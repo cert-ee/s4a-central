@@ -1,7 +1,7 @@
 'use strict';
 const fs = require("fs");
-const util = require('util');
-const checksum = require('checksum');
+// const util = require('util');
+// const checksum = require('checksum');
 const hell = new (require(__dirname + "/helper.js"))({module_name: "yara"});
 
 module.exports = function (yara) {
@@ -16,31 +16,6 @@ module.exports = function (yara) {
 
     try {
 
-      let default_yara = [
-        {
-          name: "checksum",
-          friendly_name: "Checksum",
-          description: "Yara rules checksum",
-          data: "empty"
-        },
-        {
-          name: "busy",
-          friendly_name: "Busy",
-          description: "Importing in progress, wait",
-          data: false
-        }
-      ];
-      // await yara.destroyAll();
-
-      hell.o("check default_yara", "initialize", "info");
-      let create_result;
-      for (const dy of default_yara) {
-        hell.o(["check setting", dy.name], "initialize", "info");
-        create_result = await yara.findOrCreate({where: {name: dy.name}}, dy);
-        if (!create_result) throw new Error("failed to create yara " + dy.name);
-
-      }
-
       hell.o("done", "initialize", "info");
 
       return true;
@@ -53,73 +28,91 @@ module.exports = function (yara) {
 
 
   /**
-   * GENERATE NEW EXPORT FILE
-   *
-   */
-  yara.generateNewOutput = async function () {
-    hell.o("start", "generateNewOutput", "info");
-    try {
-
-      let path_moloch_yara_out = await yara.app.models.settings.findOne({where: {name: "path_moloch_yara_out"}});
-
-      let yaras = await yara.app.models.feed.find({
-        where: {
-          component_name: "moloch",
-          component_type: "yara",
-          enabled: true
-        }
-      });
-      let yara_contents = "", file_contents, file_path;
-      for (let i = 0, l = yaras.length; i < l; i++) {
-        file_path = yaras[i].location + yaras[i].filename;
-
-        file_contents = await fs.readFileSync(file_path, 'utf8');
-        yara_contents = yara_contents + file_contents;
-      }
-
-      await yara.update({name: "busy"}, {data: true});
-
-      await fs.writeFileSync(path_moloch_yara_out.data, yara_contents);
-
-      let checksum_file = util.promisify(checksum.file);
-      let cs = await checksum_file(path_moloch_yara_out.data);
-      await yara.update({name: "checksum"}, {data: cs});
-
-      await yara.update({name: "busy"}, {data: false});
-
-      hell.o("done", "generateNewOutput", "info");
-      return true;
-
-    } catch (err) {
-      await yara.update({name: "busy"}, {data: false});
-      hell.o(err, "generateNewOutput", "err");
-      return false;
-    }
-
-  };
-
-  /**
    * CHECK DETECTOR CS AGAINST CENTRAL
    *
    * return new yara if not matched
    */
-  yara.checkForDetector = async function (detector_checksum) {
+  yara.checkForDetector = async function (detector_id, input) {
     hell.o("start", "checkForDetector", "info");
     try {
+      // console.log(input);
+      let output = [];
 
-      let path_moloch_yara_out = await yara.app.models.settings.findOne({where: {name: "path_moloch_yara_out"}});
-
-      let yara_checksum = await yara.findOne({where: {name: "checksum"}});
-
-      let output = {
-        checksum: yara_checksum.data,
-        yara: ""
-      };
-
-      if (detector_checksum !== yara_checksum.data) {
-        hell.o("detector checksum different, return yara", "checkForDetector", "info");
-        output.yara = await fs.readFileSync(path_moloch_yara_out.data, 'utf8');
+      let detector = await yara.app.models.detector.findById(detector_id, {
+        include: {
+          relation: "tags",
+        }
+      });
+      let detector_tags = detector.tags().map(a => a.name);
+      if (detector_tags.length > 0) {
+        hell.o(["found tags for detector", detector_tags.join(', ')], "checkForDetector", "info");
       }
+
+      let feeds = await yara.app.models.feed.find({
+        where: {
+          enabled: true,
+          component_name: 'moloch',
+          component_type: 'yara',
+        },
+        include: {
+          relation: "tags",
+        }
+      });
+
+      let yara_feed, file_path, file_contents, detector_feed = [], feed_tags, detector_has_the_tag;
+      for (let fd of feeds) {
+        // checks if detector has correct tags to receive the feed
+        if (fd.tags().length > 0) {
+          if (detector_tags == 0) {
+            console.log("detector has no tags, IGNORE");
+            continue;
+          }
+          detector_has_the_tag = [];
+          feed_tags = fd.tags().map(a => a.name);
+          detector_has_the_tag = feed_tags.filter(a => detector_tags.indexOf(a) !== -1);
+          if (detector_has_the_tag.length == 0) {
+            console.log("NO MATCHES?");
+            console.log(detector_has_the_tag);
+            continue;
+          }
+        }
+
+        // console.log( input );
+        if (input !== undefined && input.length > 0) {
+          detector_feed = input.filter(function (value, index, arr) {
+            return value.name === fd.name;
+          });
+        }
+
+        console.log("DETECTOR HAS THE FEED?:");
+        console.log(detector_feed);
+
+
+        file_contents = "";
+        file_path = fd.location_folder + "" + fd.filename;
+        // console.log(file_path);
+        if (detector_feed.length === 0 || detector_feed.length > 0 && detector_feed[0].checksum !== fd.checksum) {
+          console.log("DETECTOR HAS THE FEED AND NEED TO UPDATE");
+          // console.log(detector_feed[0].checksum, fd.checksum);
+          // console.log(detector_feed[0].checksum, fd.checksum);
+
+          file_contents = await fs.readFileSync(file_path, 'utf8');
+        }
+
+        yara_feed = {
+          name: fd.name,
+          friendly_name: fd.friendly_name,
+          enabled: fd.enabled,
+          filename: fd.filename,
+          type: fd.component_type,
+          tag_name: fd.component_tag_name,
+          checksum: fd.checksum,
+          contents: file_contents
+        };
+
+        output.push(yara_feed);
+      }
+      // console.log(output);
 
       hell.o("done", "checkForDetector", "info");
       return output;
@@ -130,5 +123,6 @@ module.exports = function (yara) {
     }
 
   };
+
 
 };

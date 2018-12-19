@@ -4,7 +4,9 @@
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>Detector Details - {{detector.friendly_name}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="error" v-if="$store.getters.hasAdminRole" @click.stop="openDetectorDeleteDialog">{{ $t('detectors.delete_detector') }}</v-btn>
+      <v-btn color="error" v-if="$store.getters.hasAdminRole" @click.stop="openDetectorDeleteDialog">{{
+        $t('detectors.delete_detector') }}
+      </v-btn>
 
       <v-dialog v-model="deleteDetectorDialog" width="30%" lazy>
         <v-card>
@@ -43,6 +45,13 @@
                   <span slot="badge">!</span>
                   <v-icon>dns</v-icon>
                 </v-badge>
+                <v-badge color="warning" :value="!detector.updates_overall">
+                  <span slot="badge">!</span>
+                </v-badge>
+              </v-tab>
+              <v-tab href="#content">
+                Content
+                <v-icon>dns</v-icon>
               </v-tab>
               <v-tab href="#registration">
                 Registration
@@ -111,7 +120,7 @@
                       <v-flex xs4 sm2>
                         <v-subheader>API Key</v-subheader>
                       </v-flex>
-                      <v-flex xs8 sm10 >
+                      <v-flex xs8 sm10>
                         <v-btn small class="ml-0" @click="showApiKey" v-if="apiKey == false">
                           Show
                         </v-btn>
@@ -156,12 +165,90 @@
                           <v-icon class="error--text" v-else>warning</v-icon>
                           {{ props.item.statusStr }}
                         </td>
+                        <td :class="props.item.version_status ? 'success--text' : 'warning--text'">
+                          <v-icon v-if="props.item.version_status" class="success--text">
+                            check_circle
+                          </v-icon>
+                          <v-icon class="warning--text" v-else>warning</v-icon>
+                          {{ props.item.updateStr }}
+                        </td>
+                        <td :class="props.item.version_status ? 'success--text' : 'warning--text'">
+
+                          <v-tooltip right>
+                            <span slot="activator">
+                              <span>{{ props.item.version_installed }}</span>
+                            </span>
+                            <span v-if="props.item.version_status === false">{{ props.item.version_available }}</span>
+                          </v-tooltip>
+
+                        </td>
                         <td>{{ props.item.message }}</td>
                       </template>
                     </v-data-table>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
+
+              <v-tab-item value="content">
+                <v-card>
+                  <v-card-text>
+                    <v-layout row wrap align-center>
+
+                      <v-flex xs4>
+                        <v-subheader>Last alerts report</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>{{detector.last_alerts_report | moment('ddd, MMM DD YYYY HH:mm:ss') }}</v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Last alerts report count</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>
+                        <span>{{ detector.last_alerts_report_count }}</span>
+                      </v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Last actual alerts reported</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>{{detector.last_alerts_actual_report | moment('ddd, MMM DD YYYY HH:mm:ss') }}</v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Lasta actual alerts reported count</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>
+                        <span>{{ detector.last_alerts_actual_report_count }}</span>
+                      </v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Last rules check</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>{{detector.last_rules_check | moment('ddd, MMM DD YYYY HH:mm:ss') }}</v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Last wise check</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>{{detector.last_wise_check | moment('ddd, MMM DD YYYY HH:mm:ss') }}</v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Last yara check</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>{{detector.last_yara_check | moment('ddd, MMM DD YYYY HH:mm:ss') }}</v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Rules count</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>
+                        <span>{{ detector.rules_count }}</span>
+                      </v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Rules enabled count</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>
+                        <span>{{ detector.rules_enabled_count }}</span>
+                      </v-flex>
+                      <v-flex xs4>
+                        <v-subheader>Rules custom count</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>
+                        <span>{{ detector.rules_custom_count }}</span>
+                      </v-flex>
+                    </v-layout>
+                  </v-card-text>
+                </v-card>
+              </v-tab-item>
+
 
               <v-tab-item value="registration">
                 <v-stepper v-model="registration_step" vertical>
@@ -254,7 +341,7 @@
                         </v-expansion-panel>
                       </v-card-text>
                     </v-card>
-                    <v-btn color="primary" @click="approveRegistration" :loading="loading" >Save & Approve*</v-btn>
+                    <v-btn color="primary" @click="approveRegistration" :loading="loading">Save & Approve*</v-btn>
                     <v-btn flat color="error" @click.stop="openRejectDialog">Reject</v-btn>
                     <div class="caption red--text mt-2">
                       *Detector name cannot be changed after completing this step!

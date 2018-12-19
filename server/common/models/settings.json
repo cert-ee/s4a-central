@@ -7,37 +7,134 @@
     "validateUpsert": true
   },
   "properties": {
-    "name": {
+    "id": {
       "type": "string",
       "id": true,
       "required": true,
       "index": true,
-      "description": "Setting name",
-      "isArray": false
+      "description": "",
+      "isArray": false,
+      "default": "settingid"
     },
-    "friendly_name": {
+    "path_content_base": {
       "type": "string",
       "required": true,
-      "description": "Setting friendly name",
-      "default": ""
+      "description": "PATH BASE",
+      "default": "/srv/s4a-central/"
     },
-    "description": {
+    "path_suricata_content": {
+      "type": "string",
+      "required": true,
+      "description": "Base path for suricata content folders",
+      "default": "/srv/s4a-central/suricata/"
+    },
+    "path_moloch_content": {
+      "type": "string",
+      "required": true,
+      "description": "Base path for moloch content folders",
+      "default": "/srv/s4a-central/moloch/"
+    },
+    "path_moloch_yara": {
+      "type": "string",
+      "required": true,
+      "description": "Path to yara rules for detectors",
+      "default": "/srv/s4a-central/moloch/yara/"
+    },
+    "path_moloch_wise_ip": {
+      "type": "string",
+      "required": true,
+      "description": "Path to wise IPs for detectors",
+      "default": "/srv/s4a-central/moloch/wise_ip/"
+    },
+    "path_moloch_wise_url": {
+      "type": "string",
+      "required": true,
+      "description": "Path to wise URLs for detectors",
+      "default": "/srv/s4a-central/moloch/wise_url/"
+    },
+    "path_moloch_wise_domain": {
+      "type": "string",
+      "required": true,
+      "description": "Path to wise domains for detectors",
+      "default": "/srv/s4a-central/moloch/wise_domain/"
+    },
+    "tasker_interval_mm": {
+      "type": "number",
+      "required": true,
+      "description": "Tasker interval in milliseconds",
+      "default": 5000
+    },
+    "tasker_default_cron_expression": {
+      "type": "string",
+      "required": true,
+      "description": "Tasker default cron expression",
+      "default": "*/480 * * * *"
+    },
+    "tasks_limit": {
+      "type": "number",
+      "required": true,
+      "description": "Tasks history limit",
+      "default": 10000
+    },
+    "smtp_enabled": {
+      "type": "boolean",
+      "required": false,
+      "description": "SMTP enabled",
+      "default": false
+    },
+    "smtp_server_requires_auth": {
+      "type": "boolean",
+      "required": false,
+      "description": "SMTP server requires auth",
+      "default": false
+    },
+    "smtp_server_host": {
       "type": "string",
       "required": false,
-      "description": "Setting description",
-      "default": ""
+      "description": "SMTP server for email notifications",
+      "default": "localhost"
     },
-    "data": {
-      "type": "string",
+    "smtp_server_port": {
+      "type": "number",
       "required": true,
-      "description": "Setting value or data",
-      "default": ""
+      "description": "SMTP server port for email notifications",
+      "default": "465"
     },
-    "locked": {
+    "smtp_server_tls": {
       "type": "boolean",
       "required": true,
-      "description": "Setting should be locked",
+      "description": "SMTP server TLS (native, default port 465), use false for STARTTLS (if supported, default port 587)",
+      "default": true
+    },
+    "smtp_server_force_notls": {
+      "type": "boolean",
+      "required": false,
+      "description": "SMTP server force no-TLS (even if supported)",
       "default": false
+    },
+    "smtp_server_auth_method": {
+      "type": "string",
+      "required": false,
+      "description": "SMTP server auth method",
+      "default": "PLAIN"
+    },
+    "smtp_server_username": {
+      "type": "string",
+      "required": false,
+      "description": "SMTP server username",
+      "default": "s4a"
+    },
+    "smtp_server_password": {
+      "type": "string",
+      "required": false,
+      "description": "SMTP server password",
+      "default": "columbus"
+    },
+    "smtp_server_from": {
+      "type": "string",
+      "required": false,
+      "description": "SMTP server - envelope from address",
+      "default": "s4a@localhost"
     }
   },
   "validations": [],
@@ -70,6 +167,13 @@
     },
     {
       "property": "updateSetting",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "resetApp",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "admin",

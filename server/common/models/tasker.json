@@ -86,6 +86,12 @@
       "description": "Interval hours",
       "default": "false"
     },
+    "cron_expression": {
+      "type": "string",
+      "required": true,
+      "description": "Interval hours",
+      "default": "* * * * *"
+    },
     "modified_time": {
       "type": "date",
       "required": true,
@@ -134,14 +140,14 @@
       "permission": "ALLOW"
     },
     {
-      "property": "toggleEnable",
+      "property": "reloadTaskerTasks",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "admin",
       "permission": "ALLOW"
     },
     {
-      "property": "change",
+      "property": "toggleEnable",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "admin",

@@ -120,6 +120,15 @@
           </v-list-tile-content>
         </v-list-tile>
 
+        <v-list-tile v-if="$store.getters.hasAdminRole" to="/settings" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.settings') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
         <v-list-tile v-if="$store.state.debugMode" @click.stop="showResetDemoConfirm" exact ripple>
           <v-list-tile-action>
             <v-icon dark>gavel</v-icon>

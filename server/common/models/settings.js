@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('fs');
+const shelljs = require('shelljs');
 const hell = new (require(__dirname + "/helper.js"))({module_name: "settings"});
 
 module.exports = function (settings) {
@@ -14,82 +15,39 @@ module.exports = function (settings) {
 
     try {
 
+      // create settings with defaults
+      let current_settings = await settings.findOrCreate({});
+
+      // console.log( "current_settings" );
+      // console.log( current_settings );
+
+      let found_settings = current_settings[0];
+      // console.log( found_settings );
+
       const PATH_BASE = process.env.PATH_BASE;
 
-      //TODO checks for
       if (!PATH_BASE) throw new Error("env missing: PATH_BASE");
 
       let exists = await fs.existsSync(PATH_BASE);
       if (!exists) {
-        throw new Error("path does not exist:" + PATH_BASE);
+        throw new Error("path does not exist: " + PATH_BASE);
       }
 
-      let default_settings = [
-        {
-          name: "path_content_base",
-          friendly_name: "Base path for content folders",
-          description: "Base path for content folders",
-          data: PATH_BASE,
-          locked: true
-        },
-        {
-          name: "path_suricata_content",
-          friendly_name: "Base path for suricata content folders",
-          description: "Base path for suricata content folders",
-          data: PATH_BASE + "suricata/",
-          locked: true
-        },
-        {
-          name: "path_moloch_content",
-          friendly_name: "Base path for moloch content folders",
-          description: "Base path for moloch content folders",
-          data: PATH_BASE + "moloch/",
-          locked: true
-        },
-        {
-          name: "path_moloch_yara_out",
-          friendly_name: "Path yara rules out ",
-          description: "Path to yara rules for detectors",
-          data: PATH_BASE + "moloch/SYSTEM_moloch_yara_out.txt",
-          locked: true
-        },
-        {
-          name: "path_moloch_wise_ip_out",
-          friendly_name: "Path wise IPs out ",
-          description: "Path to wise IPs for detectors",
-          data: PATH_BASE + "moloch/SYSTEM_moloch_wise_ip_out.txt",
-          locked: true
-        },
-        {
-          name: "path_moloch_wise_url_out",
-          friendly_name: "Path wise URLs out ",
-          description: "Path to wise URLs for detectors",
-          data: PATH_BASE + "moloch/SYSTEM_moloch_wise_url_out.txt",
-          locked: true
-        },
-        {
-          name: "path_moloch_wise_domain_out",
-          friendly_name: "Path wise domains out ",
-          description: "Path to wise domains for detectors",
-          data: PATH_BASE + "moloch/SYSTEM_moloch_wise_domain_out.txt",
-          locked: true
-        },
-        {
-          name: "tasks_limit",
-          friendly_name: "Tasks Limit ",
-          description: "Maximum tasks history to keep in the database",
-          data: "5000",
-          locked: false
-        }
-      ];
-      // await settings.destroyAll();
+      if (found_settings.path_content_base !== PATH_BASE) {
+        hell.o(["going to update path_content_base from env", found_settings.path_content_base, PATH_BASE], "initialize", "info");
 
-      hell.o("check settings", "initialize", "info");
-      let create_result;
-      for (const ds of default_settings) {
-        hell.o(["check setting", ds.name], "initialize", "info");
-        create_result = await settings.findOrCreate({where: {name: ds.name}}, ds);
-        if (!create_result) throw new Error("failed to create setting " + ds.name);
+        let update_paths = {
+          path_content_base: PATH_BASE,
+          path_suricata_content: PATH_BASE + "suricata/",
+          path_moloch_content: PATH_BASE + "moloch/",
+          path_moloch_yara: PATH_BASE + "moloch/yara/",
+          path_moloch_wise_ip: PATH_BASE + "moloch/wise_ip/",
+          path_moloch_wise_url: PATH_BASE + "moloch/wise_url/",
+          path_moloch_wise_domain: PATH_BASE + "moloch/wise_domain/"
+        };
+
+        await settings.update({id: found_settings.id}, update_paths);
+
       }
 
       hell.o("done", "initialize", "info");
@@ -100,5 +58,99 @@ module.exports = function (settings) {
     }
 
   };
+
+
+  /**
+   * AFTER SAVING A SETTING RELOAD SOME MODELS
+   *
+   */
+  settings.observe('after save', async (ctx) => {
+    if (ctx.isNewInstance === undefined) return Promise.resolve();
+    hell.o(["start", ctx.instance.id], "afterSave", "info");
+
+    try {
+
+      // console.log("CTX: ");
+      // console.log(ctx.instance);
+      // let current_settings = await settings.findOne({where: {id: ctx.instance.id}});
+
+      //RECREATE MAILER
+      hell.o(["start", "notify.initializeMailer"], "afterSave", "info");
+      await settings.app.models.notify.initializeMailer();
+
+      hell.o(["done", ctx.instance.id], "afterSave", "info");
+      return Promise.resolve();
+    } catch (err) {
+      hell.o(err, "afterSave", "error");
+
+      return Promise.resolve();
+    }
+
+  });
+
+
+  /**
+   * RESET FUNCTION
+   *
+   * for development
+   *
+   * @param options
+   * @param cb
+   */
+  settings.resetApp = async function (options, cb) {
+    hell.o("start", "resetApp", "warn");
+
+    if (process.env.NODE_ENV !== "dev") {
+      hell.o("ENV is not DEV, fail", "resetApp", "warn");
+      cb("error");
+      return false;
+    }
+
+    try {
+
+      hell.o("destroy database", "resetApp", "warn");
+      await settings.app.models.detector.destroyAll();
+      await settings.app.models.accessToken.destroyAll();
+      await settings.app.models.feed.destroyAll();
+      await settings.app.models.feedback.destroyAll();
+      await settings.app.models.tag.destroyAll();
+      await settings.app.models.rule.destroyAll();
+      await settings.app.models.rule_draft.destroyAll();
+      await settings.app.models.ruleset.destroyAll();
+      await settings.app.models.role.destroyAll();
+      await settings.app.models.roleMapping.destroyAll();
+      await settings.app.models.user.destroyAll();
+      await settings.app.models.log.destroyAll();
+      await settings.app.models.tasker.destroyAll();
+      await settings.app.models.task.destroyAll();
+      await settings.destroyAll();
+
+      let output = {message: "reset done"};
+
+      cb(null, output);
+
+      hell.o("restart proccess", "resetApp", "warn");
+      if (process.env.NODE_ENV == "dev") {
+        hell.o("restart nodemon", "resetApp", "warn");
+        shelljs.touch("server.js"); // kick nodemon
+      } else {
+        hell.o("pm2 restart", "resetApp", "warn");
+        //process.exit(1); //pm2
+      }
+
+    } catch (err) {
+      hell.o(err, "resetApp", "error");
+      cb({name: "Error", status: 400, message: err.message});
+    }
+
+  };
+
+  settings.remoteMethod('resetApp', {
+    accepts: [
+      {arg: "options", type: "object", http: "optionsFromRequest"}
+    ],
+    returns: {type: 'object', root: true},
+    http: {path: '/resetApp', verb: 'get', status: 200}
+  });
 
 };
