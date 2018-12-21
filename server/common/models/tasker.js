@@ -488,7 +488,7 @@ module.exports = function (tasker) {
         // console.log(result);
 
         let output = {message: "Task finished, check logs"};
-        if (typeof result === 'object' && result.hasOwnProperty(worker_busy)) {
+        if (typeof result === 'object' && result.hasOwnProperty("worker_busy")) {
           hell.o([task_name, "worker_busy"], "runTask", "error");
           return cb({name: "Error", status: 400, message: "worker_busy"});
         }
