@@ -4,6 +4,7 @@
   "save": "Save",
   "add": "Add",
   "delete": "Delete",
+  "required": "Required",
   "reset": "Reset",
   "search": "Search",
   "ok": "OK",
@@ -32,6 +33,7 @@
     "rules": "Rules",
     "rules_review": "Review Changes",
     "feedback": "Feedback",
+    "settings": "Settings",
     "users": "User Management",
     "reset_demo": "Reset demo"
   },
@@ -51,6 +53,7 @@
       "online": "Online",
       "components_status": "Components Status",
       "registration_status": "Registration Status",
+      "updates": "Updates Available",
       "tags": "Tags"
     },
     "table": {
@@ -63,6 +66,7 @@
       "tags": "Tags",
       "alerts": "Alerts",
       "graphs": "Graphs",
+      "updates": "Updates",
       "yes": "Yes",
       "no": "No",
       "ok": "OK",
@@ -95,9 +99,11 @@
     "friendly_name": "Friendly Name",
     "type": "Type",
     "location": "Location path / url",
+    "location_folder": "Folder on disk",
     "filename": "Filename",
     "component_name": "Component name",
     "component_type": "Component subtype",
+    "component_tag_name": "Tagger tag name",
     "description": "Description",
     "checksum": "Checksum"
   },
@@ -107,6 +113,8 @@
     "add_tag": "Add Tag",
     "remove_tag": "Remove Tag",
     "interval_mm": "Interval",
+    "cron_expression": "Cron Expression",
+    "cron_expression_invalid": "Invalid cron expression",
     "actions": "Actions",
     "run_task": "Run task now",
     "required": "Required",
@@ -193,6 +201,21 @@
     "net_name": "Name",
     "net_state": "State",
     "net_ip": "IP"
+  },
+  "settings": {
+    "elasticsearch_settings": "Elasticsearch",
+    "elasticsearch_port": "Elasticsearch connection",
+    "network_settings": "Network",
+    "smtp_settings": "SMTP settings",
+    "smtp_server_requires_auth": "SMTP server requires auth",
+    "smtp_server_host": "Server",
+    "smtp_server_port": "Port",
+    "smtp_server_tls": "Enable native TLS",
+    "smtp_server_force_notls": "Force no-TLS",
+    "smtp_server_auth_method": "Auth method",
+    "smtp_server_username": "Username",
+    "smtp_server_password": "Password",
+    "smtp_server_from": "Sender address"
   },
   "users": {
     "add_user": "Add User",

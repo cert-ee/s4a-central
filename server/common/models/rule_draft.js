@@ -432,6 +432,8 @@ module.exports = function (rule_draft) {
 
             for (let ti = 0, tl = draft_tags.length; ti < tl; ti++) {
 
+              // console.log( "draft tags: ");
+              // console.log( draft_tags );
               if (draft_tags[ti].added === undefined) continue;
 
               hell.o([draft.sid, "find tag"], "publish", "info");

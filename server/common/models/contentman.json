@@ -1,15 +1,10 @@
 {
-  "name": "wise",
-  "plural": "wise",
+  "name": "contentman",
+  "plural": "contentman",
   "base": "PersistedModel",
-  "idInjection": true,
-  "options": {
-    "validateUpsert": true
-  },
   "properties": {},
   "validations": [],
-  "relations": {
-  },
+  "relations": {},
   "acls": [
     {
       "accessType": "*",
@@ -27,13 +22,6 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "admin",
-      "permission": "ALLOW"
-    },
-    {
-      "property": "checkRoutine",
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "read",
       "permission": "ALLOW"
     },
     {

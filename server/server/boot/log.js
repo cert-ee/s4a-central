@@ -1,12 +1,10 @@
 const bunyanMongoDbLogger = require('bunyan-mongodb-logger');
 
-//TODO redo to single fancy function for all modules, after save etc...
-
-module.exports = function(app) {
+module.exports = function (app) {
   const mongoURL = app.datasources.db.settings.url;
 
   const logger = bunyanMongoDbLogger({
-    name: 'S4a central API log',
+    name: 'S4a detector API log',
     stream: 'mongodb',
     url: mongoURL,
     collections: 'log'
@@ -24,7 +22,7 @@ module.exports = function(app) {
 
     if (userId) {
       try {
-        const user = await User.findOne({ where: {id: userId} });
+        const user = await User.findOne({where: {id: userId}});
         const msg = `${user.username} added user ${username}`;
         logger.info({model, user: user.username, hook: 'after save', target: username}, msg);
       } catch (err) {
@@ -41,11 +39,11 @@ module.exports = function(app) {
 
   User.observe('before delete', async (ctx) => {
     const model = ctx.Model.modelName;
-    const userId = ctx.options.accessToken.userId;
+    const userId = ctx.options.accessToken ? ctx.options.accessToken.userId : null;
     const deletedId = ctx.where.id.inq[0];
 
     try {
-      const users = await User.find({ where: {or: [{id: userId}, {id: deletedId}]} });
+      const users = await User.find({where: {or: [{id: userId}, {id: deletedId}]}});
       const user = users.find(u => u.id.toString() === userId.toString());
       const deletedUser = users.find(u => u.id.toString() === deletedId.toString());
       const msg = `${user.username} deleted user ${deletedUser.username}`;
@@ -67,8 +65,8 @@ module.exports = function(app) {
 
     if (userId) {
       try {
-        const usersPromise = User.find({ where: {or: [{id: userId}, {id: principalId}]} });
-        const rolePromise = Role.findOne({ where: {id: roleId} });
+        const usersPromise = User.find({where: {or: [{id: userId}, {id: principalId}]}});
+        const rolePromise = Role.findOne({where: {id: roleId}});
         const [users, role] = await Promise.all([usersPromise, rolePromise]);
         const user = users.find(u => u.id.toString() === userId.toString());
         const principal = users.find(u => u.id.toString() === principalId.toString());
@@ -80,8 +78,8 @@ module.exports = function(app) {
       }
     } else {
       try {
-        const userPromise = User.findOne({ where: {id: principalId} });
-        const rolePromise = Role.findOne({ where: {id: roleId} });
+        const userPromise = User.findOne({where: {id: principalId}});
+        const rolePromise = Role.findOne({where: {id: roleId}});
         const [user, role] = await Promise.all([userPromise, rolePromise]);
         const msg = `Automatically added role ${role.name} to ${user.username}`;
         logger.info({model, user: 'SYSTEM', hook: 'after save', target: user.username}, msg);
@@ -96,17 +94,19 @@ module.exports = function(app) {
 
   RoleMapping.observe('before delete', async (ctx) => {
     const model = ctx.Model.modelName;
-    const userId = ctx.options.accessToken.userId;
+    const userId = ctx.options.accessToken ? ctx.options.accessToken.userId : null;
     const principalId = ctx.where.principalId;
     const roleId = ctx.where.roleId;
 
     try {
-      const usersPromise = User.find({ where: {or: [{id: userId}, {id: principalId}]} });
-      const rolePromise = Role.findOne({ where: {id: roleId} });
+      const usersPromise = User.find({where: {or: [{id: userId}, {id: principalId}]}});
+      const rolePromise = Role.findOne({where: {id: roleId}});
       const [users, role] = await Promise.all([usersPromise, rolePromise]);
       const user = users.find(u => u.id.toString() === userId.toString());
       const principal = users.find(u => u.id.toString() === principalId.toString());
       const msg = `${user.username} removed role ${role.name} from ${principal.username}`;
+
+
       logger.info({model, user: user.username, hook: 'before delete', target: principal.username}, msg);
     } catch (err) {
       const msg = `User with ID ${userId} removed role with ID ${roleId} from user with ID ${principalId}. Error occured looking up IDs: ${err.message}`;
@@ -115,4 +115,18 @@ module.exports = function(app) {
 
     return Promise.resolve();
   });
+
+  RoleMapping.observe('after delete', async (ctx) => {
+    const principalId = ctx.where.principalId;
+
+    try {
+      await User.afterRoleRemove(principalId);
+      // console.log("removed role for user", principalId);
+    } catch (err) {
+      console.log("LOG.JS FAIL");
+    }
+
+    return Promise.resolve();
+  });
+
 };

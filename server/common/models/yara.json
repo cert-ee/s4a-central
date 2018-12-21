@@ -6,34 +6,7 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {
-    "name": {
-      "type": "string",
-      "id": true,
-      "required": true,
-      "index": true,
-      "description": "Yara name",
-      "isArray": false
-    },
-    "friendly_name": {
-      "type": "string",
-      "required": true,
-      "description": "Yara friendly name",
-      "default": ""
-    },
-    "description": {
-      "type": "string",
-      "required": false,
-      "description": "Yara description",
-      "default": ""
-    },
-    "data": {
-      "type": "string",
-      "required": true,
-      "description": "Yara value or data",
-      "default": ""
-    }
-  },
+  "properties": {},
   "validations": [],
   "relations": {
   },

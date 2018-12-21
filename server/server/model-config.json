@@ -41,6 +41,10 @@
     "dataSource": "db",
     "public": true
   },
+  "contentman": {
+    "dataSource": "db",
+    "public": true
+  },
   "detector": {
     "dataSource": "db",
     "public": true
@@ -54,6 +58,10 @@
     "public": true
   },
   "log": {
+    "dataSource": "db",
+    "public": true
+  },
+  "notify": {
     "dataSource": "db",
     "public": true
   },
@@ -114,6 +122,10 @@
     "public": true
   },
   "boot": {
+    "dataSource": "db",
+    "public": true
+  },
+  "monitoring": {
     "dataSource": "db",
     "public": true
   }

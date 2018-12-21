@@ -102,8 +102,9 @@
                       <!--{{ props.item.parent_name }}-->
                     <!--</td>-->
                     <td>
-                        <v-btn v-if="props.item.completed_time" slot="activator" class="info--text" icon
-                               @click.stop="openObjectDialog(props.item)">
+                      <v-btn v-if="props.item.completed_time || props.item.cancelled == true" slot="activator"
+                             class="info--text" icon
+                             @click.stop="openObjectDialog(props.item)">
                             <v-icon>view_list</v-icon>
                         </v-btn>
                     </td>

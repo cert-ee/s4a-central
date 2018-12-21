@@ -20,7 +20,7 @@ module.exports = function (task) {
             id: true
           },
           where: {
-            loading: { "neq": true }
+            loading: {"neq": true}
           }
         };
 
@@ -68,16 +68,19 @@ module.exports = function (task) {
           id: true
         },
         where: {
-          completed: true,
-          failed: false
+          or: [
+            {completed: true},
+            {cancelled: true},
+            {failed: true}
+          ]
         }
       };
 
       let tasks_found = await task.find(tasks_filter);
       if (!tasks_found) throw new Error("Did not find any tasks");
 
-      let tasks_limit_result = await task.app.models.settings.findOne({where: {name: "tasks_limit"}});
-      let tasks_limit = tasks_limit_result.data;
+      let settings = await task.app.models.settings.findOne();
+      let tasks_limit = settings.tasks_limit;
       hell.o(["tasks_limit", tasks_limit], "task", "info");
 
       let to_remove = 0;

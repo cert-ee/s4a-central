@@ -58,10 +58,10 @@ export const mutations = {
 export const actions = {
     async nuxtServerInit({state}, {req, env, error, isDev, app: {$axios}}) {
         try {
-            console.log("FRONTEND: NUXT SERVER INIT");
+            console.log("FRONTEND | NUXT SERVER INIT");
              // console.log(req.headers);
             if (!req.headers["x-remote-user"]) {
-                console.log("FRONTEND: no x-remote-user");
+                console.log("FRONTEND | no x-remote-user");
                 error("no x-remote-user");
             }
 
@@ -77,7 +77,8 @@ export const actions = {
             state.GRAFANA_URL = env.URL_GRAFANA;
             state.debugMode = isDev;
 
-            console.log( "FRONTEND: API URL:", state.API_URL );
+            console.log("FRONTEND | API URL:", state.API_URL);
+            console.log("FRONTEND | DEBUG MODE:", state.debugMode);
 
             const vers = await $axios.get('/system_info/version');
             state.versions = vers.data;
@@ -85,7 +86,7 @@ export const actions = {
             const rule_drafts = await $axios.$get('rule_drafts/count');
             state.rulesReview = rule_drafts && rule_drafts.count;
         } catch (err) {
-            console.log("FRONTEND: NUXT SERVER INIT ERROR");
+            console.log("FRONTEND | NUXT SERVER INIT ERROR");
             console.log( err );
 
             error({

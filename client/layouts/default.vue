@@ -120,6 +120,15 @@
           </v-list-tile-content>
         </v-list-tile>
 
+        <v-list-tile v-if="$store.getters.hasAdminRole" to="/settings" exact ripple>
+          <v-list-tile-action>
+            <v-icon dark>settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('menu.settings') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
         <v-list-tile v-if="$store.state.debugMode" @click.stop="showResetDemoConfirm" exact ripple>
           <v-list-tile-action>
             <v-icon dark>gavel</v-icon>
@@ -147,25 +156,7 @@
 
         <v-list-tile ripple>
           <v-list-tile-action>
-            server
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>{{$store.state.versions.server}}</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile ripple>
-          <v-list-tile-action>
-            client
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>{{$store.state.versions.client}}</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile ripple>
-          <v-list-tile-action>
-            main
+            Package
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>{{$store.state.versions.main}}</v-list-tile-title>

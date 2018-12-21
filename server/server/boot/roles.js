@@ -4,44 +4,52 @@ const hell = new (require(__dirname + "/../../common/models/helper.js"))({module
 
 module.exports = function (app) {
 
+  hell.o("start", "roles", "info");
   /*
   CREATE DEFAULT USER AND ROLES
    */
-  const Role = app.models.role;
-  const User = app.models.user;
-  const RoleMapping = app.models.roleMapping;
-
-  const admins = [
-    {username: 'admin'}
+  const default_users = [
+    {username: 'admin', roles: ['read', 'admin']},
+    {username: 'monitoring', roles: ['monitoring']}
   ];
 
-  const roles = [
+  const default_roles = [
     {name: 'admin', description: 'Full access'},
     {name: 'read', description: 'Read only'},
+    {name: 'monitoring', description: 'Monitoring'},
     {name: 'detector', description: 'Detector'},
   ];
 
-  hell.o("start", "init", "info");
-  for (const role of roles) {
-    Role.findOrCreate({where: role}, role, (err, role) => {
-      if (err) throw err;
-      if (role.name !== 'admin') return;
+  (async () => {
+    try {
 
-      for (const admin of admins) {
-        User.findOrCreate({where: admin}, admin, (err, admin) => {
-          if (err) throw err;
-          let principal = {principalType: RoleMapping.USER, principalId: admin.id};
-
-          role.principals({where: principal}, (err, principals) => {
-            if (err) throw err;
-            if (principals && principals.length) return;
-            role.principals.create(principal, (err) => {
-              if (err) throw err;
-            });
-          });
-        });
+      let role, user, principal;
+      //create default roles
+      for (let default_role of default_roles) {
+        role = await app.models.role.findOrCreate({where: {name: default_role.name}}, default_role);
       }
-    });
-  }
-  hell.o("done", "init", "info");
+
+      //create default users
+      for (let default_user of default_users) {
+        user = await app.models.user.findOrCreate({where: {username: default_user.username}}, {username: default_user.username});
+
+        //add default user roles if needed
+        for (const user_role of default_user.roles) {
+          role = await app.models.role.findOne({where: {name: user_role}});
+          principal = {principalType: app.models.roleMapping.USER, principalId: user[0].id};
+
+          let exists = await role.principals.findOne({where: {principalId: principal.principalId}});
+          if (!exists) {
+            await role.principals.create(principal);
+          }
+        }
+
+      }
+
+      hell.o("done", "roles", "info");
+    } catch (err) {
+      hell.o(err, "roles", "error");
+    }
+  })();
+
 };

@@ -32,8 +32,7 @@
                           <v-text-field label="Password" v-model="password"
                                         :append-icon="passwordVisible ? 'visibility_off' : 'visibility'"
                                         @click:append="() => (passwordVisible = !passwordVisible)"
-                                        :type="passwordVisible ? 'text' : 'password'"
-                                        autocomplete="new-password">
+                                        :type="passwordVisible ? 'text' : 'password'">
                           </v-text-field>
                         </v-flex>
                         <v-flex xs6>
@@ -45,7 +44,21 @@
                   <v-card-title class="mb-3">
                     <v-layout row wrap>
                       <v-flex xs6>
-                        <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search"></v-text-field>
+                        <v-layout row wrap>
+                          <v-flex xs4>
+                            <v-subheader>API Key</v-subheader>
+                          </v-flex>
+                          <v-flex xs8>
+                            <v-btn small class="ml-0" @click="renewApiKey">
+                              Renew API Key
+                            </v-btn>
+
+                            <v-btn small class="ml-0" @click="showApiKey" v-if="apiKey == false">
+                              Show Current
+                            </v-btn>
+                            <span v-if="apiKey != false">{{ apiKey }}</span>
+                          </v-flex>
+                        </v-layout>
                       </v-flex>
                     </v-layout>
                   </v-card-title>
@@ -57,7 +70,8 @@
                         <td>{{ props.item.name }}</td>
                         <td>{{ props.item.description }}</td>
                         <td>
-                          <v-switch color="primary" v-model="props.item.active" @change="active => toggleRole(props.item, active)"></v-switch>
+                          <v-switch color="primary" v-model="props.item.active"
+                                    @change="active => toggleRole(props.item, active)"></v-switch>
                         </td>
                       </template>
                     </v-data-table>
@@ -69,12 +83,14 @@
                   <v-card-title class="mb-3">
                     <v-layout row wrap>
                       <v-flex xs6>
-                        <v-text-field append-icon="search" label="Search" single-line hide-details v-model="logSearch"></v-text-field>
+                        <v-text-field append-icon="search" label="Search" single-line hide-details
+                                      v-model="logSearch"></v-text-field>
                       </v-flex>
                     </v-layout>
                   </v-card-title>
                   <v-card-text>
-                    <v-data-table :headers="logHeaders" :items="log" :rows-per-page-items="logRowsPerPage" :search="logSearch"
+                    <v-data-table :headers="logHeaders" :items="log" :rows-per-page-items="logRowsPerPage"
+                                  :search="logSearch"
                                   :pagination.sync="logPagination"
                     >
                       <template slot="items" slot-scope="props">

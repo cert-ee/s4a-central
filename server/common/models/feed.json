@@ -33,13 +33,25 @@
     },
     "type": {
       "type": "string",
-      "description": "Feed type, url or local file",
+      "description": "Feed type, remote or local file",
       "required": true
     },
     "location": {
       "type": "string",
-      "description": "Feed location",
+      "description": "Feed folder or url location",
       "required": true
+    },
+    "location_url": {
+      "type": "string",
+      "description": "Feed url location",
+      "required": false,
+      "default": ""
+    },
+    "location_folder": {
+      "type": "string",
+      "description": "Feed folder location",
+      "required": false,
+      "default": ""
     },
     "filename": {
       "type": "string",
@@ -48,13 +60,19 @@
     },
     "component_name": {
       "type": "string",
-      "description": "Feed for which component",
+      "description": "Feed for which component ( moloch or suricata )",
       "required": true
     },
     "component_type": {
       "type": "string",
-      "description": "Feed for which component type",
+      "description": "Feed for which component type ( domain, ip, url )",
       "required": true
+    },
+    "component_tag_name": {
+      "type": "string",
+      "description": "Feed tag inside the component",
+      "required": true,
+      "default": "default"
     },
     "checksum": {
       "type": "string",

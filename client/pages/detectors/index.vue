@@ -30,6 +30,12 @@
                     </v-select>
                   </v-flex>
                   <v-flex xs3>
+                    <v-select :label="$t('detectors.filters.updates')"
+                              :items="[$t('detectors.table.ok'), $t('detectors.table.updates')]"
+                              v-model="updatesFilter" clearable>
+                    </v-select>
+                  </v-flex>
+                  <v-flex xs3>
                     <v-select :label="$t('detectors.filters.registration_status')" :items="regStatuses"
                               v-model="regStatusFilter" multiple clearable>
                     </v-select>
@@ -65,6 +71,13 @@
                       </v-icon>
                       <v-icon class="error--text" v-else>warning</v-icon>
                       {{ props.item.componentsStatus }}
+                    </td>
+                    <td :class="props.item.updates_overall ? 'success--text' : 'warning--text'">
+                      <v-icon v-if="props.item.updates_overall" class="success--text">
+                        check_circle
+                      </v-icon>
+                      <v-icon class="warning--text" v-else>warning</v-icon>
+                      {{ props.item.updatesStatus }}
                     </td>
                     <td>
                       <div v-if="props.item.registration_status === 'Unapproved'" class="deep-orange--text">

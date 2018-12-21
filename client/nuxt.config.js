@@ -34,5 +34,19 @@ module.exports = {
 	env: {
 		URL_GRAFANA: process.env.URL_GRAFANA || 'http://grafana/',
         API_URL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____'
+	},
+	build: {
+		extractCSS: true,
+		extend(config, ctx) {
+			// Run ESLint on save
+			// if (ctx.isDev && ctx.isClient) {
+			//     config.module.rules.push({
+			//         enforce: 'pre',
+			//         test: /\.(js|vue)$/,
+			//         loader: 'eslint-loader',
+			//         exclude: /(node_modules)/
+			//     })
+			// }
+		}
 	}
 };
