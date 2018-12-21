@@ -3,9 +3,9 @@
 
 
 "@pm2/agent-node@^1.0.9":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@pm2/agent-node/-/agent-node-1.1.1.tgz#c0a2a5e5ec087b67e708b6b44732db8c57acdc17"
-  integrity sha512-HsGaz3KqJ4uh2b/n76ROmBqYB6HIPAoxD8/1EgZ5U9E5v2XGmmcRZD+Hnj4oU3QNwyE6FceRnl0SGMqIfTe/XA==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@pm2/agent-node/-/agent-node-1.1.2.tgz#192f08f72b5a14adbb5b4cfdf427d0500fee9d2f"
+  integrity sha512-xSk/OoxiVCBP5vxS+uUMeAuJz0vpXQCR4FfzH+spXTrcoJIY1ZRgTVY+htVFyBzdgYSULfusKJp+BHVPgB6H9w==
   dependencies:
     debug "^3.1.0"
     eventemitter2 "^5.0.1"
@@ -1276,9 +1276,9 @@ mute-stream@~0.0.4:
   integrity sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
 
 nan@^2.9.2:
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.12.0.tgz#9d443fdb5e13a20770cc5e602eee59760a685885"
-  integrity sha512-zT5nC0JhbljmyEf+Z456nvm7iO7XgRV2hYxoBtPpnyp+0Q4aCoP6uWNn76v/I6k2kCYNLWqWbwBWQcjsNI/bjw==
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.12.1.tgz#7b1aa193e9aa86057e3c7bbd0ac448e770925552"
+  integrity sha512-JY7V6lRkStKcKTvHO5NVSQRv+RV+FIL5pvDoLiAtSL9pKlC5x9PKQcZDsq7m4FO4d57mkhC6Z+QhAh3Jdk5JFw==
 
 nanomatch@^1.2.9:
   version "1.2.13"
@@ -1532,10 +1532,10 @@ pm2-multimeter@^0.1.2:
   dependencies:
     charm "~0.1.1"
 
-pm2@^3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/pm2/-/pm2-3.2.3.tgz#af3f3e92ec9f986e31dcbfe9b36815a0054f4fbf"
-  integrity sha512-rBJgMf3XB5/qDvIyNc5Uo3YHqiM6c+nHpgPm10dq17CEf08z4XvNI9ucwzHNMg4S3lW07hww65IRPaXfEckS7A==
+pm2@^3.2.4:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/pm2/-/pm2-3.2.4.tgz#fb9c0ed402e04ce8f6d6e1ae935a765aa0e95c89"
+  integrity sha512-UlMsa8Tbdq5B9LJWW+sEZ1xpQv/lP7pkXKpyT2jyvIWOy+IzO60MGsLvkNEmPdyzgwi/S1qQK/FM/4DCCAu37w==
   dependencies:
     "@pm2/agent" "^0.5.11"
     "@pm2/io" "~2.4.2"

@@ -108,6 +108,13 @@
               <img src="~/assets/image/eu_logo_horizontal.jpg" width="100%" />
             </dashboard-card>
           </v-flex>
+
+          <v-flex xs6 sm4 lg3>
+            <dashboard-card>
+              <img src="~/assets/image/sisejulgeolekufond.png" width="100%"/>
+            </dashboard-card>
+          </v-flex>
+
         </v-layout>
       </v-container>
     </v-content>

@@ -20,7 +20,7 @@
                     <v-layout row wrap>
                       <v-flex xs12>
                         <v-switch color="primary" :label="$t('settings.smtp_server_requires_auth')"
-                                    v-model="settings.smtp_server_requires_auth"
+                                  v-model="settings.smtp_server_requires_auth"
                         ></v-switch>
                       </v-flex>
                       <v-flex xs6>
@@ -45,9 +45,8 @@
                         <v-text-field :label="$t('settings.smtp_server_username')" required
                                       :disabled="!settings.smtp_server_requires_auth"
                                       v-model="settings.smtp_server_username"
-                                      :rules="[editSmtpForm.required]"
-                                      autocomplete="username"
-                        ></v-text-field>
+                                      :rules="[editSmtpForm.required]">
+                        </v-text-field>
                       </v-flex>
                       <v-flex xs6>
                         <v-text-field
@@ -57,8 +56,7 @@
                                 @click:append="() => (passwordVisible = !passwordVisible)"
                                 :type="passwordVisible ? 'text' : 'password'"
                                 :label="$t('settings.smtp_server_password')" required
-                                :rules="[editSmtpForm.required]"
-                                autocomplete="new-password">
+                                :rules="[editSmtpForm.required]">
                         </v-text-field>
                       </v-flex>
                       <v-flex xs4>
@@ -72,13 +70,13 @@
                       </v-flex>
                       <v-flex xs4>
                         <v-switch color="primary" :label="$t('settings.smtp_server_tls')"
-                                    v-model="settings.smtp_server_tls" 
-                                    @change="resetSmtpPortValue"></v-switch>
+                                  v-model="settings.smtp_server_tls"
+                                  @change="resetSmtpPortValue"></v-switch>
                       </v-flex>
                       <v-flex xs4>
                         <v-switch color="primary" :label="$t('settings.smtp_server_force_notls')"
-                                    v-model="settings.smtp_server_force_notls"
-                                    @change="resetSmtpPortValueAndUpdateTLS"></v-switch>
+                                  v-model="settings.smtp_server_force_notls"
+                                  @change="resetSmtpPortValueAndUpdateTLS"></v-switch>
                       </v-flex>
                     </v-layout>
                   </v-container>

@@ -32,8 +32,7 @@
                           <v-text-field label="Password" v-model="password"
                                         :append-icon="passwordVisible ? 'visibility_off' : 'visibility'"
                                         @click:append="() => (passwordVisible = !passwordVisible)"
-                                        :type="passwordVisible ? 'text' : 'password'"
-                                        autocomplete="new-password">
+                                        :type="passwordVisible ? 'text' : 'password'">
                           </v-text-field>
                         </v-flex>
                         <v-flex xs6>
