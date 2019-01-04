@@ -25,6 +25,7 @@ module.exports = function (report) {
 
         // console.log("================");
         // console.log(detector_info);
+        // console.log(detector_info.components);
         let Detector = report.app.models.Detector;
         let JobSchedule = report.app.models.JobSchedule;
 

@@ -176,9 +176,11 @@
 
                           <v-tooltip right>
                             <span slot="activator">
-                              <span>{{ props.item.version_installed }}</span>
+                              <span>{{ props.item.version_installed }}
+                               <span v-show="props.item.version_hold">( H )</span>
+                              </span>
                             </span>
-                            <span v-if="props.item.version_status === false">{{ props.item.version_available }}</span>
+                            <span v-show="props.item.version_status === false || props.item.version_hold === true">Available: {{ props.item.version_available }}</span>
                           </v-tooltip>
 
                         </td>
