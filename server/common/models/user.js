@@ -280,7 +280,7 @@ module.exports = function (user) {
           return true;
         }
 
-        let change_input = "printf '%s' '" + password.replace(/\'/g, '\'\\\'\'') + "' | htpasswd -b /etc/nginx/.htpasswd " + username;
+        let change_input = "printf '%s' '" + password.replace(/\'/g, '\'\\\'\'') + "' | htpasswd -i /etc/nginx/.htpasswd " + username;
         shelljs.exec(change_input, {silent: true}, function (exit_code, stdout, stderr) {
           hell.o(["shelljs result ", exit_code], "updatePassword", "info");
           //let message = stderr;

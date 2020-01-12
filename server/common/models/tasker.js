@@ -323,9 +323,13 @@ module.exports = function (tasker) {
    * @param input
    */
   tasker.timeCalc = function (input) {
+    // console.log( "timeCalc" );
+    // console.log( input );
     let cron_expression = input.cron_expression;
+    // console.log( cron_expression );
     let interval = cronParser.parseExpression(cron_expression);
     let next = interval.next();
+    // console.log( next );
 
     // if (process.env.NODE_ENV == "dev") {
     //TODO: for testing
@@ -374,6 +378,29 @@ module.exports = function (tasker) {
         } else {
           check_dups.push(t.name);
         }
+      }
+
+      let overdue_filter = {
+        where: {
+          completed: false,
+          cancelled: false,
+          start_time: {lt: moment().subtract(15, "minutes").valueOf()}
+        }
+      };
+
+      //incase node is killed while task was running
+      let overdue_check = await tasker.app.models.task.find(overdue_filter);
+      let overdue_update = {cancelled: true};
+      for (const t of overdue_check) {
+        overdue_update.modified_time = moment().valueOf();
+        overdue_update.logs = {error: "automatically cancelled as overdue task at " + overdue_update.modified_time};
+        await tasker.app.models.task.update({id: t.id}, overdue_update);
+        await tasker.update({name: t.name}, {loading: false});
+        console.log(overdue_update);
+
+        //reload tasks
+        await tasker.reloadTaskerTasks(t.parent_name, function () {
+        });
       }
 
       let tasks_filter = {

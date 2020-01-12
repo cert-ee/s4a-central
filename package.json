@@ -1,6 +1,6 @@
 {
   "name": "s4a-central",
-  "version": "0.2.157",
+  "version": "0.2.178",
   "description": "s4a",
   "license": "MIT",
   "private": true,
@@ -26,6 +26,6 @@
     }
   },
   "dependencies": {
-    "pm2": "^3.2.4"
+    "pm2": "4.2.1"
   }
 }

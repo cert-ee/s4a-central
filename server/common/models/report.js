@@ -38,10 +38,24 @@ module.exports = function (report) {
         let updates_overall_ok = true;
         let version = true;
         for (let comp of detector_info.components) {
+          // console.log( "comp name: ", comp.name );
+          // console.log( "comp status: ", comp.status );
           if (!comp.status) components_overall_ok = false;
-          if (!comp.version_status) updates_overall_ok = false;
-          if (comp.package_name == 's4a-detector') version = comp.version_installed;
+          if (comp.version_status !== undefined) {
+            if (!comp.version_status) updates_overall_ok = false;
+            if (comp.package_name == 's4a-detector') version = comp.version_installed;
+          }
         }
+
+        // older detectors
+        if (detector_info.rules === undefined) {
+          hell.o("older detector, default empty values", "status", "info");
+          detector_info.rules = {};
+          detector_info.rules.rules_count = 0;
+          detector_info.rules.rules_count_enabled = 0;
+          detector_info.rules.rules_count_custom = 0;
+        }
+
 
         let update_detector = {
           last_seen: new Date(),
@@ -126,7 +140,8 @@ module.exports = function (report) {
     (async function () {
       try {
 
-        let detector = await report.app.models.detector.findById(detector_id);
+        hell.o([detector_id, "find detector"], "jobDone", "info");
+        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
         if (!detector) throw new Error("failed to find detector");
 
         let update_detector = {last_seen: new Date(), online: true};
@@ -259,7 +274,8 @@ module.exports = function (report) {
     (async function () {
       try {
 
-        let detector = await report.app.models.detector.findById(detector_id);
+        hell.o([detector_id, "find detector"], "rules", "info");
+        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
         if (!detector) throw new Error("failed to find detector");
 
         let update_detector = {last_seen: new Date(), online: true, last_rules_check: new Date()};
@@ -311,7 +327,8 @@ module.exports = function (report) {
     (async function () {
       try {
 
-        let detector = await report.app.models.detector.findById(detector_id);
+        hell.o([detector_id, "find detector"], "yara", "info");
+        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
         if (!detector) throw new Error("failed to find detector");
 
         let update_detector = {last_seen: new Date(), online: true, last_yara_check: new Date()};
@@ -371,7 +388,8 @@ module.exports = function (report) {
     (async function () {
       try {
 
-        let detector = await report.app.models.detector.findById(detector_id);
+        hell.o([detector_id, "find detector"], "wise", "info");
+        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
         if (!detector) throw new Error("failed to find detector");
 
         let update_detector = {last_seen: new Date(), online: true, last_wise_check: new Date()};
@@ -495,6 +513,10 @@ module.exports = function (report) {
     (async function () {
       try {
 
+        hell.o([detector_id, "find detector"], "alerts", "info");
+        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
+        if (!detector) throw new Error("failed to find detector");
+
         let update_detector = {last_seen: new Date(), online: true, last_alerts_report: new Date()};
 
         hell.o([detector_id, "update status"], "alerts", "info");
@@ -507,10 +529,7 @@ module.exports = function (report) {
           return cb({name: "Error", status: 400, message: "No alerts"});
         }
 
-        hell.o([detector_id, "find detector"], "alerts", "info");
-        let detector = await report.app.models.detector.find({where: {id: detector_id}});
-        if (!detector[0]) throw new Error("failed to find detector");
-        detector = detector[0];
+
         hell.o([detector_id, detector.name], "alerts", "info");
         hell.o([detector_id, detector.friendly_name], "rules", "info");
 
@@ -577,6 +596,11 @@ module.exports = function (report) {
     (async function () {
       try {
 
+        hell.o([detector_id, "find detector"], "alertsManual", "info");
+        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
+        if (!detector) throw new Error("failed to find detector");
+        // console.log(detector.name);
+
         hell.o([detector_id, "update detector"], "alertsManual", "info");
         let update_detector = {last_seen: new Date(), online: true};
         let update_result = await report.app.models.detector.update({id: detector_id}, update_detector);
@@ -586,11 +610,6 @@ module.exports = function (report) {
           hell.o([detector_id, "no alerts"], "alertsManual", "error");
           return cb({name: "Error", status: 400, message: "No alerts"});
         }
-
-        hell.o([detector_id, "find detector"], "alertsManual", "info");
-        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
-        if (!detector) throw new Error("failed to find detector");
-        // console.log(detector.name);
 
         hell.o([detector_id, "save to disk"], "alertsManual", "info");
         let update_alerts_file = await report.saveAlerts({alerts: alerts, name: detector.name});

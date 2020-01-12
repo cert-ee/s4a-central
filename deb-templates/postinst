@@ -88,7 +88,7 @@ dependency_install() {
         if hash yarn 2> /dev/null; then
           echo "Running 'yarn install'"
           # yarn install --production
-          su {{ node_deb_user }} -s /bin/bash -c "yarn install --production"
+	  su {{ node_deb_user }} -s /bin/bash -c "yarn install --production"
 	  #if [ $app == "client" ] ; then
           #  su {{ node_deb_user }} -s /bin/bash -c "yarn build"
           #fi
@@ -102,7 +102,7 @@ dependency_install() {
       npm-install)
         echo 'Installing dependenencies from NPM'
         # yarn install --production
-        su {{ node_deb_user }} -s /bin/bash -c yarn
+	su {{ node_deb_user }} -s /bin/bash -c yarn
 	#if [ $app == "client" ] ; then
         #  su {{ node_deb_user }} -s /bin/bash -c "yarn build"
         #fi
@@ -119,7 +119,13 @@ create_mongodb_users() {
   declare -r service_name="$1"
   echo "Create MongoDB users..."
   if [ ! -e /root/.mongodb.passwd ] ; then
-	  echo " * root..."
+
+	 if [ `mongo --quiet --eval "quit()" >/dev/null; echo $?` -gt 0 ] ; then
+	  	echo "CRITICAL: Can't connect to MongoDB !!!"
+		exit 1
+	fi
+
+	echo " * root..."
 	mongodb_pass=$( pwgen 12 1 )
 	echo -e "MONGODB_USER=root\nMONGODB_PASS=$mongodb_pass\n" > /root/.mongodb.passwd
 	mongo admin --eval "db.createUser({user: 'root',pwd: '"$mongodb_pass"', roles: [ 'root' ] })"
@@ -132,8 +138,8 @@ create_mongodb_users() {
   . /root/.mongodb.passwd
 
   app_db_pass=$( pwgen 12 1 )
-  user_found=$( mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.getUsers();" | jq -r '.[] | select(.user | match("'$service_name'"))|.user' )
-  if [ "x$user_found" == "x$service_name" ] ; then
+  user_found=$( mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "user=db.getUsers( { filter: { user: '$service_name'} }); if (user[0]) print(user[0].user);" )
+  if [ $user_found != "[ ]" ] ; then
         echo " * $service_name - reset password ..."
 	mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.changeUserPassword(\"$service_name\", \"$app_db_pass\")"
   else

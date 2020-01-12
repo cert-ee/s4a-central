@@ -448,13 +448,21 @@ module.exports = function (feed) {
         case "url":
           // console.log("feed url ----------------------------");
 
+          let downloaded_size = 0;
           let downloaded = await fs.existsSync(content_params.local_path);
 
+          if (downloaded) {
+            let downloaded_stats = await fs.statSync(content_params.local_path);
+            downloaded_size = downloaded_stats.size;
+          }
+
+          console.log("size", downloaded_size);
+          //console.log( "downloaded", downloaded );
           // if( entry.name == "emerging_threats2" ){ downloaded = false; }
 
           // while testing do not download always
           //|| entry.component_type !== "moloch"
-          if (process.env.NODE_ENV != "dev" || !downloaded) {
+          if (process.env.NODE_ENV != "dev" || !downloaded || downloaded_size < 10) {
             hell.o([entry.name, "no file, download"], "task", "info");
             // console.log( content_params )
             let rules_tar_path = await feed.app.models.contentman.downloadContent(content_params.url, content_params.local_path);

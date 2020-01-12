@@ -49,6 +49,8 @@ module.exports = function (rule) {
           filename.includes("shellcode")
           ||
           filename.includes("chat")
+          ||
+          filename.includes("info")
           // && feed.name == "emerging_pro" )
         ) {
         }

@@ -68,7 +68,7 @@
       "type": "string",
       "required": true,
       "description": "Tasker default cron expression",
-      "default": "*/480 * * * *"
+      "default": "0 */6 * * *"
     },
     "tasks_limit": {
       "type": "number",
