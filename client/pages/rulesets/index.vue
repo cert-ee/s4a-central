@@ -61,9 +61,19 @@
                     <td>
                       {{ props.item.name }}
                     </td>
+                    <!--                    <td>-->
+                    <!--                      <v-switch color="primary" v-model="props.item.automatically_enable_new_rules"-->
+                    <!--                                @change="saveAutomaticUpdates(props.item)">-->
+                    <!--                      </v-switch>-->
+                    <!--                    </td>-->
                     <td>
-                      <v-switch color="primary" v-model="props.item.automatically_enable_new_rules"
-                                @change="saveAutomaticUpdates(props.item)">
+                      <v-switch color="primary" v-model="props.item.skip_review"
+                                @change="saveSkipReview(props.item)">
+                      </v-switch>
+                    </td>
+                    <td>
+                      <v-switch color="primary" v-model="props.item.force_disabled"
+                                @change="saveForceDisabled(props.item)">
                       </v-switch>
                     </td>
                     <td>{{ props.item.tagsStr }}</td>

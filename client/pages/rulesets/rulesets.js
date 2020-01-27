@@ -3,11 +3,19 @@ export default {
         return {
             rowsPerPage: [50, 100, {text: 'All', value: -1}],
             headers: [
-                { text: this.$t('name'), align: 'left', value: 'name' },
-                { text: this.$t('rulesets.automatic_updates_enable_new'),
-                    align: 'left', value: 'automatically_enable_new_rules', sortable: false
+                {text: this.$t('name'), align: 'left', value: 'name'},
+                // { text: this.$t('rulesets.automatic_updates_enable_new'),
+                //     align: 'left', value: 'automatically_enable_new_rules', sortable: false
+                // },
+                {
+                    text: this.$t('rulesets.skip_review'),
+                    align: 'left', value: 'skip_review', sortable: false
                 },
-                { text: this.$t('menu.tags'), align: 'left', value: 'tagsStr' }
+                {
+                    text: this.$t('rulesets.force_disabled'),
+                    align: 'left', value: 'force_disabled', sortable: false
+                },
+                {text: this.$t('menu.tags'), align: 'left', value: 'tagsStr'}
             ],
             tagNames: [],
             rulesetsAll: [],
@@ -32,10 +40,30 @@ export default {
     },
 
     methods: {
-        async saveAutomaticUpdates(ruleset) {
+        // async saveAutomaticUpdates(ruleset) {
+        //     try {
+        //         await this.$axios.patch(`rulesets/${ruleset.name}`,
+        //             {automatically_enable_new_rules: ruleset.automatically_enable_new_rules}
+        //         );
+        //     } catch (err) {
+        //         this.$store.dispatch('handleError', err);
+        //     }
+        // },
+
+        async saveSkipReview(ruleset) {
             try {
                 await this.$axios.patch(`rulesets/${ruleset.name}`,
-                    {automatically_enable_new_rules: ruleset.automatically_enable_new_rules}
+                    {skip_review: ruleset.skip_review}
+                );
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
+        async saveForceDisabled(ruleset) {
+            try {
+                await this.$axios.patch(`rulesets/${ruleset.name}`,
+                    {force_disabled: ruleset.force_disabled}
                 );
             } catch (err) {
                 this.$store.dispatch('handleError', err);

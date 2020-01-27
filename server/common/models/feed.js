@@ -373,7 +373,7 @@ module.exports = function (feed) {
       let output = {
         folder: content_path + input.component_type + "/" + input.name + "/",
         local_path: content_path + input.component_type + "/" + input.name + "/" + input.filename,
-        url: input.location_url
+        url: input.location
       };
 
       hell.o([input.name, "check folders"], "contentPaths", "info");
@@ -464,7 +464,7 @@ module.exports = function (feed) {
           //|| entry.component_type !== "moloch"
           if (process.env.NODE_ENV != "dev" || !downloaded || downloaded_size < 10) {
             hell.o([entry.name, "no file, download"], "task", "info");
-            // console.log( content_params )
+            console.log(content_params)
             let rules_tar_path = await feed.app.models.contentman.downloadContent(content_params.url, content_params.local_path);
           } else {
             hell.o([entry.name, "DEV, do not redownload rules"], "task", "info");

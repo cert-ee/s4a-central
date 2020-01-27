@@ -216,11 +216,14 @@ export default {
         },
 
         async toggleRules(value) {
+            console.log("toggleRules");
             try {
-                let changedRules = [];
+                let changedRules = [], changedRule = {};
 
                 for (const rule of this.selectedRules) {
-                    const changedRule = {id: rule.id, enabled: value};
+                    changedRule = {id: rule.id, enabled: value};
+                    changedRules.push(changedRule);
+                    changedRule = {id: rule.id, force_disabled: !value};
                     changedRules.push(changedRule);
                 }
 
@@ -258,6 +261,7 @@ export default {
                 this.$refs.addEditRuleForm.validate();
                 if (!this.formValid) return;
                 this.newRule.enabled = !!this.newRule.enabled;
+                this.newRule.force_disabled = !this.newRule.enabled;
                 await this.$axios.post('rule_drafts/more', {changes: [this.newRule]});
                 this.addEditRuleDialog.open = false;
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});

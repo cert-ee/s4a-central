@@ -64,8 +64,9 @@
                     </v-select>
                   </v-flex>
                   <v-flex xs3>
-                    <v-select :label="$t('rules.classtype')" :items="classTypeNames" v-model="classtypeFilter" multiple chips
-                      item-text="name" item-value="name" clearable>
+                    <v-select :label="$t('rules.classtype')" :items="classTypeNames" v-model="classtypeFilter" multiple
+                              chips
+                              item-text="name" item-value="name" clearable>
                     </v-select>
                   </v-flex>
                   <v-flex xs3>
@@ -82,7 +83,11 @@
                       <v-checkbox color="primary" hide-details v-model="props.selected"></v-checkbox>
                     </td>
                     <td>{{ props.item.sid }}</td>
-                    <td>{{ props.item.enabled }}</td>
+                    <td>{{ props.item.enabled }}
+                      <i v-if="props.item.force_disabled === true" color="primary">
+                        !
+                      </i>
+                    </td>
                     <td>{{ props.item.severity }}</td>
                     <td>{{ props.item.revision }}</td>
                     <td>{{ props.item.ruleset }}</td>
@@ -90,7 +95,8 @@
                     <td>{{ props.item.message }}</td>
                     <td>{{ props.item.tagsStr }}</td>
                     <td>
-                      <v-icon class="pointer" @click.stop="newRule.rule_data = props.item.rule_data; ruleDataDialog = true">
+                      <v-icon class="pointer"
+                              @click.stop="newRule.rule_data = props.item.rule_data; ruleDataDialog = true">
                         track_changes
                       </v-icon>
                     </td>

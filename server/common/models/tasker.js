@@ -28,7 +28,8 @@ module.exports = function (tasker) {
           },
           module_name: "detector",
           cron_expression: "*/1 * * * *",
-          builtin: true
+          builtin: true,
+          loading: false
         },
         {
           name: "detector_rule_count_checker",
@@ -43,7 +44,8 @@ module.exports = function (tasker) {
           },
           module_name: "detector",
           cron_expression: "*/30 * * * *",
-          builtin: true
+          builtin: true,
+          loading: false
         },
         {
           name: "tasks_history_cleaner",
@@ -56,7 +58,8 @@ module.exports = function (tasker) {
           task_params: {},
           module_name: "task",
           cron_expression: "*/10 * * * *",
-          builtin: true
+          builtin: true,
+          loading: false
         }
 
       ];
@@ -85,10 +88,12 @@ module.exports = function (tasker) {
 
       const all_taskers = await tasker.find();
 
-      //check if we have tasks and create accordingly
+      //check if we have tasks and create accordingly and set loading to false if any has weird state
       for (const tr of all_taskers) {
         if (!tr.enabled) continue;
         // console.log( tr );
+        //loading false to all components
+        await tasker.update({name: tr.name}, {"loading": false});
         await tasker.task_loader(tr);
       }
 
