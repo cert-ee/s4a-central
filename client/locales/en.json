@@ -148,6 +148,8 @@
     "disable_all": "Disable All",
     "add_tag": "Add Tag",
     "remove_tag": "Remove Tag",
+    "skip_review": "Skip review and update rules",
+    "force_disabled": "Force external rule updates to disabled",
     "automatic_updates_enable_new": "Automatic updates: enable new rules"
   },
   "rules": {

@@ -49,6 +49,8 @@ module.exports = function (rule) {
           filename.includes("shellcode")
           ||
           filename.includes("chat")
+          ||
+          filename.includes("info")
           // && feed.name == "emerging_pro" )
         ) {
         }
@@ -228,6 +230,7 @@ module.exports = function (rule) {
       let rule_found = await rule.find({where: {sid: sid}});
 
 
+
       // hell.o([feed.name + " primary feed?: ", feed.primary], "checkRuleLine", "info");
 
 
@@ -247,6 +250,10 @@ module.exports = function (rule) {
       // } else {
       //   return;
       // }
+
+      if (ruleset.force_disabled === true) {
+        enabled = false;
+      }
 
       /**
        * ONE RULE FOUND IN DB
@@ -297,7 +304,6 @@ module.exports = function (rule) {
           create_extra = true;
         }
       } // end of rule_found.length == 1
-
 
       /**
        * TWO RULES FOUND IN DB
@@ -356,7 +362,7 @@ module.exports = function (rule) {
         // console.log( feed.tags );
         // console.log( rs_tags );
         // console.log( fd_tags );
-        if (!ruleset.automatically_enable_new_rules) {
+        if (!ruleset.skip_review) {
           rule_info.enabled = false;
         }
         let rule_create = await rule.create(rule_info);
@@ -380,12 +386,11 @@ module.exports = function (rule) {
           }
         }
 
-        if (ruleset.automatically_enable_new_rules) return true;
+        if (ruleset.skip_review) return true;
 
         rule_to_change = rule_create;
 
       } //rule_found.length == 0
-
 
       /**
        * REMOVE CURRENT FEED RULE by id
@@ -397,9 +402,18 @@ module.exports = function (rule) {
 
 
       /**
+       * IF RULE HAS FORCE DISABLED
+       */
+      if (rule_to_change.force_disabled) {
+        enabled = false;
+        rule_to_change.enabled = false;
+        rule_info.enabled = false;
+      }
+
+      /**
        * AUTOMATIC UPDATE ALLOWED
        */
-      if (ruleset.automatically_enable_new_rules && update_current) {
+      if (ruleset.skip_review && update_current) {
         hell.o([sid, "new revision update"], "checkRuleLine", "info");
         hell.o([feed.name + " primary feed: ", feed.primary], "checkRuleLine", "info");
         update_result = await rule.update({id: rule_to_change.id}, rule_info);
@@ -582,13 +596,25 @@ module.exports = function (rule) {
       //merge rules with tags
       new_rules = new_rules.concat(rules_with_tags);
 
+      let temp_rule;
       for (let i = 0, l = new_rules.length; i < l; i++) {
         // console.log( new_rules[i].sid, new_rules[i].revision );
-        new_rules[i].id = undefined;
-        delete new_rules[i].id;
-        delete new_rules[i].feed_name;
-        delete new_rules[i].primary;
+
+        temp_rule = {
+          sid: new_rules[i].sid,
+          revision: parseInt(new_rules[i].revision),
+          classtype: new_rules[i].classtype,
+          severity: new_rules[i].severity,
+          ruleset: new_rules[i].ruleset,
+          enabled: new_rules[i].enabled,
+          message: new_rules[i].message,
+          rule_data: new_rules[i].rule_data
+        };
+
+        new_rules[i] = temp_rule;
       }
+
+      // console.log( new_rules );
 
       hell.o(["total new rules", new_rules.length], "checkNewRulesForDetector", "info");
       hell.o("done", "checkNewRulesForDetector", "info");
@@ -653,7 +679,7 @@ module.exports = function (rule) {
 
     })(); // async
 
-  }
+  };
 
   rule.remoteMethod('addJobForFullSync', {
     accepts: [

@@ -1,6 +1,7 @@
 'use strict';
 
 const hell = new (require(__dirname + "/helper.js"))({module_name: "detector"});
+const fs = require('fs');
 
 module.exports = function (detector) {
 
@@ -62,13 +63,23 @@ module.exports = function (detector) {
         let detector_name = current.name;
 
         /*
+        DELETE VPN CONFIG
+         */
+        let vpn_conf_path = "/etc/openvpn/keys/" + detector_name + " .conf";
+        if (await fs.existsSync(vpn_conf_path)) {
+          hell.o([detector_name, "detector vpn conf found, going to delete"], "deleteDetector", "info");
+          await fs.unlinkSync(vpn_conf_path);
+        } else {
+          hell.o([detector_name, "detector vpn conf not found"], "deleteDetector", "info");
+        }
+
+        /*
         GET DETECTOR USER
          */
         hell.o([detector_name, "get detector user"], "deleteDetector", "info");
         let detector_user = await detector.app.models.User.findOne({where: {detectorId: detectorId}});
         if (!detector_user) throw new Error("failed to find detector user");
         hell.o([detector_name, detector_user], "deleteDetector", "info");
-
 
         /*
          EXPIRE AND REMOVE TOKENS

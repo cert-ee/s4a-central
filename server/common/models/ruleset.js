@@ -4,21 +4,23 @@ const hell = new (require(__dirname + "/helper.js"))({module_name: "ruleset"});
 
 module.exports = function (ruleset) {
 
+
   /**
    * INITIALIZE RULESETS
    *
-   * create defaults
+   * create default rulesets
+   *
+   * @param cb
    */
   ruleset.initialize = async function () {
     hell.o("start", "initialize", "info");
 
+    //create the default rulesets
+    let default_rulesets = [
+      {name: "cert", description: "Cert Ruleset"}
+    ];
+
     try {
-
-      let default_rulesets = [
-        {name: "cert", description: "Cert Ruleset"}
-        //{name: "custom", description: "Custom Ruleset"}
-      ];
-
 
       hell.o("check rulesets", "initialize", "info");
       let create_result;
@@ -54,7 +56,7 @@ module.exports = function (ruleset) {
         let rs = await ruleset.find({where: {name: ruleset_name}});
         if (!rs) throw new Error(ruleset_name + " could not find ruleset");
 
-        let update_input = {enabled: enabled, last_modified: new Date()};
+        let update_input = {enabled: enabled, force_disabled: !enabled, last_modified: new Date()};
         let update_result = await rule.updateAll({ruleset: ruleset_name}, update_input);
         if (!update_result) throw new Error(ruleset_name + " could not update ruleset ");
 

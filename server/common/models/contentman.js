@@ -36,6 +36,7 @@ module.exports = function (contentman) {
    */
   contentman.downloadContent = function (src, dst) {
     hell.o("start", "downloadContent", "info");
+    hell.o([src, dst], "downloadContent", "info");
     return new Promise((success, reject) => {
 
       let file = fs.createWriteStream(dst);

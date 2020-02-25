@@ -57,6 +57,13 @@
       "description": "Enabled disabled",
       "default": 1
     },
+    "force_disabled": {
+      "type": "boolean",
+      "required": true,
+      "index": true,
+      "description": "Force disabled",
+      "default": 0
+    },
     "message": {
       "type": "string",
       "required": true,

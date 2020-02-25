@@ -53,11 +53,12 @@ module.exports = function (monitoring) {
 
         //add unix timestamp values for parsing ease..
         for (let detector of all_detectors) {
-          detector.last_rules_check_timestamp = moment(detector.last_rules_check).valueOf();
-          detector.last_wise_check_timestamp = moment(detector.last_wise_check).valueOf();
-          detector.last_yara_check_timestamp = moment(detector.last_yara_check).valueOf();
-          detector.last_alerts_report_timestamp = moment(detector.last_alerts_report).valueOf();
-          detector.last_alerts_actual_report_timestamp = moment(detector.last_alerts_actual_report).valueOf();
+          detector.last_seen_timestamp = moment(detector.last_seen).unix();
+          detector.last_rules_check_timestamp = moment(detector.last_rules_check).unix();
+          detector.last_wise_check_timestamp = moment(detector.last_wise_check).unix();
+          detector.last_yara_check_timestamp = moment(detector.last_yara_check).unix();
+          detector.last_alerts_report_timestamp = moment(detector.last_alerts_report).unix();
+          detector.last_alerts_actual_report_timestamp = moment(detector.last_alerts_actual_report).unix();
 
           output.push(detector);
         }
