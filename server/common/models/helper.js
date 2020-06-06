@@ -5,6 +5,7 @@
  *
  * @param params
  */
+const chalk = require('chalk');
 
 let helper = function (params) {
   let self = this;
@@ -57,30 +58,40 @@ let helper = function (params) {
 
     if (override_level !== undefined || print_level < method) return; //silence
 
-    let cl = self.method_map[method];
+    let cl = self.method_map[method], cl_chalked = "[" + cl + "]";
     let called = "[" + module_name + "." + fn_name + "]";
 
-    if( input instanceof Error || method == "error" ){
+    if (input instanceof Error || method == "error") {
       if( print_level == 6 ){
-        console.trace(input);
+        console.trace(chalk.red(input));
       }
 
       input = input.message;
       cl = "error";
     }
 
+    if (cl == "warn") {
+      cl_chalked = chalk.yellow("[" + cl + "]");
+      called = chalk.yellow(called);
+    }
+
+    if (cl == "error") {
+      cl_chalked = chalk.red("[" + cl + "]");
+      called = chalk.red(called);
+    }
+
     if (!Array.isArray(input)) {
-      console[cl]("[" + cl + "]", called, input);
+      console[cl](cl_chalked, called, input);
       return;
     }
 
     if (input.length == 2) {
-      console[cl]("[" + cl + "]", called, input[0], input[1]);
+      console[cl](cl_chalked, called, input[0], input[1]);
       return;
     }
 
     for (let i = 0, l = input.length; i < l; i++) {
-      console[cl]("[" + cl + "]", called, input[i]);
+      console[cl](cl_chalked, called, input[i]);
     }
 
   };

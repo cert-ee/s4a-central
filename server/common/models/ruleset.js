@@ -4,6 +4,7 @@ const hell = new (require(__dirname + "/helper.js"))({module_name: "ruleset"});
 
 module.exports = function (ruleset) {
 
+
   /**
    * INITIALIZE RULESETS
    *
@@ -11,32 +12,28 @@ module.exports = function (ruleset) {
    *
    * @param cb
    */
-  ruleset.initialize = function (cb) {
+  ruleset.initialize = async function () {
     hell.o("start", "initialize", "info");
 
     //create the default rulesets
     let default_rulesets = [
       {name: "cert", description: "Cert Ruleset"}
-      //{name: "custom", description: "Custom Ruleset"}
     ];
 
-    (async function () {
-      try {
+    try {
 
-        hell.o("check rulesets", "initialize", "info");
-        let create_result;
-        for (const rs of default_rulesets) {
-          hell.o(["check ruleset", rs.name], "initialize", "info");
-          create_result = await ruleset.findOrCreate({where: rs}, rs);
-          if (!create_result) throw new Error("failed to create ruleset " + rs.name);
-        }
-        cb(null, true);
-      } catch (err) {
-        hell.o(err, "initialize", "error");
-        cb(err);
+      hell.o("check rulesets", "initialize", "info");
+      let create_result;
+      for (const rs of default_rulesets) {
+        hell.o(["check ruleset", rs.name], "initialize", "info");
+        create_result = await ruleset.findOrCreate({where: rs}, rs);
+        if (!create_result) throw new Error("failed to create ruleset " + rs.name);
       }
-
-    })(); // async
+      return true;
+    } catch (err) {
+      hell.o(err, "initialize", "error");
+      return false;
+    }
 
   };
 
@@ -59,7 +56,7 @@ module.exports = function (ruleset) {
         let rs = await ruleset.find({where: {name: ruleset_name}});
         if (!rs) throw new Error(ruleset_name + " could not find ruleset");
 
-        let update_input = {enabled: enabled, last_modified: new Date()};
+        let update_input = {enabled: enabled, force_disabled: !enabled, last_modified: new Date()};
         let update_result = await rule.updateAll({ruleset: ruleset_name}, update_input);
         if (!update_result) throw new Error(ruleset_name + " could not update ruleset ");
 

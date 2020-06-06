@@ -21,13 +21,25 @@
       "description": "Ruleset description",
       "default": ""
     },
+    "skip_review": {
+      "type": "boolean",
+      "required": true,
+      "description": "Skip review and update rules",
+      "default": true
+    },
+    "force_disabled": {
+      "type": "boolean",
+      "required": true,
+      "description": "Force all new rules to disabled",
+      "default": false
+    },
     "automatically_enable_new_rules": {
       "type": "boolean",
       "required": true,
-      "description": "Automatically enable new rules",
+      "description": "DEPRECATED - Automatically enable new rules",
       "default": true
     },
-    "createdAt": {
+    "created_time": {
       "type": "date",
       "required": true,
       "description": "Created time",
@@ -65,20 +77,6 @@
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "read",
-      "permission": "ALLOW"
-    },
-    {
-      "property": "toggleAll",
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "admin",
-      "permission": "ALLOW"
-    },
-    {
-      "property": "tagAll",
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

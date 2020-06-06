@@ -5,54 +5,63 @@ module.exports = function (job_schedule) {
   /**
    * ADD A JOB / TASK FOR A DETECTOR
    * @param input
-   * @returns {Promise<any>}
    */
-  job_schedule.jobAdd = function (input) {
+  job_schedule.jobAdd = async function (input) {
     hell.o([input.targetId, "start"], "jobAdd", "info");
 
-    return new Promise((success, reject) => {
+    // return new Promise((success, reject) => {
 
-      (async () => {
-        try {
+    // (async () => {
+    try {
 
-          let job = {
-            target: input.target,
-            targetId: input.targetId,
-            detectorId: input.targetId,
-            name: input.name,
-            description: input.description
-          };
+      let job = {
+        target: input.target,
+        targetId: input.targetId,
+        detectorId: input.targetId,
+        name: input.name,
+        description: input.description
+      };
 
-          //check for duplicates
-          hell.o([input.targetId, " find duplicate"], "jobAdd", "info");
-          let job_find = await job_schedule.find({
-            where: {
-              detectorId: input.targetId,
-              name: input.name,
-              completed: false
-            }
-          });
-          if (job_find.length > 0) {
-            hell.o([input.targetId, " found duplicate"], "jobAdd", "warn");
-            throw new Error(input.detectorId + " found");
-          }
+      if (input.data !== undefined) {
+        job.data = input.data;
+      }
 
-          hell.o([input.targetId, " create job"], "jobAdd", "warn");
-          let job_create = await job_schedule.create(job);
-          if (!job_create) throw new Error(input.detectorId + " jobAdd failed");
-
-          hell.o([input.targetId, " done"], "jobAdd", "warn");
-
-          success(job_create);
-
-        } catch (err) {
-          hell.o(err, "jobAdd", "error");
-          reject(err);
+      //check for duplicates
+      hell.o([input.targetId, "find duplicate"], "jobAdd", "info");
+      let job_find = await job_schedule.find({
+        where: {
+          detectorId: input.targetId,
+          name: input.name,
+          completed: false
         }
+      });
 
-      })(); // async
+      if (job_find.length > 0 && input.ignore_duplicate !== true) {
+        hell.o([input.targetId, "found duplicate"], "jobAdd", "warn");
+        // if( input.ignore_duplicate ){
+        //   hell.o([input.targetId, "ignore duplicate"], "jobAdd", "warn");
+        // return success( { message: "ok"} );
+        // }
+        throw new Error(input.detectorId + " found");
+      }
 
-    }); // promise
+      hell.o([input.targetId, "create job"], "jobAdd", "warn");
+      let job_create = await job_schedule.create(job);
+      if (!job_create) throw new Error(input.detectorId + " jobAdd failed");
+
+      hell.o([input.targetId, "done"], "jobAdd", "warn");
+
+      // success(job_create);
+      return true;
+    } catch (err) {
+      hell.o(err, "jobAdd", "error");
+      // reject(err);
+      return false;
+    }
+
+    // })(); // async
+
+    // }); // promise
 
   };
 

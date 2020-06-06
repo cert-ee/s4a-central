@@ -7,18 +7,31 @@
     "validateUpsert": true
   },
   "properties": {
-    "id": {
+    "name": {
       "type": "string",
       "id": true,
       "required": true,
       "index": true,
-      "description": "",
-      "isArray": false,
-      "default" : "systeminfoid"
+      "description": "Sysinfo name",
+      "isArray": false
     },
-    "update_version": {
-      "type": "number",
-      "required": true
+    "friendly_name": {
+      "type": "string",
+      "required": true,
+      "description": "Sysinfo name",
+      "default": ""
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Sysinfo description",
+      "default": ""
+    },
+    "data": {
+      "type": "string",
+      "required": true,
+      "description": "Sysinfo value or data",
+      "default": ""
     }
   },
   "validations": [],

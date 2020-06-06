@@ -9,7 +9,8 @@ export default {
             logRowsPerPage: [50, 100, {text: 'All', value: -1}],
             headers: [
                 { text: this.$t('users.username'), align: 'left', value: 'username' },
-                { text: this.$t('users.roles'), align: 'left', value: 'rolesStr' }
+                { text: this.$t('users.roles'), align: 'left', value: 'rolesStr' },
+                { text: '', value: '' }
             ],
             logHeaders: [
                 { text: this.$t('users.time'), align: 'left', value: 'time' },
@@ -22,11 +23,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        },
-
         search: {
             get() { return this.$store.state.users.search; },
             set(value) { this.$store.commit('users/setSearch', value); }
@@ -56,7 +52,7 @@ export default {
 
         async addUser() {
             try {
-                const {data: user} = await this.$axios.post('users', {username: this.newUser});
+                const user = await this.$axios.$post('users/createUser', {username: this.newUser});
                 this.users.push(user);
                 this.addUserDialog = false;
             } catch (err) {
@@ -85,9 +81,11 @@ export default {
         try {
             const params = { filter: {include: 'roles', where: {detectorId: {exists: false}}} };
             const logParams = { filter: {where: {model: 'user'}} };
-            const usersPromise = $axios.get('users', {params});
-            const logPromise = $axios.get('log', {params: logParams});
-            let [ {data: users}, {data: log} ] = await Promise.all([usersPromise, logPromise]);
+
+            let [ users, log ] = await Promise.all([
+                $axios.$get('users', {params}), $axios.$get('log', {params: logParams})
+            ]);
+
             if (!users || !users.length) return;
 
             for (let user of users) {

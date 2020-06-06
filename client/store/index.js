@@ -4,6 +4,7 @@ export function state() {
         drawer: true,
         user: {},
         rulesReview: false,
+        rulesExpanded: false,
         unauthorized: 'You are not authorized to view this page.',
         versions: {},
         snackBar: {
@@ -18,7 +19,7 @@ export function state() {
 
 export const getters = {
     hasAdminRole(state) {
-        return state.user && state.user.roles.some(r => r.name === 'admin');
+        return state.user && state.user.roles && state.user.roles.some(r => r.name === 'admin');
     }
 };
 
@@ -29,6 +30,10 @@ export const mutations = {
 
     setRulesReview(state, value) {
         state.rulesReview = value;
+    },
+
+    setRulesExpanded(state, value) {
+        state.rulesExpanded = value;
     },
 
     showSnackbar(state, snackBar) {
@@ -53,38 +58,35 @@ export const mutations = {
 export const actions = {
     async nuxtServerInit({state}, {req, env, error, isDev, app: {$axios}}) {
         try {
-            console.log("FRONTEND: NUXT SERVER INIT");
+            console.log("FRONTEND | NUXT SERVER INIT");
              // console.log(req.headers);
             if (!req.headers["x-remote-user"]) {
-                console.log("FRONTEND: no x-remote-user");
+                console.log("FRONTEND | no x-remote-user");
                 error("no x-remote-user");
             }
 
             //get the header and save for store
             this.$axios.setHeader("x-remote-user", req.headers["x-remote-user"]);
             const params = {filter: {include: 'roles'}};
-            const {data: user} = await $axios.get('users/current', {params});
+            const user = await $axios.$get('users/current', {params});
             state.user = user;
             state.rule_custom_name = "cert";
             state.rule_sid_limit = 10000000;
             state.rule_sid_limit_max = 20000000;
             state.API_URL = env.API_URL;
-            state.KIBANA_URL = env.URL_KIBANA;
             state.GRAFANA_URL = env.URL_GRAFANA;
             state.debugMode = isDev;
 
-            console.log( "FRONTEND: API URL:", state.API_URL );
+            console.log("FRONTEND | API URL:", state.API_URL);
+            console.log("FRONTEND | DEBUG MODE:", state.debugMode);
 
             const vers = await $axios.get('/system_info/version');
             state.versions = vers.data;
 
-            const [{data: rule_drafts}] = await Promise.all([
-                $axios.get('rule_drafts/count')
-            ]);
-
+            const rule_drafts = await $axios.$get('rule_drafts/count');
             state.rulesReview = rule_drafts && rule_drafts.count;
         } catch (err) {
-            console.log("FRONTEND: NUXT SERVER INIT ERROR");
+            console.log("FRONTEND | NUXT SERVER INIT ERROR");
             console.log( err );
 
             error({
@@ -94,17 +96,17 @@ export const actions = {
         }
     },
 
-    async updateRules({commit, dispatch}) {
-        commit('setRulesSyncing', true);
-
-        try {
-            await this.$axios.get('rules/checkRoutine');
-        } catch (err) {
-            dispatch('handleError', err);
-        } finally {
-            commit('setRulesSyncing', false);
-        }
-    },
+    // async updateRules({commit, dispatch}) {
+    //     commit('setRulesSyncing', true);
+    //
+    //     try {
+    //         await this.$axios.get('rules/task');
+    //     } catch (err) {
+    //         dispatch('handleError', err);
+    //     } finally {
+    //         commit('setRulesSyncing', false);
+    //     }
+    // },
 
     handleError({commit}, err) {
         commit('showSnackbar', {

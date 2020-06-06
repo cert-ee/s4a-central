@@ -105,14 +105,6 @@ export default {
     },
 
     computed: {
-        drawer: {
-            get() {
-                return this.$store.state.drawer;
-            },
-            set() {
-            }
-        },
-
         search: {
             get() {
                 return this.$store.state.rules.search;
@@ -217,23 +209,28 @@ export default {
                 await this.$axios.post('rule_drafts/more', {changes: changedRules});
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});
                 this.$store.commit('setRulesReview', true);
+                this.$store.commit('setRulesExpanded', true);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
         },
 
         async toggleRules(value) {
+            console.log("toggleRules");
             try {
-                let changedRules = [];
+                let changedRules = [], changedRule = {};
 
                 for (const rule of this.selectedRules) {
-                    const changedRule = {id: rule.id, enabled: value};
+                    changedRule = {id: rule.id, enabled: value};
+                    changedRules.push(changedRule);
+                    changedRule = {id: rule.id, force_disabled: !value};
                     changedRules.push(changedRule);
                 }
 
                 await this.$axios.post('rule_drafts/more', {changes: changedRules});
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});
                 this.$store.commit('setRulesReview', true);
+                this.$store.commit('setRulesExpanded', true);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -242,19 +239,21 @@ export default {
         openAddEditRuleDialog(rule) {
             this.$refs.addEditRuleForm.reset();
 
-            if (rule) {
-                Object.assign(this.newRule, rule);
-                this.newRule.enabled = this.newRule.enabled === 'Yes';
-                this.newRule.tags_changes = undefined;
-                delete this.newRule.tags;
-                delete this.newRule.tagsStr;
-                delete this.newRule.created_time;
-                delete this.newRule.modified_time;
-                delete this.newRule.published;
-            }
+            this.$nextTick(() => {
+                if (rule) {
+                    Object.assign(this.newRule, rule);
+                    this.newRule.enabled = this.newRule.enabled === 'Yes';
+                    this.newRule.tags_changes = undefined;
+                    delete this.newRule.tags;
+                    delete this.newRule.tagsStr;
+                    delete this.newRule.created_time;
+                    delete this.newRule.modified_time;
+                    delete this.newRule.published;
+                }
 
-            this.addEditRuleDialog.isEditDialog = !!rule;
-            this.addEditRuleDialog.open = true;
+                this.addEditRuleDialog.isEditDialog = !!rule;
+                this.addEditRuleDialog.open = true;
+            });
         },
 
         async addEditRule() {
@@ -262,10 +261,12 @@ export default {
                 this.$refs.addEditRuleForm.validate();
                 if (!this.formValid) return;
                 this.newRule.enabled = !!this.newRule.enabled;
+                this.newRule.force_disabled = !this.newRule.enabled;
                 await this.$axios.post('rule_drafts/more', {changes: [this.newRule]});
                 this.addEditRuleDialog.open = false;
                 this.$store.commit('showSnackbar', {type: 'success', text: this.$t('rules.saved')});
                 this.$store.commit('setRulesReview', true);
+                this.$store.commit('setRulesExpanded', true);
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -275,9 +276,11 @@ export default {
     async asyncData({store, error, app: {$axios, i18n}}) {
         try {
             const params = {filter: {include: 'tags'}};
+            const origOnProgress = $axios.defaults.onDownloadProgress;
+            $axios.defaults.onDownloadProgress = null; // temp disable axios progress control
 
-            let [{data: rulesAll}, {data: rulesetNames}, {data: tagNames}, {data: classTypeNames },] = await Promise.all([
-                $axios.get('rules', {params}), $axios.get('rulesets'), $axios.get('tags'), $axios.get('rule_classtypes')
+            let [ rulesAll, rulesetNames, tagNames, classTypeNames ] = await Promise.all([
+                $axios.$get('rules', {params}), $axios.$get('rulesets'), $axios.$get('tags'), $axios.$get('rule_classtypes')
             ]);
 
             if (!rulesAll || !rulesAll.length) return;
@@ -287,6 +290,7 @@ export default {
                 rule.tagsStr = rule.tags.map(t => t.name).join(', ');
             }
 
+            $axios.defaults.onDownloadProgress = origOnProgress; // enable axios progress control again
             return {rulesAll, rulesetNames, tagNames, classTypeNames};
         } catch (err) {
             if (err.response && err.response.status === 401) {

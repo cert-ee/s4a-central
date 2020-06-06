@@ -28,19 +28,12 @@ export default {
         clearInterval(this.syncInterval);
     },
 
-    computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
-        }
-    },
-
     methods: {
         async refreshDashboard() {
             this.refreshing = true;
 
-            let [ {data: detectorsAll}, {data: rule_drafts}, {data: feedbacks} ] = await Promise.all([
-                this.$axios.get('detectors'), this.$axios.get('rule_drafts/count'), this.$axios.get('feedbacks')
+            let [ detectorsAll, rule_drafts, feedbacks ] = await Promise.all([
+                this.$axios.$get('detectors'), this.$axios.$get('rule_drafts/count'), this.$axios.$get('feedbacks')
             ]);
 
             this.detectorsAll = detectorsAll;
@@ -77,8 +70,8 @@ export default {
 
     async asyncData({ store, error, app: {$axios} }) {
         try {
-            let [ {data: detectorsAll}, {data: rule_drafts}, {data: feedbacks} ] = await Promise.all([
-                $axios.get('detectors'), $axios.get('rule_drafts/count'), $axios.get('feedbacks')
+            let [ detectorsAll, rule_drafts, feedbacks ] = await Promise.all([
+                $axios.$get('detectors'), $axios.$get('rule_drafts/count'), $axios.$get('feedbacks')
             ]);
 
             const onlineDetectors = detectorsAll.filter(d => d.online === true).length;

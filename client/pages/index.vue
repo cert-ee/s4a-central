@@ -1,7 +1,6 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>{{ $t('dashboard.title') }}</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -12,90 +11,92 @@
         </span>
       </v-btn>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid grid-list-lg>
         <v-layout row wrap>
           <v-flex xs12>
-            <h5>{{ $t('dashboard.detectors') }}</h5>
+            <div class="headline">{{ $t('dashboard.detectors') }}</div>
           </v-flex>
           <v-flex xs6 sm4 lg3>
             <dashboard-card icon="dns" :title="$t('dashboard.detectors_online')" link @click.native="gotoOfflineDetectors">
-              <h5 v-if="onlineDetectors < detectorsAll.length">
+              <div class="headline" v-if="onlineDetectors < detectorsAll.length">
                 <v-icon class="error--text mr-2">warning</v-icon>
                 <span class="error--text">{{ onlineDetectors }}</span> / {{ detectorsAll.length }}
-              </h5>
-              <h5 v-else>
+              </div>
+              <div class="headline" v-else>
                 <v-icon class="success--text mr-2">check_circle</v-icon>
                 <span class="success--text">{{ onlineDetectors }}</span> / {{ detectorsAll.length }}
-              </h5>
+              </div>
             </dashboard-card>
           </v-flex>
           <v-flex xs6 sm4 lg3>
             <dashboard-card icon="warning" :title="$t('dashboard.detectors_problems')" link @click.native="gotoDetectorsWithProblems">
-              <h5 v-if="!detectorsWithProblems">
+              <div class="headline" v-if="!detectorsWithProblems">
                 <v-icon class="success--text mr-2">check_circle</v-icon>
                 <span class="success--text">0</span> / {{ detectorsAll.length }}
-              </h5>
-              <h5 v-else>
+              </div>
+              <div class="headline" v-else>
                 <v-icon class="error--text mr-2">warning</v-icon>
                 <span class="error--text">{{ detectorsWithProblems }}</span> / {{ detectorsAll.length }}
-              </h5>
+              </div>
             </dashboard-card>
           </v-flex>
           <v-flex xs6 sm4 lg3>
             <dashboard-card icon="person_add" :title="$t('dashboard.detectors_unapproved')" link @click.native="gotoUnapprovedDetectors">
-              <h5 v-if="!unapprovedDetectors">
+              <div class="headline" v-if="!unapprovedDetectors">
                 <v-icon class="success--text mr-2">check_circle</v-icon>
                 <span class="success--text">0</span> / {{ detectorsAll.length }}
-              </h5>
-              <h5 v-else>
+              </div>
+              <div class="headline" v-else>
                 <v-icon class="deep-orange--text mr-2">warning</v-icon>
                 <span class="deep-orange--text">{{ unapprovedDetectors }}</span> / {{ detectorsAll.length }}
-              </h5>
+              </div>
             </dashboard-card>
           </v-flex>
 
           <v-flex xs12 class="mt-3">
-            <h5>Rules</h5>
+            <div class="headline">Rules</div>
           </v-flex>
           <v-flex xs6 sm4 lg3>
             <nuxt-link to="/rules/review" style="text-decoration: none;" v-if="rule_drafts.count">
               <dashboard-card icon="security" title="Unpublished Rules" link>
-                <h5 class="deep-orange--text">
+                <div class="headline deep-orange--text">
                   {{ rule_drafts.count }}
-                </h5>
+                </div>
               </dashboard-card>
             </nuxt-link>
             <dashboard-card icon="security" title="Unpublished Rules" v-else>
-              <h5 class="success--text">
+              <div class="headline success--text">
                 <v-icon class="success--text">check_circle</v-icon> 0
-              </h5>
+              </div>
             </dashboard-card>
           </v-flex>
           <v-flex xs6 sm4 lg3>
             <dashboard-card icon="security" title="Rules">
-              <h5>
-                <v-btn flat primary :loading="$store.state.rulesSyncing" @click="$store.dispatch('updateRules')">
-                  Check and Download Updates
-                </v-btn>
-              </h5>
+              <div class="headline mt-3">
+                <!--<v-btn flat block color="primary" style="height: auto;"-->
+                       <!--:loading="$store.state.rulesSyncing" @click="$store.dispatch('updateRules')"-->
+                <!--&gt;-->
+                  <!--<span style="white-space: normal;">Check and Download Updates</span>-->
+                <!--</v-btn>-->
+              </div>
             </dashboard-card>
           </v-flex>
 
           <v-flex xs12 class="mt-3">
-            <h5>Feedback</h5>
+            <div class="headline">Feedback</div>
           </v-flex>
           <v-flex xs6 sm4 lg3>
             <nuxt-link to="/feedback" style="text-decoration: none;">
               <dashboard-card icon="feedback" title="Unsolved Feedback" link>
-                <h5 v-if="unsolvedFeedbackCount">
+                <div class="headline" v-if="unsolvedFeedbackCount">
                   <v-icon class="error--text mr-2">warning</v-icon>
                   <span class="error--text">{{ unsolvedFeedbackCount }}</span> / {{ feedbackTotalCount }}
-                </h5>
-                <h5 v-else>
+                </div>
+                <div class="headline" v-else>
                   <v-icon class="success--text mr-2">check_circle</v-icon>
                   <span class="success--text">{{ unsolvedFeedbackCount }}</span> / {{ feedbackTotalCount }}
-                </h5>
+                </div>
               </dashboard-card>
             </nuxt-link>
           </v-flex>
@@ -107,9 +108,16 @@
               <img src="~/assets/image/eu_logo_horizontal.jpg" width="100%" />
             </dashboard-card>
           </v-flex>
+
+          <v-flex xs6 sm4 lg3>
+            <dashboard-card>
+              <img src="~/assets/image/sisejulgeolekufond.png" width="100%"/>
+            </dashboard-card>
+          </v-flex>
+
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

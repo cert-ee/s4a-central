@@ -1,13 +1,12 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>{{ $t('detectors.title') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn dark @click="$store.commit('detectors/clearFilters')">{{ $t('detectors.clear_filters') }}</v-btn>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid grid-list-lg>
         <v-layout row wrap justify-center>
           <v-flex xs12>
@@ -31,6 +30,12 @@
                     </v-select>
                   </v-flex>
                   <v-flex xs3>
+                    <v-select :label="$t('detectors.filters.updates')"
+                              :items="[$t('detectors.table.ok'), $t('detectors.table.updates')]"
+                              v-model="updatesFilter" clearable>
+                    </v-select>
+                  </v-flex>
+                  <v-flex xs3>
                     <v-select :label="$t('detectors.filters.registration_status')" :items="regStatuses"
                               v-model="regStatusFilter" multiple clearable>
                     </v-select>
@@ -46,7 +51,7 @@
                 <v-data-table :headers="headers" :items="detectors" :rows-per-page-items="rowsPerPage" :search="search"
                               :pagination.sync="pagination"
                 >
-                  <template slot="items" scope="props">
+                  <template slot="items" slot-scope="props">
                     <td>
                       <nuxt-link :to="`/detectors/${props.item.id}`">
                         <div>{{ props.item.friendly_name }}</div>
@@ -66,6 +71,13 @@
                       </v-icon>
                       <v-icon class="error--text" v-else>warning</v-icon>
                       {{ props.item.componentsStatus }}
+                    </td>
+                    <td :class="props.item.updates_overall ? 'success--text' : 'warning--text'">
+                      <v-icon v-if="props.item.updates_overall" class="success--text">
+                        check_circle
+                      </v-icon>
+                      <v-icon class="warning--text" v-else>warning</v-icon>
+                      {{ props.item.updatesStatus }}
                     </td>
                     <td>
                       <div v-if="props.item.registration_status === 'Unapproved'" class="deep-orange--text">
@@ -98,7 +110,7 @@
           </v-flex>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

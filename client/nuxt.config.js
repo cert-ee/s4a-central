@@ -11,7 +11,9 @@ module.exports = {
 		],
 		link: [
 			{rel: 'icon', type: 'image/x-icon', href: '/favicon.png'},
+			/*
 			{rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons'}
+			 */
 		]
 	},
 	/*
@@ -21,9 +23,6 @@ module.exports = {
 	/*
 	 ** Build configuration
 	 */
-	build: {
-		vendor: ['vuetify', 'vue-moment', 'vue-i18n']
-	},
 	plugins: ['~/plugins/vuetify.js', '~/plugins/moment.js', '~/plugins/axios.js', '~/plugins/i18n.js'],
 	css: [
 		{src: '~/assets/style/app.styl', lang: 'styl'}
@@ -32,9 +31,24 @@ module.exports = {
 		'@nuxtjs/axios',
 	],
 	axios: {
-		baseURL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____',
+		baseURL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____'
 	},
 	env: {
-		URL_GRAFANA: process.env.URL_GRAFANA || 'http://grafana/'
+		URL_GRAFANA: process.env.URL_GRAFANA || 'http://grafana/',
+        API_URL: process.env.API_URL || '____API_URL_ERROR____CHECK_ENV____'
+	},
+	build: {
+		extractCSS: true,
+		extend(config, ctx) {
+			// Run ESLint on save
+			// if (ctx.isDev && ctx.isClient) {
+			//     config.module.rules.push({
+			//         enforce: 'pre',
+			//         test: /\.(js|vue)$/,
+			//         loader: 'eslint-loader',
+			//         exclude: /(node_modules)/
+			//     })
+			// }
+		}
 	}
-}
+};

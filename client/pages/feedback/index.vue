@@ -1,22 +1,21 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>{{ $t('feedback.title') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <transition name="fade">
-        <v-btn v-if="selectedFeedbacks.length" error @click="toggleSolved(false)">
+        <v-btn v-if="selectedFeedbacks.length" color="error" @click="toggleSolved(false)">
           {{ $t('feedback.mark_as_unsolved') }}
         </v-btn>
       </transition>
       <transition name="fade">
-        <v-btn v-if="selectedFeedbacks.length" success @click="toggleSolved(true)">
+        <v-btn v-if="selectedFeedbacks.length" color="success" @click="toggleSolved(true)">
           {{ $t('feedback.mark_as_solved') }}
         </v-btn>
       </transition>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid grid-list-lg>
         <v-layout row wrap justify-center>
           <v-flex xs12>
@@ -37,11 +36,11 @@
               </v-card-title>
               <v-card-text>
                 <v-data-table :headers="headers" :items="feedback" :rows-per-page-items="rowsPerPage" :search="search"
-                              :pagination.sync="pagination" v-model="selectedFeedbacks" select-all
+                              :pagination.sync="pagination" v-model="selectedFeedbacks" select-all="primary"
                 >
-                  <template slot="items" scope="props">
+                  <template slot="items" slot-scope="props">
                     <td>
-                      <v-checkbox primary hide-details v-model="props.selected"></v-checkbox>
+                      <v-checkbox color="primary" hide-details v-model="props.selected"></v-checkbox>
                     </td>
                     <td>
                       <nuxt-link :to="`/feedback/${props.item.id}`">
@@ -85,7 +84,7 @@
           </v-flex>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

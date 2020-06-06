@@ -10,7 +10,8 @@ export function state() {
         onlineFilter: '',
         componentsFilter: '',
         regStatusFilter: [],
-        detectorTagFilter: []
+        detectorTagFilter: [],
+        updatesFilter: ''
     };
 }
 
@@ -18,9 +19,11 @@ export const mutations = {
     clearFilters(state) {
         state.search = '';
         state.onlineFilter = '';
+        state.updatesFilter = '';
         state.componentsFilter = '';
         state.regStatusFilter = [];
         state.detectorTagFilter = [];
+
     },
 
     setSearch(state, value) {
@@ -29,6 +32,10 @@ export const mutations = {
 
     setPagination(state, value) {
         state.pagination = value;
+    },
+
+    setUpdatesFilter(state, value) {
+        state.updatesFilter = value;
     },
 
     setOnlineFilter(state, value) {

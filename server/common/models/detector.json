@@ -112,10 +112,92 @@
       "description": "Components info",
       "default": []
     },
+    "updates_overall": {
+      "type": "boolean",
+      "required": false,
+      "description": "Updates status",
+      "default": false
+    },
+    "updates": {
+      "type": "boolean",
+      "required": false,
+      "description": "Updates",
+      "default": false
+    },
     "last_seen": {
       "type": "date",
       "required": false,
-      "default": "$now"
+      "description": "Detector last seen"
+    },
+    "last_rules_check": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last checked rules"
+    },
+    "last_rules_update": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last updated rules"
+    },
+    "last_wise_check": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last checked wise"
+    },
+    "last_wise_update": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last updated wise"
+    },
+    "last_yara_check": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last checked yara"
+    },
+    "last_yara_sync": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last updated yara"
+    },
+    "last_alerts_report": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last reported alerts"
+    },
+    "last_alerts_report_count": {
+      "type": "number",
+      "required": false,
+      "description": "Detector last reported alerts count",
+      "default": 0
+    },
+    "last_alerts_actual_report": {
+      "type": "date",
+      "required": false,
+      "description": "Detector last actual reported"
+    },
+    "last_alerts_actual_report_count": {
+      "type": "number",
+      "required": false,
+      "description": "Detector last actual reported alerts count",
+      "default": 0
+    },
+    "rules_count": {
+      "type": "number",
+      "required": false,
+      "description": "Detector rules total count",
+      "default": 0
+    },
+    "rules_count_custom": {
+      "type": "number",
+      "required": false,
+      "description": "Detector rules custom count",
+      "default": 0
+    },
+    "rules_count_enabled": {
+      "type": "number",
+      "required": false,
+      "description": "Detector rules enabled count",
+      "default": 0
     },
     "online": {
       "type": "boolean",
@@ -187,6 +269,13 @@
     },
     {
       "property": "remove",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "task",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "admin",

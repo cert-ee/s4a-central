@@ -1,6 +1,7 @@
 {
   "no_changes": "No changes",
   "no_data_found": "No data found",
+  "duplicate_data": "Already exists",
   "worker_busy": "Worker already busy, please wait",
   "save_failed": "Failed to save info to database",
   "load_failed": "Failed to load info from database",

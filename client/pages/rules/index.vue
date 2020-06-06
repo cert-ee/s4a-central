@@ -1,13 +1,12 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>{{ $t('menu.rules') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <transition name="fade">
         <v-menu v-if="selectedRules.length" offset-y>
-          <v-btn primary slot="activator">
+          <v-btn color="primary" slot="activator">
             {{ $t('rules.add_tag') }}
             <v-icon right>expand_more</v-icon>
           </v-btn>
@@ -20,7 +19,7 @@
       </transition>
       <transition name="fade">
         <v-menu v-if="selectedRules.length" offset-y>
-          <v-btn error slot="activator">
+          <v-btn color="error" slot="activator">
             {{ $t('rules.remove_tag') }}
             <v-icon right>expand_more</v-icon>
           </v-btn>
@@ -33,15 +32,15 @@
       </transition>
       <v-spacer></v-spacer>
       <transition name="fade">
-        <v-btn v-if="selectedRules.length" success @click="toggleRules(true)">{{ $t('rules.enable_selected') }}</v-btn>
+        <v-btn v-if="selectedRules.length" color="success" @click="toggleRules(true)">{{ $t('rules.enable_selected') }}</v-btn>
       </transition>
       <transition name="fade">
-        <v-btn v-if="selectedRules.length" error @click="toggleRules(false)">{{ $t('rules.disable_selected') }}</v-btn>
+        <v-btn v-if="selectedRules.length" color="error" @click="toggleRules(false)">{{ $t('rules.disable_selected') }}</v-btn>
       </transition>
       <v-spacer></v-spacer>
-      <v-btn primary @click.stop="openAddEditRuleDialog()">{{ $t('rules.add_rule') }}</v-btn>
+      <v-btn color="primary" @click.stop="openAddEditRuleDialog()">{{ $t('rules.add_rule') }}</v-btn>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid grid-list-lg>
         <v-layout row wrap justify-center>
           <v-flex xs12>
@@ -65,8 +64,9 @@
                     </v-select>
                   </v-flex>
                   <v-flex xs3>
-                    <v-select :label="$t('rules.classtype')" :items="classTypeNames" v-model="classtypeFilter" multiple chips
-                      item-text="name" item-value="name" clearable>
+                    <v-select :label="$t('rules.classtype')" :items="classTypeNames" v-model="classtypeFilter" multiple
+                              chips
+                              item-text="name" item-value="name" clearable>
                     </v-select>
                   </v-flex>
                   <v-flex xs3>
@@ -76,14 +76,18 @@
               </v-card-title>
               <v-card-text>
                 <v-data-table :headers="headers" :items="rules" :rows-per-page-items="rowsPerPage" :search="search"
-                              :pagination.sync="pagination" v-model="selectedRules" select-all
+                              :pagination.sync="pagination" v-model="selectedRules" select-all="primary"
                 >
-                  <template slot="items" scope="props">
+                  <template slot="items" slot-scope="props">
                     <td>
-                      <v-checkbox primary hide-details v-model="props.selected"></v-checkbox>
+                      <v-checkbox color="primary" hide-details v-model="props.selected"></v-checkbox>
                     </td>
                     <td>{{ props.item.sid }}</td>
-                    <td>{{ props.item.enabled }}</td>
+                    <td>{{ props.item.enabled }}
+                      <i v-if="props.item.force_disabled === true" color="primary">
+                        !
+                      </i>
+                    </td>
                     <td>{{ props.item.severity }}</td>
                     <td>{{ props.item.revision }}</td>
                     <td>{{ props.item.ruleset }}</td>
@@ -91,17 +95,18 @@
                     <td>{{ props.item.message }}</td>
                     <td>{{ props.item.tagsStr }}</td>
                     <td>
-                      <v-icon class="pointer" @click.stop="newRule.rule_data = props.item.rule_data; ruleDataDialog = true">
+                      <v-icon class="pointer"
+                              @click.stop="newRule.rule_data = props.item.rule_data; ruleDataDialog = true">
                         track_changes
                       </v-icon>
                     </td>
                     <td>
-                      <v-icon v-if="props.item.ruleset === $store.state.rule_custom_name" primary class="pointer"
+                      <v-icon v-if="props.item.ruleset === $store.state.rule_custom_name" color="primary" class="pointer"
                               @click.stop="openAddEditRuleDialog(props.item)"
                       >
                         edit
                       </v-icon>
-                      <v-icon v-else error>block</v-icon>
+                      <v-icon v-else color="error">block</v-icon>
                     </td>
                   </template>
                 </v-data-table>
@@ -137,7 +142,7 @@
                         </v-select>
                       </v-flex>
                       <v-flex xs2>
-                        <v-checkbox :label="$t('enabled')" v-model="newRule.enabled"></v-checkbox>
+                        <v-checkbox color="primary" :label="$t('enabled')" v-model="newRule.enabled"></v-checkbox>
                       </v-flex>
                       <v-flex xs12 v-if="!addEditRuleDialog.isEditDialog">
                         <v-select :label="$t('menu.tags')" :items="tagNames" v-model="newRule.tags_changes" multiple chips
@@ -148,9 +153,9 @@
                         <v-text-field :label="$t('rules.message')" v-model="newRule.message" required :rules="[formRules.required]"></v-text-field>
                       </v-flex>
                       <v-flex xs12>
-                        <v-text-field :label="$t('rules.rule_data')" v-model="newRule.rule_data" required multi-line
-                                      :rules="[formRules.required]">
-                        </v-text-field>
+                        <v-textarea :label="$t('rules.rule_data')" v-model="newRule.rule_data" required
+                                    :rules="[formRules.required]">
+                        </v-textarea>
                       </v-flex>
                     </v-layout>
                   </v-container>
@@ -158,7 +163,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn type="button" flat @click="addEditRuleDialog.open = false">{{$t('cancel')}}</v-btn>
-                  <v-btn type="submit" flat primary>{{ addEditRuleDialog.isEditDialog ? $t('save') : $t('add') }}</v-btn>
+                  <v-btn type="submit" flat color="primary">{{ addEditRuleDialog.isEditDialog ? $t('save') : $t('add') }}</v-btn>
                 </v-card-actions>
               </v-form>
             </v-card>
@@ -177,7 +182,7 @@
           </v-dialog>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

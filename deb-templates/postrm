@@ -37,7 +37,7 @@ case "$1" in
   purge)
     delete_user '{{ node_deb_user }}'
     delete_group '{{ node_deb_group }}'
-    rm -rf '/var/log/{{ node_deb_package_name }}' /srv/data/suricata_em
+    rm -rf '/var/log/{{ node_deb_package_name }}' '/etc/logrotate.d/s4a-detector' '/srv/data/suricata_em'
     ;;
   *)
     echo "postinst called with unknown argument '$1'"

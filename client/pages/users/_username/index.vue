@@ -1,32 +1,29 @@
 <template>
   <div>
-    <v-navigation-drawer persistent dark overflow v-model="drawer" style="display: none;"></v-navigation-drawer>
-    <v-toolbar fixed class="blue-grey darken-2" dark>
+    <v-toolbar app dark fixed class="blue-grey darken-2">
       <v-toolbar-side-icon @click.stop="$store.commit('toggleDrawer')"></v-toolbar-side-icon>
       <v-toolbar-title>User Details - {{user.username}}</v-toolbar-title>
     </v-toolbar>
-    <main>
+    <v-content>
       <v-container fluid grid-list-lg>
         <v-layout row wrap>
           <v-flex xs1>
-            <v-btn fab dark primary @click.native="$router.go(-1)">
+            <v-btn fab dark color="primary" @click.native="$router.go(-1)">
               <v-icon dark>arrow_back</v-icon>
             </v-btn>
           </v-flex>
           <v-flex xs12 lg10>
-            <v-tabs icons centered grow>
-              <v-tabs-bar class="grey lighten-4">
-                <v-tabs-slider class="primary"></v-tabs-slider>
-                <v-tabs-item href="#roles">
-                  <v-icon>people</v-icon>
-                  User Roles & Password
-                </v-tabs-item>
-                <v-tabs-item href="#logs">
-                  <v-icon>view_list</v-icon>
-                  Logs
-                </v-tabs-item>
-              </v-tabs-bar>
-              <v-tabs-content id="roles">
+            <v-tabs icons-and-text centered grow>
+              <v-tabs-slider color="primary"></v-tabs-slider>
+              <v-tab href="#roles">
+                User Roles & Password
+                <v-icon>people</v-icon>
+              </v-tab>
+              <v-tab href="#logs">
+                Logs
+                <v-icon>view_list</v-icon>
+              </v-tab>
+              <v-tab-item value="roles">
                 <v-card>
                   <v-form @submit.prevent="updatePassword">
                     <v-card-title>
@@ -34,12 +31,12 @@
                         <v-flex xs6>
                           <v-text-field label="Password" v-model="password"
                                         :append-icon="passwordVisible ? 'visibility_off' : 'visibility'"
-                                        :append-icon-cb="() => (passwordVisible = !passwordVisible)"
+                                        @click:append="() => (passwordVisible = !passwordVisible)"
                                         :type="passwordVisible ? 'text' : 'password'">
                           </v-text-field>
                         </v-flex>
                         <v-flex xs6>
-                          <v-btn primary type="submit">Update</v-btn>
+                          <v-btn color="primary" type="submit">Update</v-btn>
                         </v-flex>
                       </v-layout>
                     </v-card-title>
@@ -47,7 +44,21 @@
                   <v-card-title class="mb-3">
                     <v-layout row wrap>
                       <v-flex xs6>
-                        <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search"></v-text-field>
+                        <v-layout row wrap>
+                          <v-flex xs4>
+                            <v-subheader>API Key</v-subheader>
+                          </v-flex>
+                          <v-flex xs8>
+                            <v-btn small class="ml-0" @click="renewApiKey">
+                              Renew API Key
+                            </v-btn>
+
+                            <v-btn small class="ml-0" @click="showApiKey" v-if="apiKey == false">
+                              Show Current
+                            </v-btn>
+                            <span v-if="apiKey != false">{{ apiKey }}</span>
+                          </v-flex>
+                        </v-layout>
                       </v-flex>
                     </v-layout>
                   </v-card-title>
@@ -55,31 +66,34 @@
                     <v-data-table :headers="headers" :items="roles" :search="search" :rows-per-page-items="rowsPerPage"
                                   :pagination.sync="pagination"
                     >
-                      <template slot="items" scope="props">
+                      <template slot="items" slot-scope="props">
                         <td>{{ props.item.name }}</td>
                         <td>{{ props.item.description }}</td>
                         <td>
-                          <v-switch v-model="props.item.active" @change="active => toggleRole(props.item, active)"></v-switch>
+                          <v-switch color="primary" v-model="props.item.active"
+                                    @change="active => toggleRole(props.item, active)"></v-switch>
                         </td>
                       </template>
                     </v-data-table>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
-              <v-tabs-content id="logs">
+              </v-tab-item>
+              <v-tab-item value="logs">
                 <v-card>
                   <v-card-title class="mb-3">
                     <v-layout row wrap>
                       <v-flex xs6>
-                        <v-text-field append-icon="search" label="Search" single-line hide-details v-model="logSearch"></v-text-field>
+                        <v-text-field append-icon="search" label="Search" single-line hide-details
+                                      v-model="logSearch"></v-text-field>
                       </v-flex>
                     </v-layout>
                   </v-card-title>
                   <v-card-text>
-                    <v-data-table :headers="logHeaders" :items="log" :rows-per-page-items="logRowsPerPage" :search="logSearch"
+                    <v-data-table :headers="logHeaders" :items="log" :rows-per-page-items="logRowsPerPage"
+                                  :search="logSearch"
                                   :pagination.sync="logPagination"
                     >
-                      <template slot="items" scope="props">
+                      <template slot="items" slot-scope="props">
                         <td>{{ props.item.time | moment('ddd, MMM DD YYYY HH:mm:ss') }}</td>
                         <td>{{ props.item.user }}</td>
                         <td>{{ props.item.msg }}</td>
@@ -87,12 +101,12 @@
                     </v-data-table>
                   </v-card-text>
                 </v-card>
-              </v-tabs-content>
+              </v-tab-item>
             </v-tabs>
           </v-flex>
         </v-layout>
       </v-container>
-    </main>
+    </v-content>
   </div>
 </template>
 

@@ -1,0 +1,9 @@
+.idea
+*.iml
+out
+gen
+*~
+*.attach_pid*
+node_modules/
+/server/server.js
+notes

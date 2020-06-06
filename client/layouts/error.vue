@@ -1,18 +1,18 @@
 <template>
     <v-app>
-        <main>
+        <v-content>
             <v-container fluid fill-height>
                 <v-layout align-center justify-center>
                     <v-flex xs12 class="text-xs-center">
-                        <h2>{{ statusCode }} </h2>
-                        <h4> {{ message }} </h4>
+                        <div class="display-3">{{ statusCode }}</div>
+                        <div class="display-1 mb-3">{{ message }}</div>
                         <p v-if="statusCode === 404">
                             <nuxt-link to="/">Back to the home page</nuxt-link>
                         </p>
                     </v-flex>
                 </v-layout>
             </v-container>
-        </main>
+        </v-content>
     </v-app>
 </template>
 

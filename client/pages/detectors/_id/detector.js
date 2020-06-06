@@ -22,6 +22,8 @@ export default {
             headers: [
                 { text: 'Name', align: 'left', value: 'friendly_name' },
                 { text: 'Status', align: 'left', value: 'statusStr' },
+                { text: 'Software', align: 'left', value: 'versionStr' },
+                {text: 'Installed', align: 'left', value: 'version_installed'},
                 { text: 'Message', align: 'left', value: 'message' }
             ],
             nameValid: true,
@@ -32,14 +34,8 @@ export default {
             rejectDialog: false,
             rejectionReason: '',
             rejectionReasonFilled: false,
+            deleteDetectorDialog: false,
             loading: false
-        }
-    },
-
-    computed: {
-        drawer: {
-            get() { return this.$store.state.drawer; },
-            set() {}
         }
     },
 
@@ -76,6 +72,11 @@ export default {
                 this.loading = false;
                 this.$store.dispatch('handleError', err);
             }
+        },
+
+        openDetectorDeleteDialog() {
+
+            this.deleteDetectorDialog = true;
         },
 
         openRejectDialog() {
@@ -116,14 +117,27 @@ export default {
 
         async saveTags() {
             try {
-                await this.$axios.delete(`detectors/${this.detector.id}/tags`);
-                let promises = [];
 
+                let current_tags = await this.$axios.get(`detectors/${this.detector.id}/tags?filter[fields][id]=true`);
+                current_tags = current_tags.data;
+
+                let current_index;
                 for (const tagId of this.detector.tags) {
-                    promises.push(this.$axios.put(`detectors/${this.detector.id}/tags/rel/${tagId}`));
+                    current_index = current_tags.findIndex(e => e.id === tagId);
+                    if( current_index > -1 ){
+                        current_tags.splice(current_tags.findIndex(e => e.id === tagId),1);
+                    } else {
+                        await this.$axios.post('rules/addJobForFullSync', {detectorId: this.detector.id, tagId: tagId });
+                        await this.$axios.put(`detectors/${this.detector.id}/tags/rel/${tagId}`);
+                    }
                 }
 
-                await Promise.all(promises);
+                for( let tag_remove of current_tags ){
+                    await this.$axios.post('rules/addJobForDeleteRules', {detectorId: this.detector.id, tagId: tag_remove.id });
+                    await this.$axios.post('rules/addJobForFullSync', {detectorId: this.detector.id, tagId: tag_remove.id });
+                    await this.$axios.delete(`detectors/${this.detector.id}/tags/rel/${tag_remove.id}`);
+                }
+
             } catch (err) {
                 this.$store.dispatch('handleError', err);
             }
@@ -152,14 +166,15 @@ export default {
         try {
             const include = {filter: {include: 'tags'}};
 
-            let [ {data: detector}, {data: tagNames} ] = await Promise.all([
-                $axios.get(`detectors/${params.id}`, {params: include}), $axios.get('tags')
+            let [ detector, tagNames ] = await Promise.all([
+                $axios.$get(`detectors/${params.id}`, {params: include}), $axios.$get('tags')
             ]);
 
             if (!detector) return error({statusCode: 404, message: 'Not Found'});
 
             for (let component of detector.components) {
                 component.statusStr = component.status ? 'OK' : 'Fail';
+                component.updateStr = component.version_status ? 'OK' : 'Update available';
             }
 
             let registration_step = 1;
