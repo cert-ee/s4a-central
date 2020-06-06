@@ -81,7 +81,7 @@ module.exports = function (boot) {
           hell.o("update test", "boot", "info");
         }
 
-        if (database_installer_version <= 2281) {
+        if (database_installer_version <= 2182) {
           something_to_update = true;
           hell.o("update ruleset model with skip_review and force_disabled", "boot", "info");
           let rulesets = await boot.app.models.ruleset.find();
