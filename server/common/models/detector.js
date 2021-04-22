@@ -101,9 +101,7 @@ module.exports = function (detector) {
          */
         hell.o("remove receiver roles", "afterSave", "info");
         let roles = await detector.app.models.roleMapping.find({where: {principalId: detectorId}});
-        for (let role of roles) {
-          let role_remove = await detector.app.models.roleMapping.destroyById(role.id);
-        }
+        await Promise.all(roles.map(role => detector.app.models.roleMapping.destroyById(role.id)));
 
         /*
         DELETE USER
@@ -155,26 +153,23 @@ module.exports = function (detector) {
 
       let all_detectors = await detector.find({fields: ["id", "last_seen", "online"]});
 
-      let offline_detectors = 0;
-      for (let i = 0, l = all_detectors.length; i < l; i++) {
-        if (all_detectors[i].online && new Date(all_detectors[i].last_seen) < filter_time) {
-          let update_result = await detector.update({id: all_detectors[i].id}, {online: false});
-          hell.o([update_result, " offline"], "task", "info");
-          offline_detectors++;
-        }
-      }
+      let offline_detectors = all_detectors.filter(det => (det.online && new Date(det.last_seen) < filter_time));
+      offline_detectors = offline_detectors.map(det => detector.update({id: det.id}, {online: false}));
+
+      for await (let update_result of offline_detectors)
+        hell.o([update_result, " offline"], "task", "info");
 
       let output = {logs: ""};
 
-      if (offline_detectors == 0) {
+      if (offline_detectors.length == 0) {
         hell.o(["no new offline detectors found"], "checkOffline", "info");
         // return cb(null, {message: "ok"});
         output = {logs: "no new offline detectors found"};
         return output;
       }
 
-      hell.o([offline_detectors, " detectors set to offline"], "checkOffline", "info");
-      output = {logs: offline_detectors + " detectors set to offline"};
+      hell.o([offline_detectors.length, " detectors set to offline"], "checkOffline", "info");
+      output = {logs: offline_detectors.length + " detectors set to offline"};
 
       hell.o("done", "checkOffline", "info");
       return output;

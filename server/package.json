@@ -37,6 +37,7 @@
     "nodemailer": "6.4.8",
     "passport": "0.4.1",
     "shelljs": "0.8.4",
+    "shell-escape": "0.2.0",
     "strong-error-handler": "3.4.0",
     "tar": "6.0.2",
     "walkdir": "0.4.1"

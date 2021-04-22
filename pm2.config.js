@@ -3,10 +3,9 @@ module.exports = {
         {
             name: 's4a-central-api-server',
             cwd: './server',
-            interpreter: '/bin/sh',
-            script: 'yarn',
-//            exec_mode: 'cluster',
-            args: 'prodenv',
+            script: './server/server.js',
+            instances: 'max',
+            exec_mode: 'cluster',
             env: {
                 NODE_ENV: 'production',
                 MONGODB_HOST: process.env.MONGODB_HOST,
