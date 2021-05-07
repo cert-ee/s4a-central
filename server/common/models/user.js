@@ -1,7 +1,8 @@
 'use strict';
 
+const { ObjectID } = require("loopback-connector-mongodb");
+
 const shelljs = require('shelljs');
-const shellescape = require('shell-escape');
 // const axios = require('axios');
 const hell = new (require(__dirname + "/helper.js"))({module_name: "user"});
 
@@ -24,7 +25,7 @@ module.exports = function (user) {
         let user_check = await user.findById(user_id);
         if (!user_check) throw new Error("no_data");
 
-        let token = await user.app.models.accessToken.findOne({where: {userId: user_id}});
+        let token = await user.app.models.accessToken.findOne({where: {userId: ObjectID(user_id) }});
         if (!token) throw new Error("could not find token");
         // hell.o(["token", token], "currentToken", "info");
 
@@ -66,7 +67,7 @@ module.exports = function (user) {
         if (!user_check) throw new Error("no_data");
 
         hell.o("find old tokens", "renewToken", "info");
-        let old_tokens = await user.app.models.AccessToken.find({where: {userId: user_id}});
+        let old_tokens = await user.app.models.AccessToken.find({where: {userId: ObjectID(user_id)}});
         for (let old_token of old_tokens) {
           hell.o(["destroy old token", old_token.id], "renewToken", "info");
           await user.app.models.AccessToken.destroyById(old_token.id)
@@ -121,7 +122,7 @@ module.exports = function (user) {
 
         /*
         if (process.env.NODE_ENV != "dev") {
-          user.local_connection.post( "http://localhost:9200/_bulk",
+          user.local_connection.post( "http://s4a-elasticsearch:9200/_bulk",
             {
               "index":
                 {"_index": "users",
@@ -187,7 +188,7 @@ module.exports = function (user) {
         let user_find = await user.findOne({where: {id: ctx.where.id.inq[0]}});
         hell.o(["user find", user_find], "delete", "info");
 
-        let change_input = shellescape(["htpasswd", "-D", "/etc/nginx/.htpasswd", user_find.username]);
+        let change_input = "htpasswd -D /etc/nginx/.htpasswd " + user_find.username;
         shelljs.exec(change_input, {silent: true}, function (exit_code, stdout, stderr) {
           hell.o(["shelljs result ", exit_code], "delete", "info");
           if (exit_code != 0) throw new Error(stderr);
@@ -234,7 +235,7 @@ module.exports = function (user) {
 
         let comp = await user.app.models.component.findOne({where: { name: "moloch", installed: true, enabled: true}})
         if ( comp && process.env.NODE_ENV != "dev") {
-          user.local_connection.delete( "http://localhost:9200/users/user/" + username);
+          user.local_connection.delete( "http://s4a-elasticsearch:9200/users/user/" + username);
           user.local_connection = "";
         }
 
@@ -281,9 +282,8 @@ module.exports = function (user) {
           return true;
         }
 
-        let change_input = shellescape(["htpasswd", "-i", "/etc/nginx/.htpasswd", username]);
-        let echo_password = shellescape(['printf', '%s', password]);
-        shelljs.exec(echo_password, {silent: true}).exec(change_input, {silent: true}, function (exit_code, stdout, stderr) {
+        let change_input = "printf '%s' '" + password.replace(/\'/g, '\'\\\'\'') + "' | htpasswd -i /etc/nginx/.htpasswd " + username;
+        shelljs.exec(change_input, {silent: true}, function (exit_code, stdout, stderr) {
           hell.o(["shelljs result ", exit_code], "updatePassword", "info");
           //let message = stderr;
           if (exit_code != 0) throw new Error(stderr);
@@ -330,12 +330,12 @@ module.exports = function (user) {
       }
 
       let current_user = await user.findOne({where: {id: user_id}});
-      let current_roles = await user.app.models.roleMapping.find({where: {principalId: user_id}});
+      let current_roles = await user.app.models.roleMapping.find({where: {principalId: ObjectID(user_id)}});
 
       if (current_roles.length > 0) return true;
       hell.o("No more roles, remove from htpasswd", "afterRoleRemove", "info");
 
-      let change_input = shellescape(["htpasswd", "-D", "/etc/nginx/.htpasswd", current_user.username]);
+      let change_input = "htpasswd -D /etc/nginx/.htpasswd " + current_user.username;
       hell.o(change_input, "afterRoleRemove", "info");
 
       shelljs.exec(change_input, {silent: true}, function (exit_code, stdout, stderr) {

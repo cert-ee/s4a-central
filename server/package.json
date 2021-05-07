@@ -1,6 +1,6 @@
 {
   "name": "s4a-central-lb_server",
-  "version": "0.2.187",
+  "version": "0.2.193",
   "description": "s4a central loopback server",
   "license": "MIT",
   "private": true,
@@ -18,39 +18,38 @@
     "posttest": "npm run lint && npm audit"
   },
   "dependencies": {
-    "axios": "0.19.2",
+    "axios": "0.21.1",
     "bunyan-mongodb-logger": "1.0.0",
-    "chalk": "4.0.0",
+    "chalk": "4.1.0",
     "checksum": "0.1.1",
     "compression": "1.7.4",
     "cors": "2.8.5",
-    "cron-parser": "2.15.0",
-    "helmet": "3.22.0",
+    "cron-parser": "2.18.0",
+    "helmet": "4.3.1",
     "i18n-node": "2.1.5",
     "line-by-line": "0.1.6",
-    "loopback": "3.27.0",
+    "loopback": "3.28.0",
     "loopback-boot": "3.3.1",
-    "loopback-connector-mongodb": "5.2.3",
-    "moment": "2.26.0",
-    "mongodb": "3.5.8",
-    "mustache": "4.0.1",
-    "nodemailer": "6.4.8",
+    "loopback-connector-mongodb": "5.5.0",
+    "moment": "2.29.1",
+    "mongodb": "3.6.3",
+    "mustache": "4.1.0",
+    "nodemailer": "6.4.17",
     "passport": "0.4.1",
     "shelljs": "0.8.4",
-    "shell-escape": "0.2.0",
-    "strong-error-handler": "3.4.0",
-    "tar": "6.0.2",
+    "strong-error-handler": "4.0.0",
+    "tar": "6.0.5",
     "walkdir": "0.4.1"
   },
   "devDependencies": {
-    "eslint": "7.2.0",
+    "eslint": "7.17.0",
     "eslint-config-loopback": "13.1.0",
-    "nodemon": "2.0.4"
+    "nodemon": "^2.0.7"
   },
   "resolutions": {
-    "i18n-node/mustache": "4.0.1",
-    "bunyan-mongodb-logger/mongodb": "3.5.8",
-    "nodemailer": "6.4.8"
+    "i18n-node/mustache": "4.1.0",
+    "bunyan-mongodb-logger/mongodb": "3.6.3",
+    "nodemailer": "6.4.17"
   },
   "repository": {
     "type": "",

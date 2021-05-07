@@ -1,6 +1,6 @@
 {
   "name": "s4a-central",
-  "version": "0.2.187",
+  "version": "0.2.193",
   "description": "s4a",
   "license": "MIT",
   "private": true,
@@ -26,6 +26,7 @@
     }
   },
   "dependencies": {
+    "node-deb": "^0.10.7",
     "pm2": "4.4.0"
   }
 }

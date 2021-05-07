@@ -37,7 +37,8 @@
       "type": "string",
       "required": true,
       "index": true,
-      "description": "Rule classtype from emerging threats"
+      "description": "Rule classtype from emerging threats",
+      "default": "no-classtype"
     },
     "severity": {
       "type": "string",

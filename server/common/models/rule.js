@@ -6,17 +6,16 @@ const fs = require('fs');
 const walk = require('walkdir');
 
 const LineByLineReader = require('line-by-line');
-const hell = new (require(__dirname + "/helper.js"))({module_name: "rule"});
+const hell = new (require(__dirname + '/helper.js'))({ module_name: 'rule' });
 
 module.exports = function (rule) {
-
   /**
    * LOOP RULE FILES
    *
    * @param rule_files
    */
   rule.loopRuleFiles = async function (rule_files, feed) {
-    hell.o("start", "loopRuleFiles", "info");
+    hell.o('start', 'loopRuleFiles', 'info');
 
     const Ruleset = rule.app.models.ruleset;
 
@@ -24,61 +23,65 @@ module.exports = function (rule) {
 
     // (async function () {
 
-    let file_check, ruleset_check, ruleset_name, ruleset_insert, filename, loop_index = 0;
+    let file_check,
+      ruleset_check,
+      ruleset_name,
+      ruleset_insert,
+      filename,
+      loop_index = 0;
     for (let file_full_path of rule_files) {
+      filename = file_full_path.split('/').pop();
 
-      filename = file_full_path.split("/").pop();
-
-      if (!filename.includes(".rules") || filename == feed.filename ) {
+      if (!filename.includes('.rules') || filename == feed.filename) {
         // hell.o([filename, " not rules file - ignore"], "loopRuleFiles", "info");
         continue;
       }
 
-      hell.o([filename, "loop"], "loopRuleFiles", "info");
-      hell.o([file_full_path, "loop"], "loopRuleFiles", "info");
+      hell.o([filename, 'loop'], 'loopRuleFiles', 'info');
+      hell.o([file_full_path, 'loop'], 'loopRuleFiles', 'info');
 
       // if (!/\.rules$/.test(filename)) continue; // ignore not .rules files
 
       //import only a subset of all the rules while development / testing
-      if (process.env.NODE_ENV == "dev") {
-        if (
-          filename.includes("drop")
-          ||
-          filename.includes("pop3")
-          ||
-          filename.includes("shellcode")
-          ||
-          filename.includes("chat")
-          ||
-          filename.includes("info")
-          // && feed.name == "emerging_pro" )
-        ) {
-        }
-        else continue;
-
-
-        // !filename.includes("drop")
-        // !filename.includes("pop3") && !filename.includes("shellcode") &&
-        // !filename.includes("telnet") && !filename.includes("chat") &&
-        // !filename.includes("drop") && !filename.includes("ftp")
-        // ) {
-        // hell.o([filename, " dev mode - ignore"], "loopRuleFiles", "info");
-        // continue;
-        // } // for testing
-      }
+      // if (process.env.NODE_ENV == "dev") {
+      //   if (
+      //     filename.includes("drop")
+      //     ||
+      //     filename.includes("pop3")
+      //     ||
+      //     filename.includes("shellcode")
+      //     ||
+      //     filename.includes("chat")
+      //     ||
+      //     filename.includes("info")
+      //     // && feed.name == "emerging_pro" )
+      //   ) {
+      //   }
+      //   else continue;
+      //
+      //
+      //   // !filename.includes("drop")
+      //   // !filename.includes("pop3") && !filename.includes("shellcode") &&
+      //   // !filename.includes("telnet") && !filename.includes("chat") &&
+      //   // !filename.includes("drop") && !filename.includes("ftp")
+      //   // ) {
+      //   // hell.o([filename, " dev mode - ignore"], "loopRuleFiles", "info");
+      //   // continue;
+      //   // } // for testing
+      // }
 
       // hell.o([filename, "loop"], "loopRuleFiles", "info");
 
-      ruleset_name = filename.replace("emerging-", "");
-      ruleset_name = ruleset_name.replace(".rules", "");
-      ruleset_insert = {name: ruleset_name};
+      ruleset_name = filename.replace('emerging-', '');
+      ruleset_name = ruleset_name.replace('.rules', '');
+      ruleset_insert = { name: ruleset_name };
 
       /*
       IF NEW RULESET, CREATE
        */
-      hell.o([ruleset_name, "find"], "loopRuleFiles", "info");
-      ruleset_check = await Ruleset.findOrCreate({where: ruleset_insert, include: ["tags"]}, ruleset_insert);
-      if (!ruleset_check) throw new Error("failed to find / create ruleset");
+      hell.o([ruleset_name, 'find'], 'loopRuleFiles', 'info');
+      ruleset_check = await Ruleset.findOrCreate({ where: ruleset_insert, include: ['tags'] }, ruleset_insert);
+      if (!ruleset_check) throw new Error('failed to find / create ruleset');
       ruleset_check = ruleset_check[0];
       //hell.o("done", "checkNewRulesForDetector", "info");
 
@@ -86,30 +89,30 @@ module.exports = function (rule) {
       CHECK RULE FILE
        */
       // hell.o([ruleset_name, "check file"], "loopRuleFiles", "info");
-      file_check = await rule.checkRuleFile({path: file_full_path, ruleset: ruleset_check, feed: feed}).then(value => {
-        return value;
-      }).catch(err => {
-        hell.o([ruleset_name, "check file result"], "loopRuleFiles", "error");
-        // reject( err );
-        return err;
-      });
+      file_check = await rule
+        .checkRuleFile({ path: file_full_path, ruleset: ruleset_check, feed: feed })
+        .then((value) => {
+          return value;
+        })
+        .catch((err) => {
+          hell.o([ruleset_name, 'check file result'], 'loopRuleFiles', 'error');
+          // reject( err );
+          return err;
+        });
 
-      hell.o([ruleset_name, "loop done for " + file_check], "loopRuleFiles", "info");
-      hell.o(["==================================="], "loopRuleFiles", "info");
-      hell.o(["current file vs total files " + loop_index, rule_files.length], "loopRuleFiles", "info");
+      hell.o([ruleset_name, 'loop done for ' + file_check], 'loopRuleFiles', 'info');
+      hell.o(['==================================='], 'loopRuleFiles', 'info');
+      hell.o(['current file vs total files ' + loop_index, rule_files.length], 'loopRuleFiles', 'info');
       loop_index = loop_index + 1;
     }
-    ;
-
-    hell.o("done", "loopRuleFiles", "info");
-    hell.o("===================================", "loopRuleFiles", "info");
+    hell.o('done', 'loopRuleFiles', 'info');
+    hell.o('===================================', 'loopRuleFiles', 'info');
     // success( true );
     return true;
 
     // })(); //async
 
     // }); //promise
-
   };
 
   /**
@@ -119,15 +122,14 @@ module.exports = function (rule) {
    * @param params
    */
   rule.checkRuleFile = function (params) {
-    hell.o([params.ruleset.name, "start"], "checkRuleFile", "info");
+    hell.o([params.ruleset.name, 'start'], 'checkRuleFile', 'info');
 
     return new Promise(function (success, reject) {
-
       let lineno = 0;
       let lr = new LineByLineReader(params.path);
 
       lr.on('error', function (err) {
-        hell.o(err, "checkRuleFile", "error");
+        hell.o(err, 'checkRuleFile', 'error');
         reject(err);
         return err;
       });
@@ -138,24 +140,22 @@ module.exports = function (rule) {
         //if( lineno % 6 ) lr.pause();
         lr.pause();
 
-        if (lineno % 250 === 0) { //just to show activity in the logs
-          hell.o([params.ruleset.name, "looping new rules " + lineno], "checkRuleFile", "info");
+        if (lineno % 250 === 0) {
+          //just to show activity in the logs
+          hell.o([params.ruleset.name, 'looping new rules ' + lineno], 'checkRuleFile', 'info');
         }
 
-        rule.checkRuleLine({ruleset: params.ruleset, line: line, feed: params.feed}).then(value => {
+        rule.checkRuleLine({ ruleset: params.ruleset, line: line, feed: params.feed }).then((value) => {
           lr.resume();
         });
-
       }); // lr.on
 
       lr.on('end', function () {
-        hell.o([params.ruleset.name, "done"], "checkRuleFile", "info");
+        hell.o([params.ruleset.name, 'done'], 'checkRuleFile', 'info');
         success(lineno);
         // return lineno;
       });
-
     }); // promise
-
   };
 
   /**
@@ -173,12 +173,16 @@ module.exports = function (rule) {
     // console.log( [ feed.name, feed.tags()] );
 
     //not a rule line, comments etc
-    if (!((line).startsWith("#alert") || (line).startsWith("alert"))) return true; // console.log( line );
+    if (!(line.startsWith('#alert') || line.startsWith('alert'))) return true; // console.log( line );
 
     let sid = parseInt(line.match(/sid:([0-9]*);/)[1]);
     // hell.o([sid, "start"], "checkRuleLine", "info");
     let revision = parseInt(line.match(/rev:([0-9]*);/)[1]);
-    let classtype = line.match(/classtype:(.*?);/)[1];
+    let classtype = 'no-classtype';
+    let classtype_check = line.match(/classtype:(.*?);/);
+    if (classtype_check !== null) {
+      classtype = classtype_check[1];
+    }
 
     let message = line.match(/msg:"(.*?)"/)[1];
     let severity = line.match(/signature_severity.(.+?),/);
@@ -188,7 +192,7 @@ module.exports = function (rule) {
     }
 
     let enabled = true;
-    if (line.charAt(0) == "#") {
+    if (line.charAt(0) == '#') {
       line = line.substr(1); //remove the hashtag
       enabled = false;
     }
@@ -210,34 +214,38 @@ module.exports = function (rule) {
       ruleset: ruleset.name,
       message: message,
       rule_data: line,
-      modified_time: new Date()
+      modified_time: new Date(),
     };
 
     // (async function () {
     try {
-
-
-
       //check if we have this classtype in db
-      if (classtype !== "" || classtype !== undefined) {
-        let classtype_found = await rule.app.models.rule_classtype.findOrCreate({where: {name: classtype}}, {name: classtype});
+      if (classtype !== undefined && classtype !== '' && classtype != null) {
+        let classtype_found = await rule.app.models.rule_classtype.findOrCreate(
+          { where: { name: classtype } },
+          { name: classtype }
+        );
       }
 
-      let update_result, tag_rule, rs_tags = ruleset.tags(), fd_tags = feed.tags(), draft_input,
-        create_extra = false, update_current = false, delete_current_feed_id = false, rule_to_change;
+      let update_result,
+        tag_rule,
+        rs_tags = ruleset.tags(),
+        fd_tags = feed.tags(),
+        draft_input,
+        create_extra = false,
+        update_current = false,
+        delete_current_feed_id = false,
+        rule_to_change;
 
       //check if we have rules with the same SID
-      let rule_found = await rule.find({where: {sid: sid}});
-
-
+      let rule_found = await rule.find({ where: { sid: sid } });
 
       // hell.o([feed.name + " primary feed?: ", feed.primary], "checkRuleLine", "info");
-
 
       // hell.o([rule_found.revision, revision], "checkRuleLine", "info");
 
       if (rule_found.length > 2) {
-        hell.o([sid, feed.name, "found more than two"], "checkRuleLine", "error");
+        hell.o([sid, feed.name, 'found more than two'], 'checkRuleLine', 'error');
         return false;
       }
 
@@ -274,7 +282,7 @@ module.exports = function (rule) {
         }
 
         //if new is not primary, rev same
-        if ( !rule_info.primary && rule_to_change.primary && rule_info.revision == rule_to_change.revision) {
+        if (!rule_info.primary && rule_to_change.primary && rule_info.revision == rule_to_change.revision) {
           // hell.o([sid, feed.name, "no changes "], "checkRuleLine", "info");
           return true;
         }
@@ -337,7 +345,11 @@ module.exports = function (rule) {
         }
 
         //if new is primary and has a higher rev, and new rev equals feed.rev
-        if (rule_info.primary && rule_info.revision > primary_rule.revision && rule_info.revision == feed_rule.revision) {
+        if (
+          rule_info.primary &&
+          rule_info.revision > primary_rule.revision &&
+          rule_info.revision == feed_rule.revision
+        ) {
           // hell.o([sid, feed.name, "existing and primary now the same, replace with primary"], "checkRuleLine", "info");
           delete_current_feed_id = feed_rule.id;
           update_current = true;
@@ -347,7 +359,6 @@ module.exports = function (rule) {
         if (!rule_info.primary && rule_info.revision > feed_rule.revision) {
           update_current = true;
         }
-
       } //end of rule_found.length == 2
 
       /**
@@ -366,13 +377,13 @@ module.exports = function (rule) {
           rule_info.enabled = false;
         }
         let rule_create = await rule.create(rule_info);
-        if (!rule_create) throw new Error("failed to create rule");
+        if (!rule_create) throw new Error('failed to create rule');
 
         //add tags from ruleset
         if (rs_tags !== undefined && rs_tags.length > 0) {
           for (let i = 0, l = rs_tags.length; i < l; i++) {
             tag_rule = await rule_create.tags.add(rs_tags[i]);
-            if (!tag_rule) throw new Error(sid + " failed to add new tag from ruleset");
+            if (!tag_rule) throw new Error(sid + ' failed to add new tag from ruleset');
           }
         }
 
@@ -382,24 +393,22 @@ module.exports = function (rule) {
           // console.log( fd_tags );
           for (let i = 0, l = fd_tags.length; i < l; i++) {
             tag_rule = await rule_create.tags.add(fd_tags[i]);
-            if (!tag_rule) throw new Error(sid + " failed to add new tag from feed");
+            if (!tag_rule) throw new Error(sid + ' failed to add new tag from feed');
           }
         }
 
         if (ruleset.skip_review) return true;
 
         rule_to_change = rule_create;
-
       } //rule_found.length == 0
 
       /**
        * REMOVE CURRENT FEED RULE by id
        */
       if (delete_current_feed_id !== false) {
-        hell.o([sid, feed.name, "remove current feed rule"], "checkRuleLine", "info");
+        hell.o([sid, feed.name, 'remove current feed rule'], 'checkRuleLine', 'info');
         let rule_remove = await rule.destroyById(delete_current_feed_id);
       }
-
 
       /**
        * IF RULE HAS FORCE DISABLED
@@ -414,11 +423,11 @@ module.exports = function (rule) {
        * AUTOMATIC UPDATE ALLOWED
        */
       if (ruleset.skip_review && update_current) {
-        hell.o([sid, "new revision update"], "checkRuleLine", "info");
-        hell.o([feed.name + " primary feed: ", feed.primary], "checkRuleLine", "info");
-        update_result = await rule.update({id: rule_to_change.id}, rule_info);
-        if (!update_result) throw new Error(sid + " failed to update rule");
-        hell.o([sid, "update ok"], "checkRuleLine", "info");
+        hell.o([sid, 'new revision update'], 'checkRuleLine', 'info');
+        hell.o([feed.name + ' primary feed: ', feed.primary], 'checkRuleLine', 'info');
+        update_result = await rule.update({ id: rule_to_change.id }, rule_info);
+        if (!update_result) throw new Error(sid + ' failed to update rule');
+        hell.o([sid, 'update ok'], 'checkRuleLine', 'info');
         return true;
       }
 
@@ -435,17 +444,16 @@ module.exports = function (rule) {
       if (rule_to_change.revision == revision && rule_to_change.enabled != enabled) {
         //toggle enabled
         // hell.o([sid, "enable change " + enabled], "checkRuleLine", "info");
-        draft_input = {id: rule_to_change.id, enabled: enabled};
-      } else { //must be new revision
+        draft_input = { id: rule_to_change.id, enabled: enabled };
+      } else {
+        //must be new revision
         delete rule_to_change.modified_time;
         // rule_to_change.id = rule_to_change.id;
         draft_input = rule_to_change;
-
       }
 
-      hell.o([sid, "create draft"], "checkRuleLine", "info");
+      hell.o([sid, 'create draft'], 'checkRuleLine', 'info');
       await rule.addToDraft(draft_input);
-
 
       // rule.app.models.rule_draft.more(draft_input, null, function () {
       //   hell.o([sid, "draft created"], "checkRuleLine", "info");
@@ -453,10 +461,9 @@ module.exports = function (rule) {
       //   return true;
       // });
 
-
       return true;
     } catch (err) {
-      hell.o([sid, err], "checkRuleLine", "error");
+      hell.o([sid, err], 'checkRuleLine', 'error');
       // reject(err);
       return false;
     }
@@ -464,15 +471,13 @@ module.exports = function (rule) {
     // })(); //async
 
     // }); //promise
-
   };
 
-
   rule.addToDraft = async function (draft_input) {
-    hell.o([draft_input.sid, "add to draft"], "addToDraft", "info");
+    hell.o([draft_input.sid, 'add to draft'], 'addToDraft', 'info');
 
     rule.app.models.rule_draft.more([draft_input], null, function () {
-      hell.o([draft_input.sid, "done"], "addToDraft", "info");
+      hell.o([draft_input.sid, 'done'], 'addToDraft', 'info');
       // return success(true);
       return true;
     });
@@ -491,25 +496,32 @@ module.exports = function (rule) {
    * @returns {Promise}
    */
   rule.checkNewRulesForDetector = async function (detector_id, last_update) {
-    hell.o("start", "checkNewRulesForDetector", "info");
-    hell.o(["last update", last_update], "checkNewRulesForDetector", "info");
+    hell.o('start', 'checkNewRulesForDetector', 'info');
+    hell.o(['last update', last_update], 'checkNewRulesForDetector', 'info');
     // return new Promise((success, reject) => {
 
     // (async function () {
     try {
-
-      let rule_fields = ["sid", "revision", "classtype", "severity", "ruleset",
-        "enabled", "message", "rule_data", "modified_time"
+      let rule_fields = [
+        'sid',
+        'revision',
+        'classtype',
+        'severity',
+        'ruleset',
+        'enabled',
+        'message',
+        'rule_data',
+        'modified_time',
         //, "created_time"
       ];
 
       let detector = await rule.app.models.detector.findById(detector_id, {
         include: {
-          relation: "tags",
+          relation: 'tags',
           scope: {
             // fields: ["id","name"]
-          }
-        }
+          },
+        },
       });
 
       let detector_tags = detector.tags();
@@ -519,34 +531,34 @@ module.exports = function (rule) {
        */
       let rules_with_tags = [];
       if (detector.tags().length > 0) {
-        hell.o(["found tags for detector", detector_tags], "checkNewRulesForDetector", "info");
+        hell.o(['found tags for detector', detector_tags], 'checkNewRulesForDetector', 'info');
 
         let tags_filter = {
           where: {
-            or: []
+            or: [],
           },
           include: {
-            relation: "rules",
+            relation: 'rules',
             scope: {
-              fields: rule_fields
-            }
-          }
+              fields: rule_fields,
+            },
+          },
         };
 
         for (const t in detector.tags()) {
-          tags_filter.where.or.push({"id": detector.tags()[t].id});
-          console.log("tag for Where Or", detector.tags()[t].id);
+          tags_filter.where.or.push({ id: detector.tags()[t].id });
+          console.log('tag for Where Or', detector.tags()[t].id);
         }
 
         // tags_filter.include.scope = {
         //   fields: rule_fields
         // };
 
-        if (last_update == "full") {
-          hell.o("perform full update on rules", "checkNewRulesForDetector", "info");
+        if (last_update == 'full') {
+          hell.o('perform full update on rules', 'checkNewRulesForDetector', 'info');
         } else {
           tags_filter.include.scope.where = {
-            modified_time: {gt: last_update}
+            modified_time: { gt: last_update },
           };
         }
 
@@ -564,25 +576,22 @@ module.exports = function (rule) {
           }
         }
 
-        hell.o(["rules with tags", rules_with_tags.length], "checkNewRulesForDetector", "info");
-
+        hell.o(['rules with tags', rules_with_tags.length], 'checkNewRulesForDetector', 'info');
       } // DETECTOR HAS TAGS
 
+      let public_filter = {
+        include: {
+          relation: 'tags',
+          scope: {
+            fields: rule_fields,
+          },
+        },
+      };
 
-      let public_filter =
-        {
-          include: {
-            relation: "tags",
-            scope: {
-              fields: rule_fields
-            }
-          }
-        };
-
-      if (last_update != "full") {
+      if (last_update != 'full') {
         public_filter.where = {
-          modified_time: {gt: last_update}
-        }
+          modified_time: { gt: last_update },
+        };
       }
 
       let new_rules = await rule.find(public_filter);
@@ -591,7 +600,7 @@ module.exports = function (rule) {
       new_rules = new_rules.filter(function (t) {
         return t.tags().length == 0;
       });
-      hell.o(["rules without tags", new_rules.length], "checkNewRulesForDetector", "info");
+      hell.o(['rules without tags', new_rules.length], 'checkNewRulesForDetector', 'info');
 
       //merge rules with tags
       new_rules = new_rules.concat(rules_with_tags);
@@ -608,7 +617,7 @@ module.exports = function (rule) {
           ruleset: new_rules[i].ruleset,
           enabled: new_rules[i].enabled,
           message: new_rules[i].message,
-          rule_data: new_rules[i].rule_data
+          rule_data: new_rules[i].rule_data,
         };
 
         new_rules[i] = temp_rule;
@@ -616,12 +625,12 @@ module.exports = function (rule) {
 
       // console.log( new_rules );
 
-      hell.o(["total new rules", new_rules.length], "checkNewRulesForDetector", "info");
-      hell.o("done", "checkNewRulesForDetector", "info");
+      hell.o(['total new rules', new_rules.length], 'checkNewRulesForDetector', 'info');
+      hell.o('done', 'checkNewRulesForDetector', 'info');
       // success(new_rules);
       return new_rules;
     } catch (err) {
-      hell.o(err, "checkNewRulesForDetector", "error");
+      hell.o(err, 'checkNewRulesForDetector', 'error');
       // reject(false);
       return false;
     }
@@ -629,10 +638,7 @@ module.exports = function (rule) {
     // })(); // async
 
     // }); //promise
-
   };
-
-
 
   /**
    * Add a job to job_schedule to perform a full sync for rules
@@ -641,53 +647,51 @@ module.exports = function (rule) {
    * @param tagId
    */
   rule.addJobForFullSync = function (detectorId, tagId, cb) {
-    hell.o("start", "addJobForFullSync", "info");
+    hell.o('start', 'addJobForFullSync', 'info');
 
     (async function () {
       try {
+        hell.o([detectorId, 'detectorId'], 'addJobForFullSync', 'info');
+        let detector = await rule.app.models.detector.findOne({ where: { id: detectorId } });
+        if (!detector) throw new Error('can not find detector');
 
-        hell.o([detectorId, "detectorId"], "addJobForFullSync", "info");
-        let detector = await rule.app.models.detector.findOne({where: {id: detectorId}});
-        if (!detector) throw new Error("can not find detector");
-
-        let tag = await rule.app.models.tag.findOne({where: {id: tagId}});
-        if (!tag) throw new Error("can not find tag");
+        let tag = await rule.app.models.tag.findOne({ where: { id: tagId } });
+        if (!tag) throw new Error('can not find tag');
 
         let job = {
           target: detector.name,
           targetId: detector.id,
           detectorId: detector.id,
-          name: "rulesFullSync",
-          description: "Perform a full sync for rules",
-          ignore_duplicate: true
+          name: 'rulesFullSync',
+          description: 'Perform a full sync for rules',
+          ignore_duplicate: true,
         };
 
         // console.log( job.data );
-        hell.o("add full sync rules job to schedule", "addJobForFullSync", "info");
+        hell.o('add full sync rules job to schedule', 'addJobForFullSync', 'info');
         let job_result = await rule.app.models.job_schedule.jobAdd(job);
-        if (!job_result) throw new Error("failed to add rulesFullSync job to schedule, detector will have current rules");
-        hell.o("job added", "addJobForFullSync", "info");
+        if (!job_result)
+          throw new Error('failed to add rulesFullSync job to schedule, detector will have current rules');
+        hell.o('job added', 'addJobForFullSync', 'info');
 
-        hell.o([detectorId, "done"], "addJobForFullSync", "info");
-        if (cb) return cb(null, {message: "ok"});
+        hell.o([detectorId, 'done'], 'addJobForFullSync', 'info');
+        if (cb) return cb(null, { message: 'ok' });
         return true;
       } catch (err) {
-        hell.o(err, "addJobForFullSync", "error");
-        if (cb) return cb({name: "Error", status: 400, message: "Central failed to process the request"});
+        hell.o(err, 'addJobForFullSync', 'error');
+        if (cb) return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
         return false;
       }
-
     })(); // async
-
   };
 
   rule.remoteMethod('addJobForFullSync', {
     accepts: [
-      {arg: 'detectorId', type: 'string', required: true},
-      {arg: 'tagId', type: 'string', required: true},
+      { arg: 'detectorId', type: 'string', required: true },
+      { arg: 'tagId', type: 'string', required: true },
     ],
-    returns: {type: 'object', root: true},
-    http: {path: '/addJobForFullSync', verb: 'post', status: 201}
+    returns: { type: 'object', root: true },
+    http: { path: '/addJobForFullSync', verb: 'post', status: 201 },
   });
 
   /**
@@ -697,82 +701,78 @@ module.exports = function (rule) {
    * @param tagId
    */
   rule.addJobForDeleteRules = function (detectorId, tagId, cb) {
-    hell.o("start", "addJobForDeleteRules", "info");
+    hell.o('start', 'addJobForDeleteRules', 'info');
 
     (async function () {
       try {
+        hell.o([detectorId, 'detectorId'], 'addJobForDeleteRules', 'info');
+        let detector = await rule.app.models.detector.findOne({ where: { id: detectorId } });
+        if (!detector) throw new Error('can not find detector');
 
-        hell.o([detectorId, "detectorId"], "addJobForDeleteRules", "info");
-        let detector = await rule.app.models.detector.findOne({where: {id: detectorId}});
-        if (!detector) throw new Error("can not find detector");
-
-        let tag = await rule.app.models.tag.findOne({where: {id: tagId}});
-        if (!tag) throw new Error("can not find tag");
+        let tag = await rule.app.models.tag.findOne({ where: { id: tagId } });
+        if (!tag) throw new Error('can not find tag');
 
         /**
          * find rules with the tag
          */
         let tags_filter = {
           where: {
-            id: tag.id
+            id: tag.id,
           },
           include: {
-            relation: "rules",
+            relation: 'rules',
             scope: {
-              fields: ["sid"]
-            }
-          }
+              fields: ['sid'],
+            },
+          },
         };
 
         // console.log( "tags_filter" );
         // console.log( tags_filter );
         let look_for_rules_w_this_tag = await rule.app.models.tag.find(tags_filter);
         if (look_for_rules_w_this_tag.length == 0 && look_for_rules_w_this_tag[0].rules().length > 0) {
-          if (cb) return cb(null, {message: "ok"});
+          if (cb) return cb(null, { message: 'ok' });
           return true;
         }
 
         let output_rules = [];
         look_for_rules_w_this_tag[0].rules().forEach(function (v) {
-          output_rules.push({sid: v.sid});
+          output_rules.push({ sid: v.sid });
         });
 
         let job = {
           target: detector.name,
           targetId: detector.id,
           detectorId: detector.id,
-          data: {rules: output_rules},
-          name: "rulesRemove",
-          description: "Remove some rules"
+          data: { rules: output_rules },
+          name: 'rulesRemove',
+          description: 'Remove some rules',
         };
 
         // console.log( job.data );
-        hell.o("add remove rules job to schedule", "addJobForDeleteRules", "info");
+        hell.o('add remove rules job to schedule', 'addJobForDeleteRules', 'info');
         let job_result = await rule.app.models.job_schedule.jobAdd(job);
-        if (!job_result) throw new Error("failed to add addJobForDeleteRules job to schedule, detector will have current rules");
-        hell.o("job added", "addJobForDeleteRules", "info");
+        if (!job_result)
+          throw new Error('failed to add addJobForDeleteRules job to schedule, detector will have current rules');
+        hell.o('job added', 'addJobForDeleteRules', 'info');
 
-        hell.o([detectorId, "done"], "addJobForDeleteRules", "info");
-        if (cb) return cb(null, {message: "ok"});
+        hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
+        if (cb) return cb(null, { message: 'ok' });
         return true;
       } catch (err) {
-        hell.o(err, "addJobForDeleteRules", "error");
-        if (cb) return cb({name: "Error", status: 400, message: "Central failed to process the request"});
+        hell.o(err, 'addJobForDeleteRules', 'error');
+        if (cb) return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
         return false;
       }
-
     })(); // async
-
   };
 
   rule.remoteMethod('addJobForDeleteRules', {
     accepts: [
-      {arg: 'detectorId', type: 'string', required: true},
-      {arg: 'tagId', type: 'string', required: true},
+      { arg: 'detectorId', type: 'string', required: true },
+      { arg: 'tagId', type: 'string', required: true },
     ],
-    returns: {type: 'object', root: true},
-    http: {path: '/addJobForDeleteRules', verb: 'post', status: 201}
+    returns: { type: 'object', root: true },
+    http: { path: '/addJobForDeleteRules', verb: 'post', status: 201 },
   });
-
-
 };
