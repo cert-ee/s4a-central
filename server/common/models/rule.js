@@ -175,16 +175,27 @@ module.exports = function (rule) {
     //not a rule line, comments etc
     if (!(line.startsWith('#alert') || line.startsWith('alert'))) return true; // console.log( line );
 
-    let sid = parseInt(line.match(/sid:([0-9]*);/)[1]);
+    let sid = undefined;
+    try {
+        sid = parseInt(line.match(/sid:([0-9]*);/)[1]);
+    } catch(e) {
+        hell.o(line, "checkRuleLineAAAA", "info");
+        throw e;
+    };
     // hell.o([sid, "start"], "checkRuleLine", "info");
-    let revision = parseInt(line.match(/rev:([0-9]*);/)[1]);
+    let revision = line.match(/rev:([0-9]*);/);
+    if (revision === null) {
+        revision = 1;
+    } else {
+        revision = parseInt(revision[1]);
+    };
     let classtype = 'no-classtype';
     let classtype_check = line.match(/classtype:(.*?);/);
     if (classtype_check !== null) {
       classtype = classtype_check[1];
     }
 
-    let message = line.match(/msg:"(.*?)"/)[1];
+    let message = line.match(/msg:\s*"(.*?)"/)[1];
     let severity = line.match(/signature_severity.(.+?),/);
 
     if (severity && severity.constructor === Array) {
