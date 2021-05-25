@@ -265,7 +265,7 @@ module.exports = function (report) {
    * @param options
    * @param cb
    */
-  report.rules = function (last_rules_update, options, cb) {
+  report.rules = function (last_rules_update, options, req, cb) {
     hell.o("start", "rules", "info");
 
     let detector_id = options.accessToken.detectorId;
@@ -274,6 +274,7 @@ module.exports = function (report) {
     (async function () {
       try {
 
+        req.setTimeout(3600000);
         hell.o([detector_id, "find detector"], "rules", "info");
         let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
         if (!detector) throw new Error("failed to find detector");
@@ -304,7 +305,8 @@ module.exports = function (report) {
   report.remoteMethod('rules', {
     accepts: [
       {arg: 'last_rules_update', type: 'string', required: true},
-      {arg: "options", type: "object", http: "optionsFromRequest"}
+      {arg: "options", type: "object", http: "optionsFromRequest"},
+      {arg: 'req', type: 'object', http: {source: 'req'}}
     ],
     returns: {type: 'object', root: true},
     http: {path: '/rules', verb: 'post', status: 201}
