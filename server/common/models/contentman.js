@@ -103,7 +103,8 @@ module.exports = function (contentman) {
         counter = 0;
 
       if (files.length == 0) {
-        throw new Error('no files to remove ' + folder);
+//        throw new Error('no files to remove ' + folder);
+         return true;
       }
 
       hell.o([files.length, ' files found to remove'], 'removeFilesR', 'info');
