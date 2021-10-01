@@ -26,8 +26,7 @@ module.exports = function (registration) {
                                    machine_id, options, req, cb) {
     hell.o( ["start", organization_name ], "request" , "info" );
 
-    let ip_address = "unknown";
-    if (req.ip) ip_address = req.ip;
+    let ip_address = req.ip ? req.ip : "unknown";
 
     let temp_detector_name = "UNAPPROVED_" + Math.floor(new Date());
     let registration_info = {
@@ -117,7 +116,7 @@ module.exports = function (registration) {
         hell.o( "dev mode: return dummy", "saveCsrFile", "info" ); return success(true);
       }
 
-      let file_path = csr_path_unsigned + "" + input.name + ".csr";
+      let file_path = `${csr_path_unsigned}${input.name.replaceAll('/', '_')}.csr`;
       fs.writeFile(file_path, input.csr_unsigned, function (err) {
         if (err) {
           hell.o( err, "saveCsrFile", "error" );
@@ -146,7 +145,7 @@ module.exports = function (registration) {
     return new Promise((success, reject) => {
       setTimeout(function () { // signing is hard work, need to wait a bit
 
-          let file_path = csr_path_signed + "" + input.name + ".conf";
+          let file_path = `${csr_path_signed}${input.name.replaceAll('/', '_')}.conf`;
           fs.readFile(file_path, 'utf8', function (err, contents) {
             if (err) {
               hell.o( err, "checkIfCsrIsReady", "error" );

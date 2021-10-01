@@ -267,6 +267,7 @@ module.exports = function (report) {
    */
   report.rules = function (last_rules_update, options, req, cb) {
     hell.o("start", "rules", "info");
+    req.setTimeout(3600000);
 
     let detector_id = options.accessToken.detectorId;
     hell.o(detector_id, "rules", "info");

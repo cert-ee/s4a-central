@@ -49,6 +49,20 @@ module.exports = {
 			//         exclude: /(node_modules)/
 			//     })
 			// }
+		},
+		// https://stackoverflow.com/questions/66325582/nuxt-js-cannot-find-module-babel-preset-env-lib-utils
+		babel: {
+			presets({isServer}) {
+				const targets = isServer ? { node: 'current' } : { ie: 11 }
+				return [
+					[ require.resolve("@babel/preset-env"), { targets }  ]
+				]
+			},
+			plugins: [
+				"@babel/syntax-dynamic-import",
+				"@babel/transform-runtime",
+				"@babel/transform-async-to-generator"
+			]
 		}
 	}
 };
