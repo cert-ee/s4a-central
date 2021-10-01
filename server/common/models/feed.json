@@ -65,13 +65,13 @@
     },
     "component_type": {
       "type": "string",
-      "description": "Feed for which component type ( domain, ip, url )",
+      "description": "Feed for which component type ( domain, ip, ja3, url )",
       "required": true
     },
     "component_tag_name": {
       "type": "string",
       "description": "Feed tag inside the component",
-      "required": false,
+      "required": true,
       "default": "default"
     },
     "checksum": {

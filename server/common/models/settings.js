@@ -42,6 +42,7 @@ module.exports = function (settings) {
           path_moloch_content: PATH_BASE + "moloch/",
           path_moloch_yara: PATH_BASE + "moloch/yara/",
           path_moloch_wise_ip: PATH_BASE + "moloch/wise_ip/",
+          path_moloch_wise_ja3: PATH_BASE + "moloch/wise_ja3/",
           path_moloch_wise_url: PATH_BASE + "moloch/wise_url/",
           path_moloch_wise_domain: PATH_BASE + "moloch/wise_domain/"
         };

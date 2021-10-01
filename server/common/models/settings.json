@@ -46,6 +46,12 @@
       "description": "Path to wise IPs for detectors",
       "default": "/srv/s4a-central/moloch/wise_ip/"
     },
+    "path_moloch_wise_ja3": {
+      "type": "string",
+      "required": true,
+      "description": "Path to wise JA3s for detectors",
+      "default": "/srv/s4a-central/moloch/wise_ja3/"
+    },
     "path_moloch_wise_url": {
       "type": "string",
       "required": true,

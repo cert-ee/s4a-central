@@ -11,7 +11,7 @@ export default {
             ],
             feedTypes: ['url', 'file'],
             feedComponents: ['suricata', 'moloch'],
-            feedComponentTypes: ['rules', 'wise_ip', 'wise_url', 'wise_domain', 'yara'],
+            feedComponentTypes: ['rules', 'wise_ip', 'wise_ja3', 'wise_url', 'wise_domain', 'yara'],
             addEditEntryDialog: {
                 open: false,
                 isEditDialog: false
@@ -78,7 +78,7 @@ export default {
 
         changeComponent() {
             if (this.entry.component_name == 'moloch') {
-                this.feedComponentTypes = ['wise_ip', 'wise_url', 'wise_domain', 'yara'];
+                this.feedComponentTypes = ['wise_domain', 'wise_ip', 'wise_ja3', 'wise_url', 'yara'];
                 // this.component_type = "wise_ip";
                 this.component_tag_name = "";
             }

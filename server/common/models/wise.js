@@ -54,6 +54,7 @@ module.exports = function (wise) {
           or: [
             {component_type: 'wise_domain'},
             {component_type: 'wise_ip'},
+            {component_type: 'wise_ja3'},
             {component_type: 'wise_url'}
           ]
         },
@@ -62,18 +63,16 @@ module.exports = function (wise) {
         }
       });
 
-      let wise_feed, file_path, file_contents, detector_feed = [], feed_tags, detector_has_the_tag;
-      for (let fd of feeds) {
+      for (let feed of feeds) {
 
         // checks if detector has correct tags to receive the feed
-        if (fd.tags().length > 0) {
+        if (feed.tags().length > 0) {
           if (detector_tags == 0) {
             console.log("detector has no tags, IGNORE");
             continue;
           }
-          detector_has_the_tag = [];
-          feed_tags = fd.tags().map(a => a.name);
-          detector_has_the_tag = feed_tags.filter(a => detector_tags.indexOf(a) !== -1);
+
+          let detector_has_the_tag = feed.tags().map(a => a.name).filter(a => detector_tags.indexOf(a) !== -1);
           if (detector_has_the_tag.length == 0) {
             console.log("NO MATCHES?");
             console.log(detector_has_the_tag);
@@ -82,34 +81,30 @@ module.exports = function (wise) {
         }
 
         // console.log( input );
-        if (input !== undefined && input.length > 0) {
-          detector_feed = input.filter(function (value, index, arr) {
-            return value.name === fd.name;
-          });
-        }
+        let detector_feed = input !== undefined && input.length > 0 ? input.filter(value => value.name === feed.name) : [];
 
         console.log("DETECTOR HAS THE FEED?:");
         console.log(detector_feed);
 
-        file_contents = "";
-        file_path = fd.location_folder + "" + fd.filename;
+        let file_contents = "";
+        let file_path = feed.location_folder + "" + feed.filename;
         // console.log(file_path);
         //detector_feed.length === 1 ||
-        if (detector_feed.length === 0 || detector_feed.length > 0 && detector_feed[0].checksum !== fd.checksum) {
+        if (detector_feed.length === 0 || detector_feed.length > 0 && detector_feed[0].checksum !== feed.checksum) {
           console.log("DETECTOR HAS THE FEED AND NEED TO UPDATE");
-          // console.log(detector_feed[0].checksum, fd.checksum);
+          // console.log(detector_feed[0].checksum, feed.checksum);
 
-          file_contents = await fs.readFileSync(file_path, 'utf8');
+          file_contents = fs.readFileSync(file_path, 'utf8');
         }
 
-        wise_feed = {
-          name: fd.name,
-          friendly_name: fd.friendly_name,
-          enabled: fd.enabled,
-          filename: fd.filename,
-          type: fd.component_type,
-          tag_name: fd.component_tag_name,
-          checksum: fd.checksum,
+        let wise_feed = {
+          name: feed.name,
+          friendly_name: feed.friendly_name,
+          enabled: feed.enabled,
+          filename: feed.filename,
+          type: feed.component_type,
+          tag_name: feed.component_tag_name,
+          checksum: feed.checksum,
           contents: file_contents
         };
 
