@@ -7,3 +7,4 @@ gen
 node_modules/
 /server/server.js
 notes
+*.deb

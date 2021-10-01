@@ -608,9 +608,7 @@ module.exports = function (rule) {
       let new_rules = await rule.find(public_filter);
 
       //get public rules ( no tags )
-      new_rules = new_rules.filter(function (t) {
-        return t.tags().length == 0;
-      });
+      new_rules = new_rules.filter(t => t.tags().length === 0);
       hell.o(['rules without tags', new_rules.length], 'checkNewRulesForDetector', 'info');
 
       //merge rules with tags
