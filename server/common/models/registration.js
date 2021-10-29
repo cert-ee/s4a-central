@@ -116,7 +116,7 @@ module.exports = function (registration) {
         hell.o( "dev mode: return dummy", "saveCsrFile", "info" ); return success(true);
       }
 
-      let file_path = `${csr_path_unsigned}${input.name.replaceAll('/', '_')}.csr`;
+      let file_path = `${csr_path_unsigned}${input.name.replace(/\//g, '_')}.csr`;
       fs.writeFile(file_path, input.csr_unsigned, function (err) {
         if (err) {
           hell.o( err, "saveCsrFile", "error" );
@@ -145,7 +145,7 @@ module.exports = function (registration) {
     return new Promise((success, reject) => {
       setTimeout(function () { // signing is hard work, need to wait a bit
 
-          let file_path = `${csr_path_signed}${input.name.replaceAll('/', '_')}.conf`;
+          let file_path = `${csr_path_signed}${input.name.replace(/\//g, '_')}.conf`;
           fs.readFile(file_path, 'utf8', function (err, contents) {
             if (err) {
               hell.o( err, "checkIfCsrIsReady", "error" );
