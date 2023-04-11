@@ -80,6 +80,26 @@ module.exports = function (report) {
         });
         if (!job_queue) throw new Error(detector_id + " failed to get detector job queue");
 
+
+      job_queue.sort((x, y) => {
+        x = x.name;
+        y = y.name;
+
+        // always sort registrationApproved/registrationRejected first,
+        // avoids a registration status message getting lost
+        if (x.startsWith('registration'))
+          return -1;
+        if (y.startsWith('registration'))
+          return 1;
+
+        // default
+        if (x < y)
+          return -1;
+        if (x > y)
+          return 1;
+        return 0;
+      });
+
         let output = {
           job_queue: job_queue
         };
