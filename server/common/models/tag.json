@@ -28,7 +28,7 @@
     },
     "feeds": {
       "type": "hasAndBelongsToMany",
-      "model": "detector",
+      "model": "feed",
       "foreignKey": ""
     },
     "rules": {

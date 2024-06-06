@@ -73,6 +73,20 @@
       "permission": "ALLOW"
     },
     {
+      "property": "feedFetch",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "detector",
+      "permission": "ALLOW"
+    },
+    {
+      "property": "sidFetch",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "detector",
+      "permission": "ALLOW"
+    },
+    {
       "property": "alertsManual",
       "accessType": "*",
       "principalType": "ROLE",

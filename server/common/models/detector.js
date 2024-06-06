@@ -67,9 +67,9 @@ module.exports = function (detector) {
         DELETE VPN CONFIG
          */
         let vpn_conf_path = "/etc/openvpn/keys/" + detector_name + " .conf";
-        if (await fs.existsSync(vpn_conf_path)) {
+        if (fs.existsSync(vpn_conf_path)) {
           hell.o([detector_name, "detector vpn conf found, going to delete"], "deleteDetector", "info");
-          await fs.unlinkSync(vpn_conf_path);
+          await fs.promises.unlink(vpn_conf_path);
         } else {
           hell.o([detector_name, "detector vpn conf not found"], "deleteDetector", "info");
         }
@@ -232,27 +232,27 @@ module.exports = function (detector) {
    * @param cb
    */
   detector.tasks = {};
-  detector.task = async function (input, cb) {
+  detector.task = async function (input) {
     hell.o("start", "task", "info");
     // console.log(input);
     try {
 
       if (input.check_name == "offline") {
         let offline_check = await detector.checkOffline();
-        return cb(null, {message: "ok", logs: offline_check.logs});
+        return {message: "ok", logs: offline_check.logs};
       }
 
       if (input.check_name == "rule_count") {
         let rules_check = await detector.checkRules();
-        return cb(null, {message: "ok", logs: rules_check.logs});
+        return {message: "ok", logs: rules_check.logs};
       }
 
       hell.o(["done", " done"], "task", "info");
 
-      return cb(null, {message: "ok"});
+      return  {message: "ok"};
     } catch (err) {
       hell.o(err, "task", "error");
-      return cb({name: "Error", status: 400, message: err.message});
+      throw {name: "Error", status: 400, message: err.message};
     }
 
   };

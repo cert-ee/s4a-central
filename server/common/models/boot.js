@@ -15,7 +15,7 @@ module.exports = function (boot) {
     try {
 
       //this also builds indexes
-      let check_for_data_models_changes = await boot.app.dataSources.db.autoupdate();
+      await boot.app.dataSources.db.autoupdate();
 
       let versions_load = util.promisify(boot.app.models.system_info.version);
       let versions = await versions_load();

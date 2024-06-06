@@ -104,19 +104,48 @@
                       <v-flex xs4 sm2>
                         <v-subheader>Organization Name</v-subheader>
                       </v-flex>
-                      <v-flex xs8 sm10>{{detector.organization_name}}</v-flex>
-                      <v-flex xs4 sm2>
-                        <v-subheader>Contact Name</v-subheader>
+                      <v-flex xs8 sm10>
+                        <v-text-field v-if="$store.getters.hasAdminRole"
+                                      v-model="detector.organization_name" @blur="saveOrganizationName">
+                        </v-text-field>
+                        <span v-else>{{detector.organization_name}}</span> 
                       </v-flex>
-                      <v-flex xs8 sm10>{{detector.first_name}} {{detector.last_name}}</v-flex>
+                      <v-flex xs4 sm2>
+                        <v-subheader>Contact First Name</v-subheader>
+                      </v-flex>
+                      <v-flex xs8 sm10>
+                        <v-text-field v-if="$store.getters.hasAdminRole"
+                                      v-model="detector.first_name" @blur="saveFirstName">
+                        </v-text-field>
+                        <span v-else>{{detector.first_name}}</span> 
+                      </v-flex>
+                      <v-flex xs4 sm2>
+                        <v-subheader>Contact Last Name</v-subheader>
+                      </v-flex>
+                      <v-flex xs8 sm10>
+                        <v-text-field v-if="$store.getters.hasAdminRole"
+                                      v-model="detector.last_name" @blur="saveLastName">
+                        </v-text-field>
+                        <span v-else>{{detector.last_name}}</span> 
+                      </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Contact Phone</v-subheader>
                       </v-flex>
-                      <v-flex xs8 sm10>{{detector.contact_phone}}</v-flex>
+                      <v-flex xs8 sm10>
+                        <v-text-field v-if="$store.getters.hasAdminRole"
+                                      v-model="detector.contact_phone" @blur="saveContactPhone">
+                        </v-text-field>
+                        <span v-else>{{detector.contact_phone}}</span> 
+                      </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>Contact Email</v-subheader>
                       </v-flex>
-                      <v-flex xs8 sm10>{{detector.contact_email}}</v-flex>
+                      <v-flex xs8 sm10>
+                        <v-text-field v-if="$store.getters.hasAdminRole"
+                                      v-model="detector.contact_email" @blur="saveContactEmail">
+                        </v-text-field>
+                        <span v-else>{{detector.contact_email}}</span> 
+                      </v-flex>
                       <v-flex xs4 sm2>
                         <v-subheader>API Key</v-subheader>
                       </v-flex>

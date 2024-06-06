@@ -107,30 +107,23 @@ module.exports = function (registration) {
    * @param input
    * @returns {Promise}
    */
-  registration.saveCsrFile = function (input) {
+  registration.saveCsrFile = async function (input) {
     hell.o( "start", "saveCsrFile", "info" );
+    if (process.env.NODE_ENV == "dev") {
+      hell.o( "dev mode: return dummy", "saveCsrFile", "info" ); return true;
+    }
 
-    return new Promise((success, reject) => {
+    let file_path = `${csr_path_unsigned}${input.name.replace(/\//g, '_')}.csr`;
+    try {
+      await fs.promises.writeFile(file_path, input.csr_unsigned);
+    } catch(e) {
+      hell.o( err, "saveCsrFile", "error" );
+      console.log(err);
+      throw err;
+    }
 
-      if (process.env.NODE_ENV == "dev") {
-        hell.o( "dev mode: return dummy", "saveCsrFile", "info" ); return success(true);
-      }
-
-      let file_path = `${csr_path_unsigned}${input.name.replace(/\//g, '_')}.csr`;
-      fs.writeFile(file_path, input.csr_unsigned, function (err) {
-        if (err) {
-          hell.o( err, "saveCsrFile", "error" );
-          console.log(err);
-          reject(err);
-          return;
-        }
-
-        hell.o( "csr saved", "saveCsrFile", "info" );
-        success(true);
-      });
-
-    }); // promise
-
+    hell.o( "csr saved", "saveCsrFile", "info" );
+    return true;
   };
 
   /**

@@ -32,7 +32,7 @@ module.exports = function (notify) {
    * @param cb
    * @returns {*}
    */
-  notify.initializeMailer = async function (cb) {
+  notify.initializeMailer = async function () {
     hell.o("init nodemailer", "initializeMailer", "info");
 
     try {
@@ -58,13 +58,11 @@ module.exports = function (notify) {
       notify.nm_client = new nodemailer.createTransport(smtp_config);
 
       hell.o("done", "initializeMailer", "info");
-      if (cb) return cb(null, {message: "ok"});
-      return true;
+      return {message: "ok"};
     } catch (err) {
       hell.o(err, "initializeMailer", "error");
       notify.notify_routine_active = false;
-      if (cb) return cb({name: "Error", status: 400, message: err.message});
-      return false;
+      return {name: "Error", status: 400, message: err.message};
     }
 
   };
@@ -142,13 +140,12 @@ module.exports = function (notify) {
         //   }]
       };
       hell.o(["subject", template.subject], "sendNotification", "info");
-      let send_notfications = await notify.nm_client.sendMail(message);
+      await notify.nm_client.sendMail(message);
 
       hell.o("done", "sendNotification", "info");
     } catch (err) {
       hell.o(err, "sendNotification", "error");
-      throw new Error(err);
-      return false;
+      throw err;
     }
   };
 

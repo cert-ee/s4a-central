@@ -6,6 +6,7 @@
  * @param params
  */
 const chalk = require('chalk');
+const {lockSync, unlockSync} = require('proper-lockfile');
 
 let helper = function (params) {
   let self = this;
@@ -14,6 +15,9 @@ let helper = function (params) {
   self.module_name = params && params.module_name || "logger_undefined_module";
   self.fn_name = params && params.fn_name || "logger_undefined_function_name";
   self.method_map = [false, "error", "warn", "debug", "log", "info", "trace"];
+  self.lock_dir = '/tmp';
+  self.file_prefix = '.s4a-lock-'
+  self.lock_base = `${self.lock_dir}/${self.file_prefix}`;
 
   if (process.env.DEBUG_LEVEL !== undefined) {
     //console.log( "ENV DEBUG_LEVEL SET", process.env.DEBUG_LEVEL );
@@ -96,6 +100,46 @@ let helper = function (params) {
 
   };
 
+
+  self.to_lock_path = function(path) {
+    return self.lock_base + path.replace(/_/g, '__').replace(/\//g, '_s');
+  }
+
+  // try to acquire a file lock for a given fd;
+  self.lock = function(path) {
+    self.o(`creating lock on path ${path}, type ${type}`, "helper", "info");
+    let lock_path = self.to_lock_path(path);
+    lockSync(lock_path);
+  };
+
+  // remove a lock acquired by the lock function for a given fd
+  self.unlock = function(fd) {
+    self.o(`removing lock on path ${path}`, "helper", "info");
+    let lock_path = self.to_lock_path(path);
+    unlockSync(lock_path);
+  };
+
+  // call the callback only if a lock is successfully acquired + close it
+  self.lockedCall = async function(path, cb) {
+    self.lock(path);
+
+    let ret, exception;
+    try {
+      ret = await cb();
+    } catch(e) {
+      exception = e;
+    }
+    self.unlock(path);
+
+    if (exception !== undefined)
+      throw exception;
+
+    return ret;
+  };
+
+  self.sleep = function(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
 };
 
 module.exports = helper;
