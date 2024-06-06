@@ -47,7 +47,7 @@ module.exports = function (app) {
 
         if (!token) throw new Error("Failed to create access token for user: " + remote_user);
 
-        req.logIn(user, {session: false}, (err) => {
+        req.logIn(user, {session: false}, err => {
           if (err) return next(err);
           req.accessToken = token;
           // console.log( token );

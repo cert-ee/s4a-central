@@ -14,104 +14,119 @@ module.exports = function (report) {
    * @param options
    * @param cb
    */
-  report.status = function (detector_info, options, req, cb) {
+  report.status = async function (detector_info, options, req) {
     hell.o("start", "status", "info");
 
     let detector_id = options.accessToken.detectorId;
     hell.o(detector_id, "status", "info");
 
-    (async function () {
-      try {
+    try {
+      // console.log("================");
+      // console.log(detector_info);
+      // console.log(detector_info.components);
+      let Detector = report.app.models.Detector;
+      let JobSchedule = report.app.models.JobSchedule;
 
-        // console.log("================");
-        // console.log(detector_info);
-        // console.log(detector_info.components);
-        let Detector = report.app.models.Detector;
-        let JobSchedule = report.app.models.JobSchedule;
+      hell.o([detector_id, "find detector"], "status", "info");
+      let current_detector = await Detector.findOne({where: {id: detector_id}});
+      if (!current_detector) throw new Error("failed to find detector");
 
-        hell.o([detector_id, "find detector"], "status", "info");
-        let current_detector = await Detector.findOne({where: {id: detector_id}});
-        if (!current_detector) throw new Error("failed to find detector");
-
-        //detector components/updates info
-        let components_overall_ok = true;
-        let updates_overall_ok = true;
-        let version = true;
-        for (let comp of detector_info.components) {
-          // console.log( "comp name: ", comp.name );
-          // console.log( "comp status: ", comp.status );
-          if (!comp.status) components_overall_ok = false;
-          if (comp.version_status !== undefined) {
-            if (!comp.version_status) updates_overall_ok = false;
-            if (comp.package_name == 's4a-detector') version = comp.version_installed;
-          }
+      //detector components/updates info
+      let components_overall_ok = true;
+      let updates_overall_ok = true;
+      let version = true;
+      for (let comp of detector_info.components) {
+        // console.log( "comp name: ", comp.name );
+        // console.log( "comp status: ", comp.status );
+        if (!comp.status) components_overall_ok = false;
+        if (comp.version_status !== undefined) {
+          if (!comp.version_status) updates_overall_ok = false;
+          if (comp.package_name == 's4a-detector') version = comp.version_installed;
         }
-
-        // older detectors
-        if (detector_info.rules === undefined) {
-          hell.o("older detector, default empty values", "status", "info");
-          detector_info.rules = {};
-          detector_info.rules.rules_count = 0;
-          detector_info.rules.rules_count_enabled = 0;
-          detector_info.rules.rules_count_custom = 0;
-        }
-
-
-        let update_detector = {
-          last_seen: new Date(),
-          online: true,
-          components: detector_info.components,
-          components_overall: components_overall_ok,
-          updates_overall: updates_overall_ok,
-          rules_count: detector_info.rules.rules_count,
-          rules_count_enabled: detector_info.rules.rules_count_enabled,
-          rules_count_custom: detector_info.rules.rules_count_custom,
-          version: version
-        };
-
-        hell.o([detector_id, "update detector"], "status", "info");
-        let update_result = await Detector.update({id: detector_id}, update_detector);
-        if (!update_result) throw new Error(detector_id + " failed to update detector status");
-
-        hell.o([detector_id, "check jobs"], "status", "info");
-        let job_queue = await JobSchedule.find({
-          where: {detectorId: detector_id, transferred: false, completed: false},
-          fields: ["id", "name", "data"]
-        });
-        if (!job_queue) throw new Error(detector_id + " failed to get detector job queue");
-
-        let output = {
-          job_queue: job_queue
-        };
-
-        if (job_queue.length == 0) { //no jobs to report back
-          cb(null, output);
-          return;
-        }
-
-        hell.o([detector_id, "jobs"], "status", "info");
-        let job_update = {transferred: true, transferred_time: new Date()};
-
-        for (let i = 0, l = job_queue.length; i < l; i++) {
-          hell.o([detector_id, "update job " + job_queue[i].name], "status", "info");
-          let job_transferred = await JobSchedule.update({id: job_queue[i].id}, job_update);
-          if (!job_transferred) throw new Error("failed to update job status");
-        }
-
-        output = {
-          job_queue: job_queue
-        };
-
-        hell.o([detector_id, "done"], "status", "info");
-
-        cb(null, output);
-
-      } catch (err) {
-        hell.o([detector_id, "done"], "status", "error");
-        cb({name: "Error", status: 400, message: "Central failed to process the request"});
       }
 
-    })(); // async
+      // older detectors
+      if (detector_info.rules === undefined) {
+        hell.o("older detector, default empty values", "status", "info");
+        detector_info.rules = {};
+        detector_info.rules.rules_count = 0;
+        detector_info.rules.rules_count_enabled = 0;
+        detector_info.rules.rules_count_custom = 0;
+      }
+
+
+      let update_detector = {
+        last_seen: new Date(),
+        online: true,
+        components: detector_info.components,
+        components_overall: components_overall_ok,
+        updates_overall: updates_overall_ok,
+        rules_count: detector_info.rules.rules_count,
+        rules_count_enabled: detector_info.rules.rules_count_enabled,
+        rules_count_custom: detector_info.rules.rules_count_custom,
+        version: version
+      };
+
+      hell.o([detector_id, "update detector"], "status", "info");
+      let update_result = await Detector.update({id: detector_id}, update_detector);
+      if (!update_result) throw new Error(detector_id + " failed to update detector status");
+
+      hell.o([detector_id, "check jobs"], "status", "info");
+      let job_queue = await JobSchedule.find({
+        where: {detectorId: detector_id, transferred: false, completed: false},
+        fields: ["id", "name", "data"]
+      });
+      if (!job_queue) throw new Error(detector_id + " failed to get detector job queue");
+
+
+      job_queue.sort((x, y) => {
+        x = x.name;
+        y = y.name;
+
+        // always sort registrationApproved/registrationRejected first,
+        // avoids a registration status message getting lost
+        if (x.startsWith('registration'))
+          return -1;
+        if (y.startsWith('registration'))
+          return 1;
+
+        // default
+        if (x < y)
+          return -1;
+        if (x > y)
+          return 1;
+        return 0;
+      });
+
+      let output = {
+          job_queue: job_queue
+        };
+
+      if (job_queue.length == 0) { //no jobs to report back
+        return output;
+      }
+
+      hell.o([detector_id, "jobs"], "status", "info");
+      let job_update = {transferred: true, transferred_time: new Date()};
+
+      for (let i = 0, l = job_queue.length; i < l; i++) {
+        hell.o([detector_id, "update job " + job_queue[i].name], "status", "info");
+        let job_transferred = await JobSchedule.update({id: job_queue[i].id}, job_update);
+        if (!job_transferred) throw new Error("failed to update job status");
+      }
+
+      output = {
+        job_queue: job_queue
+      };
+
+      hell.o([detector_id, "done"], "status", "info");
+
+      return output;
+    } catch (err) {
+      hell.o([detector_id, err], "status", "error");
+      throw {name: "Error", status: 400, message: "Central failed to process the request"};
+    }
+
 
   };
 
@@ -265,42 +280,38 @@ module.exports = function (report) {
    * @param options
    * @param cb
    */
-  report.rules = function (last_rules_update, options, req, cb) {
+  report.rules = async function (last_rules_update, options, req) {
     hell.o("start", "rules", "info");
     req.setTimeout(3600000);
 
     let detector_id = options.accessToken.detectorId;
     hell.o(detector_id, "rules", "info");
 
-    (async function () {
-      try {
+    try {
+      req.setTimeout(3600000);
+      hell.o([detector_id, "find detector"], "rules", "info");
+      let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
+      if (!detector) throw new Error("failed to find detector");
 
-        req.setTimeout(3600000);
-        hell.o([detector_id, "find detector"], "rules", "info");
-        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
-        if (!detector) throw new Error("failed to find detector");
+      let now = new Date();
+      let update_detector = {last_seen: now, online: true, last_rules_check: now};
 
-        let update_detector = {last_seen: new Date(), online: true, last_rules_check: new Date()};
+      hell.o([detector_id, "update status"], "rules", "info");
+      let update_result = await report.app.models.detector.update({id: detector_id}, update_detector);
+      if (!update_result) throw new Error("failed to update detector status");
 
-        hell.o([detector_id, "update status"], "rules", "info");
-        let update_result = await report.app.models.detector.update({id: detector_id}, update_detector);
-        if (!update_result) throw new Error("failed to update detector status");
+      hell.o([detector_id, "check if new rules"], "rules", "info");
+      let feeds_to_update = await report.app.models.rule.checkNewRulesForDetector(detector_id, last_rules_update);
+      if (!feeds_to_update) throw new Error("failed to check rules");
 
-        hell.o([detector_id, "check if new rules"], "rules", "info");
-        let rules_to_update = await report.app.models.rule.checkNewRulesForDetector(detector_id, last_rules_update);
-        if (!rules_to_update) throw new Error("failed to check rules");
+      hell.o([detector_id, "done"], "rules", "info");
+      let output = {feeds: feeds_to_update};
+      return output;
 
-        hell.o([detector_id, "done"], "rules", "info");
-        let output = {rules: rules_to_update};
-        cb(null, output);
-
-      } catch (err) {
-        hell.o(err, "rules", "error");
-        cb({name: "Error", status: 400, message: "Central failed to process the request"});
-      }
-
-    })(); // async
-
+    } catch (err) {
+      hell.o(err, "rules", "error");
+      throw {name: "Error", status: 400, message: "Central failed to process the request"};
+    }
   };
 
   report.remoteMethod('rules', {
@@ -382,47 +393,42 @@ module.exports = function (report) {
    * @param options
    * @param cb
    */
-  report.wise = function (input, options, cb) {
+  report.wise = async function (input, options) {
     hell.o("start", "wise", "info");
 
     let detector_id = options.accessToken.detectorId;
     hell.o(detector_id, "wise", "info");
 
-    (async function () {
-      try {
+    try {
+      hell.o([detector_id, "find detector"], "wise", "info");
+      let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
+      if (!detector) throw new Error("failed to find detector");
 
-        hell.o([detector_id, "find detector"], "wise", "info");
-        let detector = await report.app.models.detector.findOne({where: {id: detector_id}});
-        if (!detector) throw new Error("failed to find detector");
+      let update_detector = {last_seen: new Date(), online: true, last_wise_check: new Date()};
 
-        let update_detector = {last_seen: new Date(), online: true, last_wise_check: new Date()};
+      hell.o([detector_id, "update status"], "rules", "info");
+      let update_result = await report.app.models.detector.update({id: detector_id}, update_detector);
+      if (!update_result) throw new Error("failed to update detector status");
 
-        hell.o([detector_id, "update status"], "rules", "info");
-        let update_result = await report.app.models.detector.update({id: detector_id}, update_detector);
-        if (!update_result) throw new Error("failed to update detector status");
-
-        let wise_busy = await report.app.models.feed.tasks['moloch'];
-        if (wise_busy !== undefined && wise_busy === "true") {
-          hell.o("wise busy", "wise", "warning");
-          return cb({name: "Error", status: 503, message: "Central busy"}); //?
-        }
-        /*
-        output = { checksum: "", wise_ip: "", wise_url: "", wise_domain: "" };
-         */
-        let output = await report.app.models.wise.checkForDetector(detector_id, input);
-
-        //TODO mark wise as updated for detector
-
-        hell.o([detector_id, "done"], "wise", "info");
-
-        cb(null, output);
-      } catch (err) {
-        hell.o(err, "wise", "error");
-        cb({name: "Error", status: 400, message: "Central failed to process the request"});
+      let wise_busy = await report.app.models.feed.tasks['moloch'];
+      if (wise_busy === "true") {
+        hell.o("wise busy", "wise", "warning");
+        throw {name: "Error", status: 503, message: "Central busy"}; //?
       }
+      /*
+      output = { checksum: "", wise_ip: "", wise_url: "", wise_domain: "" };
+        */
+      let output = await report.app.models.wise.checkForDetector(detector_id, input);
 
-    })(); // async
+      //TODO mark wise as updated for detector
 
+      hell.o([detector_id, "done"], "wise", "info");
+
+      return output;
+    } catch (err) {
+      hell.o(err, "wise", "error");
+      throw {name: "Error", status: 400, message: "Central failed to process the request"};
+    }
   };
 
   report.remoteMethod('wise', {
@@ -639,4 +645,87 @@ module.exports = function (report) {
     http: {path: '/alertsManual', verb: 'post', status: 201}
   });
 
+  /**
+   * serve rule file archive to detector
+   */
+
+    report.feedFetch = function(feed_name, options, cb) {
+      hell.o('start', 'feedFetch', 'info');
+      (async function() {
+        try {
+          hell.o([feed_name, 'feed_name'], 'feedFetch', 'info');
+          let detector_id = options.accessToken.detectorId;
+          hell.o([detector_id, 'detector_id'], 'feedFetch', 'info');
+
+          let [detector, feed] = await Promise.all([
+            report.app.models.detector.findById(detector_id, {include: ['tags']}),
+            report.app.models.feed.findOne({ where: { name: feed_name }, include: ['tags'] }),
+          ]);
+
+          let feed_tags = feed.tags();
+          let detector_tags = detector.tags();
+          let detector_tag_set = new Set(detector_tags.map(tag => tag.name));
+
+          hell.o(`feed_tags: ${JSON.stringify(feed_tags)}, detector_tags: ${JSON.stringify(detector_tags)}`, 'feedFetch', 'info');
+
+          // both cases where the detector has the tag (licensed to access feed) and where the feed has no tag (public feed)
+          if (!feed_tags.every(tag => detector_tag_set.has(tag.name))) {
+            hell.o('unauthorized query', 'feedFetch', 'warn')
+            return cb({name: 'Forbidden', status: 403, message: 'Unauthorized feed for this detector'});
+          };
+
+          let file_path = feed.location_folder + feed.filename;
+          hell.o(['file_path', file_path], 'feedFetch', 'info');
+          let stream = fs.createReadStream(file_path);
+          if (!stream) cb({ name: 'Error', status: 400, message: 'failed to open file' });
+          return cb(null, stream, 'application/octet-stream');
+          //return stream;
+
+        } catch(err) {
+          hell.o(err, 'feedFetch', 'error');
+          //return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
+          return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
+        }
+      })();
+    }
+
+    report.remoteMethod('feedFetch', {
+      accepts: [
+        {arg: "feed_name", type: "string", required: true},
+        {arg: "options", type: "object", http: "optionsFromRequest"},
+      ],
+      returns: { type: 'file', root: true },
+      http: { path: '/feedFetch', verb: 'post', status: 201 },
+    });
+
+  /**
+   * serve SID filter file to detector
+   */
+
+    report.sidFetch = function(options, cb) {
+      hell.o('start', 'sidFetch', 'info');
+      (async function() {
+        try {
+          let settings = await report.app.models.settings.findOne();
+          let file_path = settings.path_suricata_content + 'disabled_rule_sids.txt';
+          hell.o(['file_path', file_path], 'sidFetch', 'info');
+          let stream = fs.createReadStream(file_path);
+          if (!stream) cb({ name: 'Error', status: 400, message: 'failed to open file' });
+          return cb(null, stream, 'application/octet-stream');
+          //return stream;
+
+        } catch(err) {
+          hell.o(err, 'sidFetch', 'error');
+          return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
+        }
+      })();
+    }
+
+    report.remoteMethod('sidFetch', {
+      accepts: [
+        {arg: "options", type: "object", http: "optionsFromRequest"},
+      ],
+      returns: { type: 'file', root: true },
+      http: { path: '/sidFetch', verb: 'post', status: 201 },
+    });
 };

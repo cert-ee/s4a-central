@@ -82,9 +82,7 @@ module.exports = function (tasker) {
       let feeds = await tasker.app.models.feed.find({where: {enabled: true}});
       if (!feeds) throw new Error("failed to load feeds");
 
-      for (const fd of feeds) {
-        await tasker.addFeedTasker(fd);
-      }
+      await Promise.all(feeds.map(feed => tasker.addFeedTasker(feed)));
 
       const all_taskers = await tasker.find();
 
@@ -93,7 +91,8 @@ module.exports = function (tasker) {
         if (!tr.enabled) continue;
         // console.log( tr );
         //loading false to all components
-        await tasker.update({name: tr.name}, {"loading": false});
+        await tasker.update({name: tr.name}, {loading: false});
+        tr.loading = false;
         await tasker.task_loader(tr);
       }
 
@@ -202,7 +201,8 @@ module.exports = function (tasker) {
           {
             name: input.task_name,
             completed: false,
-            cancelled: false
+            cancelled: false,
+            failed: false,
           }
       });
 
@@ -228,7 +228,7 @@ module.exports = function (tasker) {
       };
 
       hell.o([input.task_name, "create new task"], "task_loader", "info");
-      let task_create = await tasker.app.models.task.create(task_input);
+      await tasker.app.models.task.create(task_input);
       return true;
     } catch (err) {
       hell.o(err, "task_loader", "error");
@@ -251,7 +251,8 @@ module.exports = function (tasker) {
         where: {
           name: input.task_name,
           completed: false,
-          cancelled: false
+          cancelled: false,
+          failed: false,
         }
       });
       if (task_found) {
@@ -269,7 +270,7 @@ module.exports = function (tasker) {
             error: ""
           }
         };
-        let task_updated = await tasker.app.models.task.update({id: task_found.id}, task_update);
+        await tasker.app.models.task.update({id: task_found.id}, task_update);
       }
       hell.o("done", "task_unloader", "info");
     } catch (err) {
@@ -365,7 +366,8 @@ module.exports = function (tasker) {
       let duplicates_filter = {
         where: {
           completed: false,
-          cancelled: false
+          cancelled: false,
+          failed: false,
         }
       };
 
@@ -374,23 +376,24 @@ module.exports = function (tasker) {
       let duplicate_update = {cancelled: true};
       let check_dups = [];
       for (const t of duplicates_check) {
-        if (check_dups.includes(t.name)) {
-          duplicate_update.modified_time = moment().valueOf();
-          duplicate_update.logs = {error: "automatically cancelled as duplicate task at " + duplicate_update.modified_time};
-          await tasker.app.models.task.update({id: t.id}, duplicate_update);
-          console.log(duplicate_update);
-          hell.o(["cancelled duplicate task for", t.name], "checkTasks", "warn");
-        } else {
+        if (!check_dups.includes(t.name)) {
           check_dups.push(t.name);
+          continue;
         }
+        duplicate_update.modified_time = moment().valueOf();
+        duplicate_update.logs = {error: "automatically cancelled as duplicate task at " + duplicate_update.modified_time};
+        await tasker.app.models.task.update({id: t.id}, duplicate_update);
+        console.log(duplicate_update);
+        hell.o(["cancelled duplicate task for", t.name], "checkTasks", "warn");  
       }
 
       let overdue_filter = {
         where: {
           completed: false,
           cancelled: false,
-          start_time: {lt: moment().subtract(15, "minutes").valueOf()}
-        }
+          failed: false,
+          start_time: {lt: moment().subtract(15, "minutes").valueOf()},
+        },
       };
 
       //incase node is killed while task was running
@@ -404,16 +407,16 @@ module.exports = function (tasker) {
         console.log(overdue_update);
 
         //reload tasks
-        await tasker.reloadTaskerTasks(t.parent_name, function () {
-        });
+        await tasker.reloadTaskerTasks(t.parent_name,  () => {});
       }
 
       let tasks_filter = {
         where: {
           completed: false,
           cancelled: false,
-          start_time: {lt: moment().valueOf()}
-        }
+          failed: false,
+          start_time: {lt: moment().valueOf()},
+        },
       };
 
       if (task_name !== undefined) {
@@ -421,8 +424,9 @@ module.exports = function (tasker) {
           where: {
             completed: false,
             cancelled: false,
-            name: task_name
-          }
+            failed: false,
+            name: task_name,
+          },
         };
       }
 
@@ -431,10 +435,9 @@ module.exports = function (tasker) {
       if (tasks_found.length == 0) return;
       hell.o(["found", tasks_found.length], "checkTasks", "info");
 
-      let task_updated, task_update, worker_busy = false;
       for (const t of tasks_found) {
-        worker_busy = false;
-        task_update = {
+        let worker_busy = false;
+        let task_update = {
           completed: true,
           failed: false
         };
@@ -486,7 +489,7 @@ module.exports = function (tasker) {
 
         hell.o(["set task completed", t.name], "checkTasks", "info");
         await tasker.update({name: current_tasker}, {loading: false});
-        task_updated = await tasker.app.models.task.update({id: t.id}, task_update);
+        await tasker.app.models.task.update({id: t.id}, task_update);
 
         let check_if_tasker_enabled = await tasker.find({where: {task_name: t.name, enabled: true}});
         if (check_if_tasker_enabled.length > 0) {

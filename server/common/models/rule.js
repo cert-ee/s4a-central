@@ -1,10 +1,5 @@
 'use strict';
 
-const https = require('https');
-const tar = require('tar');
-const fs = require('fs');
-const walk = require('walkdir');
-
 const LineByLineReader = require('line-by-line');
 const hell = new (require(__dirname + '/helper.js'))({ module_name: 'rule' });
 
@@ -23,14 +18,10 @@ module.exports = function (rule) {
 
     // (async function () {
 
-    let file_check,
-      ruleset_check,
-      ruleset_name,
-      ruleset_insert,
-      filename,
-      loop_index = 0;
+    let loop_index = 0;
+
     for (let file_full_path of rule_files) {
-      filename = file_full_path.split('/').pop();
+      let filename = file_full_path.split('/').pop();
 
       if (!filename.includes('.rules') || filename == feed.filename) {
         // hell.o([filename, " not rules file - ignore"], "loopRuleFiles", "info");
@@ -72,15 +63,14 @@ module.exports = function (rule) {
 
       // hell.o([filename, "loop"], "loopRuleFiles", "info");
 
-      ruleset_name = filename.replace('emerging-', '');
-      ruleset_name = ruleset_name.replace('.rules', '');
-      ruleset_insert = { name: ruleset_name };
+      let ruleset_name = filename.replace(/emerging-/g, '').replace(/.rules/g, '');
+      let ruleset_insert = { name: ruleset_name };
 
       /*
       IF NEW RULESET, CREATE
        */
       hell.o([ruleset_name, 'find'], 'loopRuleFiles', 'info');
-      ruleset_check = await Ruleset.findOrCreate({ where: ruleset_insert, include: ['tags'] }, ruleset_insert);
+      let ruleset_check = await Ruleset.findOrCreate({ where: ruleset_insert, include: ['tags'] }, ruleset_insert);
       if (!ruleset_check) throw new Error('failed to find / create ruleset');
       ruleset_check = ruleset_check[0];
       //hell.o("done", "checkNewRulesForDetector", "info");
@@ -89,16 +79,15 @@ module.exports = function (rule) {
       CHECK RULE FILE
        */
       // hell.o([ruleset_name, "check file"], "loopRuleFiles", "info");
-      file_check = await rule
+      let cb = async () => rule
         .checkRuleFile({ path: file_full_path, ruleset: ruleset_check, feed: feed })
-        .then((value) => {
-          return value;
-        })
-        .catch((err) => {
+        .catch(err => {
           hell.o([ruleset_name, 'check file result'], 'loopRuleFiles', 'error');
           // reject( err );
           return err;
         });
+
+      let file_check = await hell.lockedCall(file_full_path, cb);
 
       hell.o([ruleset_name, 'loop done for ' + file_check], 'loopRuleFiles', 'info');
       hell.o(['==================================='], 'loopRuleFiles', 'info');
@@ -124,9 +113,19 @@ module.exports = function (rule) {
   rule.checkRuleFile = function (params) {
     hell.o([params.ruleset.name, 'start'], 'checkRuleFile', 'info');
 
+    let fd = fs.openSync(params.path);
+    try {
+      hell.lock(params.path);
+    } catch (e) {
+      fs.closeSync(fd);
+      return; // given file is already being parsed
+    }
+
+    let stream = fs.createReadStream(null, { fd: fd });
+
     return new Promise(function (success, reject) {
       let lineno = 0;
-      let lr = new LineByLineReader(params.path);
+      let lr = new LineByLineReader(stream);
 
       lr.on('error', function (err) {
         hell.o(err, 'checkRuleFile', 'error');
@@ -145,9 +144,7 @@ module.exports = function (rule) {
           hell.o([params.ruleset.name, 'looping new rules ' + lineno], 'checkRuleFile', 'info');
         }
 
-        rule.checkRuleLine({ ruleset: params.ruleset, line: line, feed: params.feed }).then((value) => {
-          lr.resume();
-        });
+        rule.checkRuleLine({ ruleset: params.ruleset, line: line, feed: params.feed }).then(() => lr.resume()).catch(e => reject(e));
       }); // lr.on
 
       lr.on('end', function () {
@@ -155,7 +152,8 @@ module.exports = function (rule) {
         success(lineno);
         // return lineno;
       });
-    }); // promise
+    }) // promise
+      .finally(() => hell.unlock(params.path));
   };
 
   /**
@@ -177,17 +175,17 @@ module.exports = function (rule) {
 
     let sid = undefined;
     try {
-        sid = parseInt(line.match(/sid:([0-9]*);/)[1]);
-    } catch(e) {
-        hell.o(line, "checkRuleLineAAAA", "info");
-        throw e;
+      sid = parseInt(line.match(/sid:([0-9]*);/)[1]);
+    } catch (e) {
+      hell.o(line, "checkRuleLineAAAA", "info");
+      throw e;
     };
     // hell.o([sid, "start"], "checkRuleLine", "info");
     let revision = line.match(/rev:([0-9]*);/);
     if (revision === null) {
-        revision = 1;
+      revision = 1;
     } else {
-        revision = parseInt(revision[1]);
+      revision = parseInt(revision[1]);
     };
     let classtype = 'no-classtype';
     let classtype_check = line.match(/classtype:(.*?);/);
@@ -208,10 +206,7 @@ module.exports = function (rule) {
       enabled = false;
     }
 
-    let primary = false;
-    if (feed.primary) {
-      primary = true;
-    }
+    let primary = !!feed.primary;
 
     let rule_info = {
       sid: sid,
@@ -232,7 +227,7 @@ module.exports = function (rule) {
     try {
       //check if we have this classtype in db
       if (classtype !== undefined && classtype !== '' && classtype != null) {
-        let classtype_found = await rule.app.models.rule_classtype.findOrCreate(
+        await rule.app.models.rule_classtype.findOrCreate(
           { where: { name: classtype } },
           { name: classtype }
         );
@@ -260,16 +255,6 @@ module.exports = function (rule) {
         return false;
       }
 
-      // if( sid == 2102409 ){ // if( sid == 2400032 ){
-      // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
-      // console.log( rule_info );
-      // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
-      // console.log( rule_found );
-      // console.log( "==========================" );console.log( "==========================" );console.log( "==========================" );
-      // } else {
-      //   return;
-      // }
-
       if (ruleset.force_disabled === true) {
         enabled = false;
       }
@@ -278,11 +263,6 @@ module.exports = function (rule) {
        * ONE RULE FOUND IN DB
        */
       if (rule_found.length == 1) {
-        // if( sid == 2400032 ){
-        //   console.log( "found one");
-        // }
-        // hell.o([sid, feed.name, "found one"], "checkRuleLine", "info")
-
         //same feed and same rev, no changes
         rule_to_change = rule_found[0];
 
@@ -327,27 +307,15 @@ module.exports = function (rule) {
       /**
        * TWO RULES FOUND IN DB
        */
-      let primary_rule, feed_rule;
       if (rule_found.length == 2) {
-        // if( sid == 2400032 ){
-        //   console.log( "found two");
-        // }
-        // hell.o([sid, feed.name, "found two"], "checkRuleLine", "info");
-        for (let i = 0, l = rule_found.length; i < l; i++) {
-          if (rule_found[i].primary == true) {
-            primary_rule = rule_found[i];
-            if (rule_info.primary) rule_to_change = primary_rule;
-          } else {
-            feed_rule = rule_found[i];
-            if (!rule_info.primary) rule_to_change = feed_rule;
-          }
+        let primary_rule, feed_rule;
+        for (let rule of rule_found) {
+          if (rule.primary == true)
+            primary_rule = rule;
+          else
+            feed_rule = rule;
         }
-
-        //primary rule, no changes
-        if (rule_info.primary && rule_info.revision == primary_rule.revision) {
-          // hell.o([sid, feed.name, "no changes "], "checkRuleLine", "info");
-          return true;
-        }
+        rule_to_change = rule_info.primary ? primary_rule : feed_rule;
 
         //feed rule, no changes
         if (!rule_info.primary && rule_info.revision == feed_rule.revision) {
@@ -509,68 +477,62 @@ module.exports = function (rule) {
   rule.checkNewRulesForDetector = async function (detector_id, last_update) {
     hell.o('start', 'checkNewRulesForDetector', 'info');
     hell.o(['last update', last_update], 'checkNewRulesForDetector', 'info');
-    // return new Promise((success, reject) => {
 
-    // (async function () {
     try {
-      let rule_fields = [
-        'sid',
-        'revision',
-        'classtype',
-        'severity',
-        'ruleset',
-        'enabled',
-        'message',
-        'rule_data',
-        'modified_time',
-        //, "created_time"
-      ];
 
-      let detector = await rule.app.models.detector.findById(detector_id, {
+      // get detectors w/ tags, fetch feeds based on that while
+
+      let public_filter_ = {
+        where: { component_name: 'suricata', },
+        include: {
+          relation: 'tags',
+        },
+      };
+
+      let [all_feeds, detector_] = await Promise.all([rule.app.models.feed.find(public_filter_), rule.app.models.detector.findById(detector_id, {
         include: {
           relation: 'tags',
           scope: {
             // fields: ["id","name"]
           },
         },
-      });
+      })]);
 
-      let detector_tags = detector.tags();
+      let public_feeds = all_feeds.filter(f => f.tags().length === 0);
 
-      /**
-       * DETECTOR HAS TAGS
-       */
-      let rules_with_tags = [];
-      if (detector.tags().length > 0) {
-        hell.o(['found tags for detector', detector_tags], 'checkNewRulesForDetector', 'info');
+      hell.o(['feeds without tags', public_feeds.length], 'checkNewRulesForDetector', 'info');
 
-        let tags_filter = {
+      let detector_tags_ = detector_.tags();
+      let tag_feeds_ = [];
+
+      if (detector_tags_.length > 0) {
+        hell.o(['found tags for detector', detector_tags_], 'checkNewRulesForDetector', 'info');
+        hell.o(['all_feeds', all_feeds], 'checkNewRulesForDetector', 'info');
+
+        let tag_set = new Set(detector_tags_.map(tag => tag.name));
+        tag_feeds_ = all_feeds
+          .filter(f => {
+            let tags = f.tags();
+            if (tags.length === 0) return false;
+            return tags.some(tag => tag_set.has(tag.name));
+          });
+
+        /*let tags_filter = {
           where: {
-            or: [],
+            and: [
+            {or: detector_tags_.map(t => { return {id: t.id};})},
+            {component_name: 'suricata'},
+            ],
           },
           include: {
-            relation: 'rules',
-            scope: {
-              fields: rule_fields,
-            },
+            relation: 'feeds',
           },
         };
 
-        for (const t in detector.tags()) {
-          tags_filter.where.or.push({ id: detector.tags()[t].id });
-          console.log('tag for Where Or', detector.tags()[t].id);
-        }
-
-        // tags_filter.include.scope = {
-        //   fields: rule_fields
-        // };
-
         if (last_update == 'full') {
-          hell.o('perform full update on rules', 'checkNewRulesForDetector', 'info');
+          hell.o('perform full update on feeds', 'checkNewRulesForDetector', 'info');
         } else {
-          tags_filter.include.scope.where = {
-            modified_time: { gt: last_update },
-          };
+          tags_filter.include.scope = { where: { modified_time: { gt: last_update } } };
         }
 
         // console.log( "tags_filter" );
@@ -578,75 +540,22 @@ module.exports = function (rule) {
         let look_for_rules_w_tags = await rule.app.models.tag.find(tags_filter);
 
         //do we have actual rules in tags?
-        if (look_for_rules_w_tags.length > 0) {
-          for (const r in look_for_rules_w_tags) {
-            if (rules_with_tags.concat(look_for_rules_w_tags[r].rules().length > 0)) {
-              // console.log(look_for_rules_w_tags[r].rules().length);
-              rules_with_tags = rules_with_tags.concat(look_for_rules_w_tags[r].rules());
-            }
-          }
-        }
+        tag_feeds_ = look_for_rules_w_tags.map(r => r.feeds());
 
-        hell.o(['rules with tags', rules_with_tags.length], 'checkNewRulesForDetector', 'info');
-      } // DETECTOR HAS TAGS
-
-      let public_filter = {
-        include: {
-          relation: 'tags',
-          scope: {
-            fields: rule_fields,
-          },
-        },
+        hell.o(['feeds with tags', tag_feeds_.length], 'checkNewRulesForDetector', 'info');*/
       };
 
-      if (last_update != 'full') {
-        public_filter.where = {
-          modified_time: { gt: last_update },
-        };
-      }
-
-      let new_rules = await rule.find(public_filter);
-
-      //get public rules ( no tags )
-      new_rules = new_rules.filter(t => t.tags().length === 0);
-      hell.o(['rules without tags', new_rules.length], 'checkNewRulesForDetector', 'info');
-
-      //merge rules with tags
-      new_rules = new_rules.concat(rules_with_tags);
-
-      let temp_rule;
-      for (let i = 0, l = new_rules.length; i < l; i++) {
-        // console.log( new_rules[i].sid, new_rules[i].revision );
-
-        temp_rule = {
-          sid: new_rules[i].sid,
-          revision: parseInt(new_rules[i].revision),
-          classtype: new_rules[i].classtype,
-          severity: new_rules[i].severity,
-          ruleset: new_rules[i].ruleset,
-          enabled: new_rules[i].enabled,
-          message: new_rules[i].message,
-          rule_data: new_rules[i].rule_data,
-        };
-
-        new_rules[i] = temp_rule;
-      }
-
-      // console.log( new_rules );
-
-      hell.o(['total new rules', new_rules.length], 'checkNewRulesForDetector', 'info');
+      let sent_feeds = public_feeds;
+      tag_feeds_.forEach(feed => sent_feeds.push(feed)); //.flat(1).map(feed => feed.name);
+      hell.o(['total sent feeds', sent_feeds.length], 'checkNewRulesForDetector', 'info');
       hell.o('done', 'checkNewRulesForDetector', 'info');
-      // success(new_rules);
-      return new_rules;
+
+      return sent_feeds;
     } catch (err) {
       hell.o(err, 'checkNewRulesForDetector', 'error');
       // reject(false);
       return false;
     }
-
-    // })(); // async
-
-    // }); //promise
   };
 
   /**
@@ -709,71 +618,65 @@ module.exports = function (rule) {
    * @param detectorId
    * @param tagId
    */
-  rule.addJobForDeleteRules = function (detectorId, tagId, cb) {
+  rule.addJobForDeleteRules = async function (detectorId, tagId) {
     hell.o('start', 'addJobForDeleteRules', 'info');
+    try {
+      hell.o([detectorId, 'detectorId'], 'addJobForDeleteRules', 'info');
+      let detector = await rule.app.models.detector.findOne({ where: { id: detectorId } });
+      if (!detector) throw new Error('can not find detector');
 
-    (async function () {
-      try {
-        hell.o([detectorId, 'detectorId'], 'addJobForDeleteRules', 'info');
-        let detector = await rule.app.models.detector.findOne({ where: { id: detectorId } });
-        if (!detector) throw new Error('can not find detector');
+      let tag = await rule.app.models.tag.findOne({ where: { id: tagId } });
+      if (!tag) throw new Error('can not find tag');
 
-        let tag = await rule.app.models.tag.findOne({ where: { id: tagId } });
-        if (!tag) throw new Error('can not find tag');
-
-        /**
-         * find rules with the tag
-         */
-        let tags_filter = {
-          where: {
-            id: tag.id,
+      /**
+       * find rules with the tag
+       */
+      let tags_filter = {
+        where: {
+          id: tag.id,
+        },
+        include: {
+          relation: 'rules',
+          scope: {
+            fields: ['sid'],
           },
-          include: {
-            relation: 'rules',
-            scope: {
-              fields: ['sid'],
-            },
-          },
-        };
+        },
+      };
 
-        // console.log( "tags_filter" );
-        // console.log( tags_filter );
-        let look_for_rules_w_this_tag = await rule.app.models.tag.find(tags_filter);
-        if (look_for_rules_w_this_tag.length == 0 && look_for_rules_w_this_tag[0].rules().length > 0) {
-          if (cb) return cb(null, { message: 'ok' });
-          return true;
-        }
-
-        let output_rules = [];
-        look_for_rules_w_this_tag[0].rules().forEach(function (v) {
-          output_rules.push({ sid: v.sid });
-        });
-
-        let job = {
-          target: detector.name,
-          targetId: detector.id,
-          detectorId: detector.id,
-          data: { rules: output_rules },
-          name: 'rulesRemove',
-          description: 'Remove some rules',
-        };
-
-        // console.log( job.data );
-        hell.o('add remove rules job to schedule', 'addJobForDeleteRules', 'info');
-        let job_result = await rule.app.models.job_schedule.jobAdd(job);
-        if (!job_result)
-          throw new Error('failed to add addJobForDeleteRules job to schedule, detector will have current rules');
-        hell.o('job added', 'addJobForDeleteRules', 'info');
-
-        hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
-        if (cb) return cb(null, { message: 'ok' });
-        return true;
-      } catch (err) {
-        hell.o(err, 'addJobForDeleteRules', 'error');
-        if (cb) return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
-        return false;
+      // console.log( "tags_filter" );
+      // console.log( tags_filter );
+      let look_for_rules_w_this_tag = await rule.app.models.tag.find(tags_filter);
+      if (look_for_rules_w_this_tag.length == 0 && look_for_rules_w_this_tag[0].rules().length > 0) {
+        return { message: 'ok' };
       }
-    })(); // async
+
+      let output_rules = [];
+      look_for_rules_w_this_tag[0].rules().forEach(function (v) {
+        output_rules.push({ sid: v.sid });
+      });
+
+      let job = {
+        target: detector.name,
+        targetId: detector.id,
+        detectorId: detector.id,
+        data: { rules: output_rules },
+        name: 'rulesRemove',
+        description: 'Remove some rules',
+      };
+
+      // console.log( job.data );
+      hell.o('add remove rules job to schedule', 'addJobForDeleteRules', 'info');
+      let job_result = await rule.app.models.job_schedule.jobAdd(job);
+      if (!job_result)
+        throw new Error('failed to add addJobForDeleteRules job to schedule, detector will have current rules');
+      hell.o('job added', 'addJobForDeleteRules', 'info');
+
+      hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
+      return { message: 'ok' };
+    } catch (err) {
+      hell.o(err, 'addJobForDeleteRules', 'error');
+      throw { name: 'Error', status: 400, message: 'Central failed to process the request' };
+    }
   };
 
   rule.remoteMethod('addJobForDeleteRules', {

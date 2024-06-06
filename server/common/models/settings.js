@@ -28,7 +28,7 @@ module.exports = function (settings) {
 
       if (!PATH_BASE) throw new Error("env missing: PATH_BASE");
 
-      let exists = await fs.existsSync(PATH_BASE);
+      let exists = fs.existsSync(PATH_BASE);
       if (!exists) {
         throw new Error("path does not exist: " + PATH_BASE);
       }
@@ -98,37 +98,18 @@ module.exports = function (settings) {
    * @param options
    * @param cb
    */
-  settings.resetApp = async function (options, cb) {
+  settings.resetApp = async function (options) {
     hell.o("start", "resetApp", "warn");
 
     if (process.env.NODE_ENV !== "dev") {
       hell.o("ENV is not DEV, fail", "resetApp", "warn");
-      cb("error");
-      return false;
+      throw "error";
     }
 
     try {
-
       hell.o("destroy database", "resetApp", "warn");
-      await settings.app.models.detector.destroyAll();
-      await settings.app.models.accessToken.destroyAll();
-      await settings.app.models.feed.destroyAll();
-      await settings.app.models.feedback.destroyAll();
-      await settings.app.models.tag.destroyAll();
-      await settings.app.models.rule.destroyAll();
-      await settings.app.models.rule_draft.destroyAll();
-      await settings.app.models.ruleset.destroyAll();
-      await settings.app.models.role.destroyAll();
-      await settings.app.models.roleMapping.destroyAll();
-      await settings.app.models.user.destroyAll();
-      await settings.app.models.log.destroyAll();
-      await settings.app.models.tasker.destroyAll();
-      await settings.app.models.task.destroyAll();
-      await settings.destroyAll();
-
-      let output = {message: "reset done"};
-
-      cb(null, output);
+      let models = ['detector', 'accessToken', 'feed', 'feedback', 'tag', 'rule', 'rule_draft', 'ruleset', 'role', 'roleMapping', 'user', 'log', 'tasker', 'task'];
+      await Promise.all(models.map(name => settings.app.models[name].destroyAll()).concat([settings.destroyAll()]));
 
       hell.o("restart proccess", "resetApp", "warn");
       if (process.env.NODE_ENV == "dev") {
@@ -139,9 +120,10 @@ module.exports = function (settings) {
         //process.exit(1); //pm2
       }
 
+      return {message: "reset done"};
     } catch (err) {
       hell.o(err, "resetApp", "error");
-      cb({name: "Error", status: 400, message: err.message});
+      throw {name: "Error", status: 400, message: err.message};
     }
 
   };

@@ -1,13 +1,9 @@
 'use strict';
 
-const https = require('https');
-const tar = require('tar');
 const fs = require('fs');
 const util = require('util');
-const walk = require('walkdir');
 const checksum = require('checksum');
 
-const LineByLineReader = require('line-by-line');
 const hell = new (require(__dirname + '/helper.js'))({ module_name: 'feed' });
 
 module.exports = function (feed) {
@@ -122,7 +118,7 @@ module.exports = function (feed) {
        */
       let tag_exists = await feed.app.models.tag.findOne({ where: { name: 'PRO' } });
       if (!tag_exists) {
-        let tag_create = await feed.app.models.tag.create({ name: 'PRO', description: 'EM Pro rules' });
+        await feed.app.models.tag.create({ name: 'PRO', description: 'EM Pro rules' });
       }
       let pro_feed = await feed.findOne({ where: { name: 'emerging_pro' }, include: ['tags'] });
       // console.log(pro_feed.tags());
@@ -297,7 +293,7 @@ module.exports = function (feed) {
         if (enabled) {
           hell.o([feed_name, 'add tag to feed'], 'tagAll', 'info');
           hell.o([feed_name, tag_exists.name], 'tagAll', 'info');
-          let feed_tag = await fd.tags.add(tag_exists);
+          await fd.tags.add(tag_exists);
           let rules = await rule.find({ where: { feed_name: feed_name } });
 
           for (let i = 0, l = rules.length; i < l; i++) {
@@ -308,7 +304,7 @@ module.exports = function (feed) {
         if (!enabled) {
           hell.o([feed_name, 'remove tag from feed'], 'tagAll', 'info');
           hell.o([feed_name, tag_exists.name], 'tagAll', 'info');
-          let feed_tag = await fd.tags.remove(tag_exists);
+          await fd.tags.remove(tag_exists);
           let rules = await rule.find({ where: { feed_name: feed_name } });
 
           for (let i = 0, l = rules.length; i < l; i++) {
@@ -353,9 +349,10 @@ module.exports = function (feed) {
       let settings = await feed.app.models.settings.findOne();
       let content_path = settings['path_' + input.component_name + '_content'];
 
+      let folder = content_path + input.component_type + '/' + input.name + '/';
       let output = {
-        folder: content_path + input.component_type + '/' + input.name + '/',
-        local_path: content_path + input.component_type + '/' + input.name + '/' + input.filename,
+        folder: folder,
+        local_path: folder + input.filename,
         url: input.location,
       };
 
@@ -394,7 +391,7 @@ module.exports = function (feed) {
    * @type {{}}
    */
   feed.tasks = {};
-  feed.task = async function (input, cb) {
+  feed.task = async function (input) {
     hell.o([input.feed_name, 'start'], 'task', 'info');
     // console.log(input);
 
@@ -404,8 +401,7 @@ module.exports = function (feed) {
 
     if (feed.tasks[input.component_name] == true) {
       hell.o(['feed check in progress for', input.component_name], 'task', 'warn');
-      if (cb) return cb({ name: 'Error', status: 400, message: 'worker_busy', worker_busy: true });
-      return;
+      throw { name: 'Error', status: 400, message: 'worker_busy', worker_busy: true };
     }
 
     // const PATH_BASE = process.env.PATH_BASE;
@@ -429,10 +425,11 @@ module.exports = function (feed) {
           // console.log("feed url ----------------------------");
 
           let downloaded_size = 0;
-          let downloaded = await fs.existsSync(content_params.local_path);
+          let download_path = `${content_params.local_path}.down`;
+          let downloaded = fs.existsSync(download_path);
 
           if (downloaded) {
-            let downloaded_stats = await fs.statSync(content_params.local_path);
+            let downloaded_stats = await fs.promises.stat(download_path);
             downloaded_size = downloaded_stats.size;
           }
 
@@ -445,44 +442,12 @@ module.exports = function (feed) {
           if (process.env.NODE_ENV != 'dev' || !downloaded || downloaded_size < 10) {
             hell.o([entry.name, 'no file, download'], 'task', 'info');
             console.log(content_params);
-            let rules_tar_path = await feed.app.models.contentman.downloadContent(
-              content_params.url,
-              content_params.local_path
-            );
+            await feed.app.models.contentman.downloadContent(content_params.url, download_path);
           } else {
             hell.o([entry.name, 'DEV, do not redownload rules'], 'task', 'info');
           }
 
-          if (entry.component_name == 'suricata') {
-            hell.o([entry.name, 'extract'], 'task', 'info');
-            let extracted = await feed.app.models.contentman.extractContent(
-              content_params.local_path,
-              content_params.folder
-            );
-
-            hell.o([entry.name, 'scan dir for rule files'], 'task', 'info');
-            let extracted_files = await feed.app.models.contentman.readDirR(content_params.folder);
-            hell.o([entry.name, 'loop files'], 'task', 'info');
-            // console.log( extracted_files );
-            let filtered_files = await feed.app.models.rule.loopRuleFiles(extracted_files, entry);
-            hell.o([entry.name, 'remove files'], 'task', 'info');
-            let remove_files = await feed.app.models.contentman.removeFilesR(
-              content_params.folder,
-              content_params.local_path
-            );
-          }
-
-          if (entry.component_name == 'moloch') {
-            // let extracted_files = await feed.app.models.contentman.readDirR(content_params.folder);
-            // console.log( extracted_files );
-
-            let checksum_file = util.promisify(checksum.file);
-            let cs = await checksum_file(content_params.local_path);
-            if (cs !== entry.checksum) {
-              hell.o([entry.name, 'checksum has changed'], 'task', 'info');
-              await feed.update({ name: entry.name }, { checksum: cs, location_folder: content_params.folder });
-            }
-          }
+          await fs.promises.rename(download_path, content_params.local_path);
 
           break;
         /**
@@ -492,32 +457,31 @@ module.exports = function (feed) {
           /*
           AFTER LATEST CHANGE REQUEST, NOTHING MUCH TO DO WITH THIS PART OF THE TASK
            */
-          let checksum_file = util.promisify(checksum.file);
-          let cs = await checksum_file(content_params.local_path);
-          if (cs !== entry.checksum) {
-            hell.o([entry.name, 'checksum has changed'], 'task', 'info');
-            await feed.update({ name: entry.name }, { checksum: cs, location_folder: content_params.folder });
-          }
-
           break;
 
         default:
           throw new Error('failed to match feed type ' + entry.type);
       }
 
+      let checksum_file = util.promisify(checksum.file);
+      let cs = await checksum_file(content_params.local_path);
+      if (cs !== entry.checksum) {
+        hell.o([entry.name, 'checksum has changed'], 'task', 'info');
+        await feed.update({ name: entry.name }, { checksum: cs, location_folder: content_params.folder });
+      }
+
+
       hell.o([input.component_name, 'done'], 'task', 'info');
       feed.tasks[input.component_name] = false;
 
-      if (cb) return cb(null, { message: 'ok' });
-      return true;
+      return { message: 'ok' };
     } catch (err) {
       hell.o([input.component_name, 'failed'], 'task', 'error');
       hell.o([input.feed_name, 'failed'], 'task', 'error');
       hell.o(err, 'task', 'error');
       feed.tasks[input.component_name] = false;
 
-      if (cb) return cb({ name: 'name', status: 400, message: err.message });
-      return false;
+      throw { name: 'name', status: 400, message: err.message };
     }
   }; //feed.task
 };

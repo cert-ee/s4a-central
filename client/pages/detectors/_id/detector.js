@@ -115,6 +115,56 @@ export default {
             }
         },
 
+        async saveOrganizationName() {
+            try {
+                await this.$axios.patch(`detectors/${this.detector.id}`, {
+                    organization_name: this.detector.organization_name
+                });
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
+        async saveFirstName() {
+            try {
+                await this.$axios.patch(`detectors/${this.detector.id}`, {
+                    first_name: this.detector.first_name
+                });
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
+        async saveLastName() {
+            try {
+                await this.$axios.patch(`detectors/${this.detector.id}`, {
+                    last_name: this.detector.last_name
+                });
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
+        async saveContactPhone() {
+            try {
+                await this.$axios.patch(`detectors/${this.detector.id}`, {
+                    contact_phone: this.detector.contact_phone
+                });
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
+        async saveContactEmail() {
+            try {
+                await this.$axios.patch(`detectors/${this.detector.id}`, {
+                    contact_email: this.detector.contact_email
+                });
+            } catch (err) {
+                this.$store.dispatch('handleError', err);
+            }
+        },
+
         async saveTags() {
             try {
 
@@ -223,3 +273,4 @@ export default {
         }
     }
 }
+

@@ -1,6 +1,6 @@
 {
   "name": "s4a-central",
-  "version": "0.2.198",
+  "version": "0.3.0",
   "description": "s4a",
   "license": "MIT",
   "private": true,
@@ -26,6 +26,7 @@
     }
   },
   "dependencies": {
+    "corepack": "^0.15.3",
     "node-deb": "^0.10.7",
     "pm2": "5.1.2"
   }

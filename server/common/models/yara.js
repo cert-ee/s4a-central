@@ -96,7 +96,7 @@ module.exports = function (yara) {
           // console.log(detector_feed[0].checksum, fd.checksum);
           // console.log(detector_feed[0].checksum, fd.checksum);
 
-          file_contents = await fs.readFileSync(file_path, 'utf8');
+          file_contents = await fs.promises.readFile(file_path, 'utf8');
         }
 
         yara_feed = {

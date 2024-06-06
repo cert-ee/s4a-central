@@ -4,6 +4,7 @@ const https = require('https');
 const tar = require('tar');
 const fs = require('fs');
 const walk = require('walkdir');
+const stream = require('stream');
 
 const hell = new (require(__dirname + '/helper.js'))({ module_name: 'contentman' });
 
@@ -35,18 +36,19 @@ module.exports = function (contentman) {
   contentman.downloadContent = function (src, dst) {
     hell.o('start', 'downloadContent', 'info');
     hell.o([src, dst], 'downloadContent', 'info');
-    return new Promise((success, reject) => {
-      let file = fs.createWriteStream(dst);
+    let file = fs.createWriteStream(dst);
 
-      let request = https
-        .get(src, function (response) {
+    return new Promise((resolve, reject) => {
+      https
+        .get(src, response => {
           response.pipe(file);
           file.on('finish', function () {
             hell.o('done', 'downloadContent', 'info');
-            file.close(success(true));
+            file.close();
+            resolve(true);
           });
         })
-        .on('error', function (err) {
+        .on('error', err => {
           hell.o(err, 'downloadContent', 'error');
           //fs.unlink(dst);
           reject(err);
@@ -55,35 +57,37 @@ module.exports = function (contentman) {
   };
 
   /**
-   * EXTRACT CONTENT
+   * extract suricata rules from archive, collect into a single file, replace dst atomically
    *
    * src
    * dst
    *
    * @returns {Promise}
    */
-  contentman.extractContent = function (src, dst) {
+  contentman.extractContent = async function (src, dst) {
     hell.o('start', 'extractContent', 'info');
+    hell.o(['tar file', path], 'extractContent', 'info');
+    hell.o(['extract', dst], 'extractContent', 'info');
 
-    return new Promise((success, reject) => {
-      hell.o(['tar file', src], 'extractContent', 'info');
-      hell.o(['extract', dst], 'extractContent', 'info');
-
-      tar
-        .extract({
-          file: src,
-          cwd: dst,
-          strip: 1,
-        })
-        .then((_) => {
-          hell.o('done', 'extractContent', 'info');
-          success(true);
-        })
-        .catch((err) => {
-          hell.o(err, 'extractContent', err);
-          reject(err);
-        }); // tar.extract
-    }); // promise
+    try {
+      let tmpfile = `${dst}.tmp`; // should be on the same filesystem as dst for atomic replacement via rename(2)
+      await new Promise((resolve, reject) =>
+        stream.pipeline(
+          fs.createReadStream(src),
+          new tar.Parse({ strict: true, filter: (path, entry) => entry.type === 'File' && path.endsWith('.rules') }),
+          new extractTransform(),
+          fs.createWriteStream(tmpfile),
+        )
+          .on('error', reject)
+          .on('end', resolve)
+      );
+      await fs.promises.rename(tmpfile, dst);
+      hell.o('done', 'extractContent', 'info');
+      return true;
+    } catch (err) {
+      hell.o(err, 'extractContent', err);
+      throw err;
+    };
   };
 
   /**
@@ -98,44 +102,41 @@ module.exports = function (contentman) {
     try {
       let files = await contentman.readDirR(folder);
 
-      let stats,
-        exists,
-        counter = 0;
-
       if (files.length == 0) {
-//        throw new Error('no files to remove ' + folder);
-         return true;
+        //        throw new Error('no files to remove ' + folder);
+        return true;
       }
 
       hell.o([files.length, ' files found to remove'], 'removeFilesR', 'info');
-      for (var i = 0; i < files.length; i++) {
-        exists = await fs.existsSync(files[i]);
+      let success = await Promise.all(files.map(async file => {
+        let exists = await fs.promises.exists(file);
         if (!exists) {
-          hell.o(['path does not exist:', files[i]], 'removeFilesR', 'error');
-          continue;
-        }
+          hell.o(['path does not exist:', file], 'removeFilesR', 'error');
+          return false;
+        };
 
-        stats = await fs.statSync(files[i]);
+        let stats = await fs.promises.stat(file);
 
-        if (process.env.NODE_ENV == 'dev' && ignore_file !== undefined && files[i] == ignore_file) {
+        if (process.env.NODE_ENV == 'dev' && ignore_file !== undefined && file == ignore_file) {
           hell.o(
-            ['DEV: ignore removing rules tar, so we would not abuse external sources', files[i]],
+            ['DEV: ignore removing rules tar, so we would not abuse external sources', file],
             'removeFilesR',
             'info'
           );
-          continue;
-        }
+          return false;
+        };
 
         if (stats.isDirectory()) {
-          hell.o(['ignore directory:', files[i]], 'removeFilesR', 'info');
-        } else {
-          //hell.o(["remove file:", files[i]], "removeFilesR", "info");
-          await fs.unlinkSync(files[i]);
-          counter++;
-        }
-      } // for loop
+          hell.o(['ignore directory:', file], 'removeFilesR', 'info');
+          return false;
+        };
 
-      hell.o([counter, ' files removed'], 'removeFilesR', 'info');
+        return true;
+      }));
+      files = files.filter((_v, i) => success[i]);
+      await Promise.all(files.map(file => fs.promises.unlink(file)));
+
+      hell.o([files.length, ' files removed'], 'removeFilesR', 'info');
       hell.o('done', 'removeFilesR', 'info');
       return true;
     } catch (err) {
@@ -171,7 +172,7 @@ module.exports = function (contentman) {
     try {
       if (create_file === undefined) create_file = true;
 
-      let file_exists = await fs.existsSync(path_to_check);
+      let file_exists = fs.existsSync(path_to_check);
       if (file_exists) {
         hell.o('done', 'pathCheck', 'info');
         return true;
@@ -184,23 +185,22 @@ module.exports = function (contentman) {
       splitted = splitted.filter(Boolean);
 
       var folders = splitted.slice(0, -1);
-      var filename = splitted.slice(splitted.length, 1);
 
       let current_folder = '';
       for (const fd in folders) {
         current_folder = current_folder + '/' + folders[fd];
-        let check_folder = await fs.existsSync(current_folder);
+        let check_folder = fs.existsSync(current_folder);
 
         hell.o(['check folder', current_folder], 'pathCheck', 'info');
         if (!check_folder) {
-          let make_folder = await fs.mkdirSync(current_folder);
+          await fs.promises.mkdir(current_folder);
           hell.o(['make folder', current_folder], 'pathCheck', 'info');
         }
       }
 
       if (!file_exists) {
         hell.o(['make empty file', path_to_check], 'pathCheck', 'info');
-        await fs.writeFileSync(path_to_check, '');
+        await fs.promises.writeFile(path_to_check, '');
       }
       hell.o('done', 'pathCheck', 'info');
       return true;
@@ -210,3 +210,14 @@ module.exports = function (contentman) {
     }
   };
 };
+
+// helper transform stream for suricata rule file generation
+// input: entries from tar stream
+// output: comment with filename + file contents in a single stream
+class extractTransform extends stream.Transform {
+  _transform(entry, _encoding, callback) {
+    this.push(`\n# ${entry.path}\n`);
+    entry.on('data', this.push)
+      .on('end', callback);
+  }
+}

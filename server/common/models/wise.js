@@ -35,16 +35,15 @@ module.exports = function (wise) {
     hell.o("start", "checkForDetector", "info");
     try {
       // console.log(input);
-      let output = [];
 
       let detector = await wise.app.models.detector.findById(detector_id, {
         include: {
           relation: "tags",
         }
       });
-      let detector_tags = detector.tags().map(a => a.name);
-      if (detector_tags.length > 0) {
-        hell.o(["found tags for detector", detector_tags.join(', ')], "checkForDetector", "info");
+      let detector_tags = new Set(detector.tags().map(a => a.name));
+      if (detector_tags.size > 0) {
+        hell.o(["found tags for detector", Array.from(detector_tags).sort().join(', ')], "checkForDetector", "info");
       }
 
       let feeds = await wise.app.models.feed.find({
@@ -63,20 +62,19 @@ module.exports = function (wise) {
         }
       });
 
-      for (let feed of feeds) {
-
+      let output = (await Promise.all(feeds.map(async feed => {
         // checks if detector has correct tags to receive the feed
         if (feed.tags().length > 0) {
           if (detector_tags == 0) {
             console.log("detector has no tags, IGNORE");
-            continue;
+            return;
           }
 
-          let detector_has_the_tag = feed.tags().map(a => a.name).filter(a => detector_tags.indexOf(a) !== -1);
+          let detector_has_the_tag = feed.tags().filter(tag => detector_tags.has(tag.name));
           if (detector_has_the_tag.length == 0) {
             console.log("NO MATCHES?");
             console.log(detector_has_the_tag);
-            continue;
+            return;
           }
         }
 
@@ -94,10 +92,10 @@ module.exports = function (wise) {
           console.log("DETECTOR HAS THE FEED AND NEED TO UPDATE");
           // console.log(detector_feed[0].checksum, feed.checksum);
 
-          file_contents = fs.readFileSync(file_path, 'utf8');
+          file_contents = await fs.promises.readFile(file_path, 'utf8');
         }
 
-        let wise_feed = {
+        return {
           name: feed.name,
           friendly_name: feed.friendly_name,
           enabled: feed.enabled,
@@ -107,9 +105,7 @@ module.exports = function (wise) {
           checksum: feed.checksum,
           contents: file_contents
         };
-
-        output.push(wise_feed);
-      }
+      }))).filter(e => e !== undefined);
       // console.log(output);
 
       hell.o("done", "checkForDetector", "info");
