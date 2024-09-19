@@ -13,7 +13,7 @@
     "user": "s4a",
     "group": "s4a",
     "maintainer": "CERT.EE",
-    "dependencies": "mongodb-org, nodejs, yarn, pwgen, jq",
+    "dependencies": "mongodb-org, nodejs, yarn, pwgen, jq, apache2-utils",
     "description": "s4a central",
     "templates": {
       "postinst": "deb-templates/postinst",
