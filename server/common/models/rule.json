@@ -128,7 +128,7 @@
       "permission": "ALLOW"
     },
     {
-      "property": "addJobForDeleteRules",
+      "property": "addJobForDeleteTag",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "admin",

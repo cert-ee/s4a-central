@@ -272,7 +272,6 @@ module.exports = function (feed) {
 
     (async function () {
       try {
-        const rule = feed.app.models.rule;
         const tag = feed.app.models.tag;
 
         hell.o([feed_name, 'find feed'], 'tagAll', 'info');
@@ -289,27 +288,16 @@ module.exports = function (feed) {
         hell.o([feed_name, 'find tag'], 'tagAll', 'info');
         let tag_exists = await tag.findById(tag_id);
         if (!tag_exists) throw new Error(feed_name + ' could not find tag: ' + tag_id);
-
         if (enabled) {
           hell.o([feed_name, 'add tag to feed'], 'tagAll', 'info');
           hell.o([feed_name, tag_exists.name], 'tagAll', 'info');
           await fd.tags.add(tag_exists);
-          let rules = await rule.find({ where: { feed_name: feed_name } });
-
-          for (let i = 0, l = rules.length; i < l; i++) {
-            rules[i].tags.add(tag_exists);
-          }
         }
 
         if (!enabled) {
           hell.o([feed_name, 'remove tag from feed'], 'tagAll', 'info');
           hell.o([feed_name, tag_exists.name], 'tagAll', 'info');
           await fd.tags.remove(tag_exists);
-          let rules = await rule.find({ where: { feed_name: feed_name } });
-
-          for (let i = 0, l = rules.length; i < l; i++) {
-            rules[i].tags.remove(tag_exists);
-          }
         }
 
         hell.o([feed_name, 'done'], 'tagAll', 'info');

@@ -183,7 +183,7 @@ export default {
                 }
 
                 for( let tag_remove of current_tags ){
-                    await this.$axios.post('rules/addJobForDeleteRules', {detectorId: this.detector.id, tagId: tag_remove.id });
+                    await this.$axios.post('rules/addJobForDeleteTag', {detectorId: this.detector.id, tagId: tag_remove.id });
                     await this.$axios.post('rules/addJobForFullSync', {detectorId: this.detector.id, tagId: tag_remove.id });
                     await this.$axios.delete(`detectors/${this.detector.id}/tags/rel/${tag_remove.id}`);
                 }

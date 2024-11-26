@@ -618,73 +618,45 @@ module.exports = function (rule) {
    * @param detectorId
    * @param tagId
    */
-  rule.addJobForDeleteRules = async function (detectorId, tagId) {
-    hell.o('start', 'addJobForDeleteRules', 'info');
+  rule.addJobForDeleteTag = async function (detectorId, tagId) {
+    hell.o('start', 'addJobForDeleteTag', 'info');
     try {
-      hell.o([detectorId, 'detectorId'], 'addJobForDeleteRules', 'info');
+      hell.o([detectorId, 'detectorId'], 'addJobForDeleteTag', 'info');
       let detector = await rule.app.models.detector.findOne({ where: { id: detectorId } });
       if (!detector) throw new Error('can not find detector');
 
       let tag = await rule.app.models.tag.findOne({ where: { id: tagId } });
       if (!tag) throw new Error('can not find tag');
 
-      /**
-       * find rules with the tag
-       */
-      let tags_filter = {
-        where: {
-          id: tag.id,
-        },
-        include: {
-          relation: 'rules',
-          scope: {
-            fields: ['sid'],
-          },
-        },
-      };
-
-      // console.log( "tags_filter" );
-      // console.log( tags_filter );
-      let look_for_rules_w_this_tag = await rule.app.models.tag.find(tags_filter);
-      if (look_for_rules_w_this_tag.length == 0 && look_for_rules_w_this_tag[0].rules().length > 0) {
-        return { message: 'ok' };
-      }
-
-      let output_rules = [];
-      look_for_rules_w_this_tag[0].rules().forEach(function (v) {
-        output_rules.push({ sid: v.sid });
-      });
-
       let job = {
         target: detector.name,
         targetId: detector.id,
         detectorId: detector.id,
-        data: { rules: output_rules },
-        name: 'rulesRemove',
-        description: 'Remove some rules',
+        data: { tagId: tagId, detectorId: detectorId },
+        name: 'removeTagFromDetector',
+        description: 'Remove the tag-detector relationship',
       };
 
-      // console.log( job.data );
-      hell.o('add remove rules job to schedule', 'addJobForDeleteRules', 'info');
+      hell.o('add remove tag job to schedule', 'addJobForDeleteTag', 'info');
       let job_result = await rule.app.models.job_schedule.jobAdd(job);
       if (!job_result)
-        throw new Error('failed to add addJobForDeleteRules job to schedule, detector will have current rules');
-      hell.o('job added', 'addJobForDeleteRules', 'info');
+        throw new Error('failed to add addJobForDeleteTag job to schedule, detector will retain tag relation');
+      hell.o('job added', 'addJobForDeleteTag', 'info');
 
-      hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
+      //hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
       return { message: 'ok' };
     } catch (err) {
-      hell.o(err, 'addJobForDeleteRules', 'error');
+      hell.o(err, 'addJobForDeleteTag', 'error');
       throw { name: 'Error', status: 400, message: 'Central failed to process the request' };
     }
   };
 
-  rule.remoteMethod('addJobForDeleteRules', {
+  rule.remoteMethod('addJobForDeleteTag', {
     accepts: [
       { arg: 'detectorId', type: 'string', required: true },
       { arg: 'tagId', type: 'string', required: true },
     ],
     returns: { type: 'object', root: true },
-    http: { path: '/addJobForDeleteRules', verb: 'post', status: 201 },
+    http: { path: '/addJobForDeleteTag', verb: 'post', status: 201 },
   });
 };
