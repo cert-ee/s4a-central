@@ -267,13 +267,13 @@
                         <v-subheader>Rules enabled count</v-subheader>
                       </v-flex>
                       <v-flex xs8>
-                        <span>{{ detector.rules_enabled_count }}</span>
+                        <span>{{ detector.rules_count_enabled }}</span>
                       </v-flex>
                       <v-flex xs4>
                         <v-subheader>Rules custom count</v-subheader>
                       </v-flex>
                       <v-flex xs8>
-                        <span>{{ detector.rules_custom_count }}</span>
+                        <span>{{ detector.rules_count_custom }}</span>
                       </v-flex>
                     </v-layout>
                   </v-card-text>
