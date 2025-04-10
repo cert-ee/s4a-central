@@ -36,12 +36,17 @@ module.exports = function (job_schedule) {
         }
       });
 
-      if (job_find.length > 0 && input.ignore_duplicate !== true) {
+      // removeTagFromDetector job already exists, delete it before adding a new one
+      if (job_find.length > 0 && input.name === 'removeTagFromDetector') {
+        hell.o([input.targetId, "removing existing removeTagFromDetector job(s)"], "jobAdd", "warn");
+        const remove_result = await job_schedule.destroyAll({
+          detectorId: input.targetId,
+          name: 'removeTagFromDetector',
+          completed: false
+        });
+        hell.o(["removed", (remove_result && remove_result.count) || 0], "jobAdd", "info");
+      } else if (job_find.length > 0 && input.ignore_duplicate !== true) {
         hell.o([input.targetId, "found duplicate"], "jobAdd", "warn");
-        // if( input.ignore_duplicate ){
-        //   hell.o([input.targetId, "ignore duplicate"], "jobAdd", "warn");
-        // return success( { message: "ok"} );
-        // }
         throw new Error(input.detectorId + " found");
       }
 

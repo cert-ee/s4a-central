@@ -177,14 +177,12 @@ export default {
                     if( current_index > -1 ){
                         current_tags.splice(current_tags.findIndex(e => e.id === tagId),1);
                     } else {
-                        await this.$axios.post('rules/addJobForFullSync', {detectorId: this.detector.id, tagId: tagId });
                         await this.$axios.put(`detectors/${this.detector.id}/tags/rel/${tagId}`);
                     }
                 }
 
                 for( let tag_remove of current_tags ){
                     await this.$axios.post('rules/addJobForDeleteTag', {detectorId: this.detector.id, tagId: tag_remove.id });
-                    await this.$axios.post('rules/addJobForFullSync', {detectorId: this.detector.id, tagId: tag_remove.id });
                     await this.$axios.delete(`detectors/${this.detector.id}/tags/rel/${tag_remove.id}`);
                 }
 

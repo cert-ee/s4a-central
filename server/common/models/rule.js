@@ -559,60 +559,6 @@ module.exports = function (rule) {
   };
 
   /**
-   * Add a job to job_schedule to perform a full sync for rules
-   *
-   * @param detectorId
-   * @param tagId
-   */
-  rule.addJobForFullSync = function (detectorId, tagId, cb) {
-    hell.o('start', 'addJobForFullSync', 'info');
-
-    (async function () {
-      try {
-        hell.o([detectorId, 'detectorId'], 'addJobForFullSync', 'info');
-        let detector = await rule.app.models.detector.findOne({ where: { id: detectorId } });
-        if (!detector) throw new Error('can not find detector');
-
-        let tag = await rule.app.models.tag.findOne({ where: { id: tagId } });
-        if (!tag) throw new Error('can not find tag');
-
-        let job = {
-          target: detector.name,
-          targetId: detector.id,
-          detectorId: detector.id,
-          name: 'rulesFullSync',
-          description: 'Perform a full sync for rules',
-          ignore_duplicate: true,
-        };
-
-        // console.log( job.data );
-        hell.o('add full sync rules job to schedule', 'addJobForFullSync', 'info');
-        let job_result = await rule.app.models.job_schedule.jobAdd(job);
-        if (!job_result)
-          throw new Error('failed to add rulesFullSync job to schedule, detector will have current rules');
-        hell.o('job added', 'addJobForFullSync', 'info');
-
-        hell.o([detectorId, 'done'], 'addJobForFullSync', 'info');
-        if (cb) return cb(null, { message: 'ok' });
-        return true;
-      } catch (err) {
-        hell.o(err, 'addJobForFullSync', 'error');
-        if (cb) return cb({ name: 'Error', status: 400, message: 'Central failed to process the request' });
-        return false;
-      }
-    })(); // async
-  };
-
-  rule.remoteMethod('addJobForFullSync', {
-    accepts: [
-      { arg: 'detectorId', type: 'string', required: true },
-      { arg: 'tagId', type: 'string', required: true },
-    ],
-    returns: { type: 'object', root: true },
-    http: { path: '/addJobForFullSync', verb: 'post', status: 201 },
-  });
-
-  /**
    * Add a job to job_schedule to remove rules
    *
    * @param detectorId
@@ -643,7 +589,7 @@ module.exports = function (rule) {
         throw new Error('failed to add addJobForDeleteTag job to schedule, detector will retain tag relation');
       hell.o('job added', 'addJobForDeleteTag', 'info');
 
-      //hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
+      hell.o([detectorId, 'done'], 'addJobForDeleteRules', 'info');
       return { message: 'ok' };
     } catch (err) {
       hell.o(err, 'addJobForDeleteTag', 'error');
