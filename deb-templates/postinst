@@ -120,7 +120,7 @@ create_mongodb_users() {
   echo "Create MongoDB users..."
   if [ ! -e /root/.mongodb.passwd ] ; then
 
-	 if [ `mongo --quiet --eval "quit()" >/dev/null; echo $?` -gt 0 ] ; then
+	 if [ `mongosh --quiet --eval "quit()" >/dev/null; echo $?` -gt 0 ] ; then
 	  	echo "CRITICAL: Can't connect to MongoDB !!!"
 		exit 1
 	fi
@@ -128,7 +128,7 @@ create_mongodb_users() {
 	echo " * root..."
 	mongodb_pass=$( pwgen 12 1 )
 	echo -e "MONGODB_USER=root\nMONGODB_PASS=$mongodb_pass\n" > /root/.mongodb.passwd
-	mongo admin --eval "db.createUser({user: 'root',pwd: '"$mongodb_pass"', roles: [ 'root' ] })"
+	mongosh admin --eval "db.createUser({user: 'root',pwd: '"$mongodb_pass"', roles: [ 'root' ] })"
 	if [ `grep -c ^security.authorization /etc/mongod.conf` == 0 ] ; then
 	        echo "security.authorization: enabled" >> /etc/mongod.conf
 	fi
@@ -138,13 +138,13 @@ create_mongodb_users() {
   . /root/.mongodb.passwd
 
   app_db_pass=$( pwgen 12 1 )
-  user_found=$( mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "user=db.getUsers( { filter: { user: '$service_name'} }); if (user[0]) print(user[0].user);" )
+  user_found=$( mongosh --quiet --json relaxed --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "user=db.getUsers( { filter: { user: '$service_name'} });" | jq -r .users[].user )
   if [ $user_found != "[ ]" ] ; then
         echo " * $service_name - reset password ..."
-	mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.changeUserPassword(\"$service_name\", \"$app_db_pass\")"
+	mongosh --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.changeUserPassword(\"$service_name\", \"$app_db_pass\")"
   else
         echo " * $service_name - create user ..."
-	mongo --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.createUser({ user: \"$service_name\", pwd: \"$app_db_pass\", roles: [ \"readWrite\" ] })"
+	mongosh --quiet --authenticationDatabase admin -u $MONGODB_USER -p $MONGODB_PASS $service_name --eval "db.createUser({ user: \"$service_name\", pwd: \"$app_db_pass\", roles: [ \"readWrite\" ] })"
   fi
 
   # Update app configuration
